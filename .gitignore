@@ -1,0 +1,8 @@
+.DS_Store
+config.json
+doc/*
+dist
+tmp
+build
+.vscode
+deploy/*

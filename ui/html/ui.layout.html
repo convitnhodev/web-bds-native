@@ -1,0 +1,55 @@
+{{define "ui" -}}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" type="image/x-icon" href="/static/img/1662110263.ico">
+    {{block "title" . -}}
+    <title>default title | deein.com</title>
+    {{- end}}
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <link rel="preconnect" href="//www.googletagmanager.com">
+    <link rel="preconnect" href="//cdnjs.cloudflare.com">
+
+    {{block "description" . -}}
+    <meta name="description"
+        content="default description">
+    {{- end}}
+
+    {{block "robots" . -}}
+    <meta name="robots" content="index,follow">
+    {{- end}}
+
+    {{block "opengraph" . -}}
+    {{- end}}
+
+    {{block "canonical" . -}}
+    <link rel="canonical" href="https://deein.com{{.CurrentURL}}">
+    {{- end}}
+
+    <link rel="stylesheet" href="/static/css/style.css?v=1">
+
+
+    {{if not .Localhost -}}
+    <!-- Google Analytics -->
+    {{- end}}
+
+    {{block "styles". -}}
+    {{- end}}
+
+
+</head>
+
+<body>
+    {{template "header" .}}
+    {{template "body" .}}
+    {{template "footer" .}}
+
+    {{block "scripts". -}}
+    {{- end}}
+</body>
+
+</html>
+{{- end}}
