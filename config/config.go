@@ -103,7 +103,7 @@ func (config *Config) setDefaults() {
 	config.SetDefault("FIBER_BODYLIMIT", 4194304)
 	config.SetDefault("FIBER_CONCURRENCY", 262144)
 	config.SetDefault("FIBER_VIEWS", "html")
-	config.SetDefault("FIBER_VIEWS_DIRECTORY", "static/private") //resources/views
+	config.SetDefault("FIBER_VIEWS_DIRECTORY", "resources/views")
 	config.SetDefault("FIBER_VIEWS_RELOAD", false)
 	config.SetDefault("FIBER_VIEWS_DEBUG", false)
 	config.SetDefault("FIBER_VIEWS_LAYOUT", "embed")
