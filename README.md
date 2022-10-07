@@ -4,9 +4,8 @@
 
 ### Start the application 
 
-
 ```bash
-go run app.go
+go run main.go serve
 ```
 
 ### Use local container
