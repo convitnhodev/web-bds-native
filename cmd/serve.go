@@ -2,8 +2,8 @@ package cmd
 
 import (
 	configuration "github.com/deeincom/deeincom/config"
-	"github.com/deeincom/deeincom/database"
-	"github.com/deeincom/deeincom/handlers"
+	"github.com/deeincom/deeincom/pkg/database"
+	"github.com/deeincom/deeincom/routes"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
@@ -34,14 +34,6 @@ func serve(cmd *cobra.Command, args []string) {
 	}
 	app.Use(recover.New())
 	app.Use(logger.New())
-
-	v1 := app.Group("/api/v1")
-
-	v1.Get("/users", handlers.UserList)
-	v1.Post("/users", handlers.UserCreate)
-
-	app.Static("/", "./static/public")
-
-	app.Use(handlers.NotFound)
+	routes.RegisterWeb(app)
 	log.Fatal(app.Listen(config.GetString("APP_ADDR")))
 }

@@ -2,7 +2,7 @@ package database
 
 import (
 	"fmt"
-	"github.com/deeincom/deeincom/models"
+	"github.com/deeincom/deeincom/app/models"
 	"sync"
 )
 

@@ -5,6 +5,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/template/html"
 	"github.com/spf13/viper"
+	"net/http"
 	"os"
 	"strconv"
 )
@@ -128,7 +129,7 @@ func (config *Config) setDefaults() {
 func (config *Config) getFiberViewsEngine() fiber.Views {
 	var viewsEngine fiber.Views
 	config.Set("FIBER_VIEWS_EXTENSION", ".html")
-	engine := html.New(config.GetString("FIBER_VIEWS_DIRECTORY"), config.GetString("FIBER_VIEWS_EXTENSION"))
+	engine := html.NewFileSystem(http.Dir(config.GetString("FIBER_VIEWS_DIRECTORY")), config.GetString("FIBER_VIEWS_EXTENSION"))
 	engine.Reload(config.GetBool("FIBER_VIEWS_RELOAD")).
 		Debug(config.GetBool("FIBER_VIEWS_DEBUG")).
 		Layout(config.GetString("FIBER_VIEWS_LAYOUT")).
