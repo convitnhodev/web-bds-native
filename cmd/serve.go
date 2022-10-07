@@ -28,7 +28,10 @@ func init() {
 
 func serve(cmd *cobra.Command, args []string) {
 	config := configuration.New()
-	database.Connect()
+	db := database.NewDB(config.GetString("DB_URI"))
+	if err := db.Connect(); err != nil {
+		log.Fatal("unable connect to db", err)
+	}
 	app := App{
 		App: fiber.New(*config.GetFiberConfig()),
 	}

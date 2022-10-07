@@ -1,28 +1,52 @@
 package database
 
 import (
-	"fmt"
-	"github.com/deeincom/deeincom/app/models"
-	"sync"
+	"context"
+	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
+	"github.com/upper/db/v4"
+	"github.com/upper/db/v4/adapter/postgresql"
+	"time"
 )
 
-var (
-	db []*models.User
-	mu sync.Mutex
-)
-
-// Connect with database
-func Connect() {
-	db = make([]*models.User, 0)
-	fmt.Println("Connected with Database")
+type DBConnector interface {
+	Connect() error
+	Close() error
 }
 
-func Insert(user *models.User) {
-	mu.Lock()
-	db = append(db, user)
-	mu.Unlock()
+func NewDB(uri string) DBConnector {
+	return &DB{
+		uri: uri,
+	}
 }
 
-func Get() []*models.User {
-	return db
+type DB struct {
+	uri string
+	db  *sqlx.DB
+	dbx db.Session
+}
+
+func (d *DB) Connect() error {
+	database, err := sqlx.Open("postgres", d.uri)
+	if err != nil {
+		return err
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	if _, err := database.QueryContext(ctx, "SELECT 1"); err != nil {
+		return err
+	}
+	d.db = database
+	d.dbx, err = postgresql.New(database.DB)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (d *DB) Close() error {
+	if err := d.db.Close(); err != nil {
+		return err
+	}
+	return d.dbx.Close()
 }
