@@ -2,12 +2,12 @@ package routes
 
 import (
 	handlers "github.com/deeincom/deeincom/app/handlers/web"
-
-	"github.com/gofiber/fiber/v2"
+	"github.com/deeincom/deeincom/app/repositories"
+	"github.com/labstack/echo/v4"
 )
 
-func RegisterWeb(web fiber.Router) {
-	h := handlers.NewHandler()
+func RegisterWeb(web *echo.Echo, r *repositories.Repository) {
+	h := handlers.NewHandler(r)
 	// Homepage
-	web.Get("/", h.Index)
+	web.GET("/", h.Index)
 }

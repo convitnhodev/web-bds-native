@@ -1,18 +1,23 @@
 package cmd
 
 import (
+	"errors"
+	"github.com/deeincom/deeincom/app/repositories"
 	configuration "github.com/deeincom/deeincom/config"
-	"github.com/deeincom/deeincom/pkg/database"
+	"github.com/deeincom/deeincom/database"
 	"github.com/deeincom/deeincom/routes"
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/logger"
-	"github.com/gofiber/fiber/v2/middleware/recover"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/spf13/cobra"
+	"html/template"
+	"io"
 	"log"
+	"net/http"
+	"path/filepath"
 )
 
 type App struct {
-	*fiber.App
+	*echo.Echo
 }
 
 var serveCmd = &cobra.Command{
@@ -26,6 +31,19 @@ func init() {
 	rootCmd.AddCommand(serveCmd)
 }
 
+type TemplateRenderer struct {
+	templates map[string]*template.Template
+}
+
+func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
+	tmpl, ok := t.templates[name]
+	if !ok {
+		err := errors.New("Template not found -> " + name)
+		return err
+	}
+	return tmpl.ExecuteTemplate(w, name, data)
+}
+
 func serve(cmd *cobra.Command, args []string) {
 	config := configuration.New()
 	db := database.NewDB(config.GetString("DB_URI"))
@@ -33,10 +51,61 @@ func serve(cmd *cobra.Command, args []string) {
 		log.Fatal("unable connect to db", err)
 	}
 	app := App{
-		App: fiber.New(*config.GetFiberConfig()),
+		Echo: echo.New(),
 	}
-	app.Use(recover.New())
-	app.Use(logger.New())
-	routes.RegisterWeb(app)
-	log.Fatal(app.Listen(config.GetString("APP_ADDR")))
+	app.Use(middleware.Logger())
+	app.Use(middleware.Recover())
+	app.Static("/", "./public")
+	renderer := &TemplateRenderer{
+		templates: getRenderer(),
+	}
+
+	app.Renderer = renderer
+	routes.RegisterWeb(app.Echo, repositories.New(db.GetSession()))
+	routes.RegisterAdmin(app.Echo)
+	app.Echo.GET("/test", func(c echo.Context) error {
+		return c.JSON(http.StatusOK, app.Routes())
+	})
+
+	app.Logger.Fatal(app.Start(config.GetString("APP_ADDR")))
+}
+
+func getRenderer() map[string]*template.Template {
+	t, err := parseHTML(filepath.Join("resources", "views"))
+	if err != nil {
+		panic(err)
+	}
+	return t
+}
+
+var functions = template.FuncMap{}
+
+func parseHTML(dir string) (map[string]*template.Template, error) {
+	cache := map[string]*template.Template{}
+	pages, err := filepath.Glob(filepath.Join(dir, "pages", "*.page.html"))
+	if err != nil {
+		return nil, err
+	}
+	for _, page := range pages {
+		name := filepath.Base(page)
+		ts := template.New(name).Funcs(functions)
+
+		ts, err = ts.ParseGlob(filepath.Join(dir, "*.layout.html"))
+		if err != nil {
+			return nil, err
+		}
+
+		ts, err = ts.ParseGlob(filepath.Join(dir, "partials", "*.partial.html"))
+		if err != nil {
+			return nil, err
+		}
+
+		ts, err = ts.ParseFiles(page)
+		if err != nil {
+			return nil, err
+		}
+
+		cache[name] = ts
+	}
+	return cache, nil
 }

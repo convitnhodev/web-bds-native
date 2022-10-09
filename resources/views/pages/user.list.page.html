@@ -1,0 +1,177 @@
+{{ template "admin" .}}
+
+{{ define "js-before-app" -}}
+    <script src="/assets/admin/global_assets/js/plugins/tables/datatables/datatables.min.js"></script>
+{{- end}}
+{{ define "js-after-app" -}}
+    <script type="application/javascript">
+        var DatatableBasic = function () {
+
+
+            //
+            // Setup module components
+            //
+
+            // Basic Datatable examples
+            var _componentDatatableBasic = function () {
+                if (!$().DataTable) {
+                    console.warn('Warning - datatables.min.js is not loaded.');
+                    return;
+                }
+
+                // Setting datatable defaults
+                $.extend($.fn.dataTable.defaults, {
+                    autoWidth: false,
+                    columnDefs: [{
+                        orderable: false,
+                        width: 100,
+                        targets: [5]
+                    }],
+                    dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',
+                    language: {
+                        search: '<span>Filter:</span> _INPUT_',
+                        searchPlaceholder: 'Type to filter...',
+                        lengthMenu: '<span>Show:</span> _MENU_',
+                        paginate: {
+                            'first': 'First',
+                            'last': 'Last',
+                            'next': $('html').attr('dir') == 'rtl' ? '&larr;' : '&rarr;',
+                            'previous': $('html').attr('dir') == 'rtl' ? '&rarr;' : '&larr;'
+                        }
+                    }
+                });
+
+                // Apply custom style to select
+                $.extend($.fn.dataTableExt.oStdClasses, {
+                    "sLengthSelect": "custom-select"
+                });
+
+                // Basic datatable
+                $('.datatable-basic').DataTable();
+
+                // Alternative pagination
+                $('.datatable-pagination').DataTable({
+                    pagingType: "simple",
+                    language: {
+                        paginate: {
+                            'next': $('html').attr('dir') == 'rtl' ? 'Next &larr;' : 'Next &rarr;',
+                            'previous': $('html').attr('dir') == 'rtl' ? '&rarr; Prev' : '&larr; Prev'
+                        }
+                    }
+                });
+
+                // Datatable with saving state
+                $('.datatable-save-state').DataTable({
+                    stateSave: true
+                });
+
+                // Scrollable datatable
+                var table = $('.datatable-scroll-y').DataTable({
+                    autoWidth: true,
+                    scrollY: 300
+                });
+
+                // Resize scrollable table when sidebar width changes
+                $('.sidebar-control').on('click', function () {
+                    table.columns.adjust().draw();
+                });
+            };
+
+
+            //
+            // Return objects assigned to module
+            //
+
+            return {
+                init: function () {
+                    _componentDatatableBasic();
+                }
+            }
+        }();
+
+
+        // Initialize module
+        // ------------------------------
+
+        document.addEventListener('DOMContentLoaded', function () {
+            DatatableBasic.init();
+        });
+    </script>
+{{- end}}
+
+{{ define "page-header" -}}
+    <div class="page-header-content d-sm-flex">
+        <div class="page-title">
+            <h4><span class="font-weight-semibold">List Users </span></h4>
+        </div>
+    </div>
+
+    <div class="breadcrumb-line breadcrumb-line-light header-elements-sm-inline">
+        <div class="d-flex">
+            <div class="breadcrumb">
+                <a href="/admin" class="breadcrumb-item"><i class="icon-home2 mr-2"></i> Home</a>
+                <span class="breadcrumb-item active">Dashboard</span>
+            </div>
+
+            <a href="#" class="header-elements-toggle text-body d-sm-none"><i class="icon-more"></i></a>
+        </div>
+    </div>
+{{- end }}
+
+{{define "content" -}}
+    <div class="card">
+        <div class="card-header">
+            <h5 class="card-title">Striped rows</h5>
+        </div>
+
+        <div class="card-body">
+            The <code>DataTables</code> is a highly flexible tool, based upon the foundations of progressive
+            enhancement, and will add advanced interaction controls to any HTML table. DataTables has most features
+            enabled by default, so all you need to do to use it with your own tables is to call the construction
+            function. Searching, ordering, paging etc goodness will be immediately added to the table, as shown in this
+            example. <strong>Datatables support all available table styling.</strong>
+        </div>
+
+        <table class="table datatable-basic table-striped">
+            <thead>
+            <tr>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Email</th>
+                <th>Phone Number</th>
+                <th>Status</th>
+                <th class="text-center">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            {{ with .Users }}
+                {{ range . }}
+                    <tr>
+                        <td>{{ .FirstName }}</td>
+                        <td>{{ .LastName }}</td>
+                        <td>{{ .Email }}</td>
+                        <td>{{ .PhoneNumber }}</td>
+                        <td><span class="badge badge-success">Active</span></td>
+                        <td class="text-center">
+                            <div class="list-icons">
+                                <div class="dropdown">
+                                    <a href="#" class="list-icons-item" data-toggle="dropdown">
+                                        <i class="icon-menu9"></i>
+                                    </a>
+
+                                    <div class="dropdown-menu dropdown-menu-right">
+                                        <a href="#" class="dropdown-item"><i class="icon-file-pdf"></i> Export to
+                                            .pdf</a>
+                                        <a href="#" class="dropdown-item"><i class="icon-file-excel"></i> Export to .csv</a>
+                                        <a href="#" class="dropdown-item"><i class="icon-file-word"></i> Export to .doc</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                {{ end }}
+            {{ end }}
+            </tbody>
+        </table>
+    </div>
+{{- end}}
