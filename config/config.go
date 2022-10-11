@@ -42,10 +42,10 @@ func New() *Config {
 	return config
 }
 
-func (config *Config) setDefaults() {
+func (c *Config) setDefaults() {
 	// Set default App configuration
-	config.SetDefault("APP_ADDR", ":3000")
-	config.SetDefault("APP_ENV", "local")
+	c.SetDefault("APP_ADDR", ":3000")
+	c.SetDefault("APP_ENV", "local")
 	// Set default database configuration
-	config.SetDefault("DB_URI", "postgresql://postgres:postgres@localhost/postgres")
+	c.SetDefault("DB_URI", "postgresql://postgres:postgres@localhost/postgres")
 }

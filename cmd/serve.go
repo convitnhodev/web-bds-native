@@ -13,7 +13,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"path/filepath"
 )
 
 type App struct {
@@ -50,17 +49,18 @@ func serve(cmd *cobra.Command, args []string) {
 	if err := db.Connect(); err != nil {
 		log.Fatal("unable connect to db", err)
 	}
+	renderer, err := config.GetEmbedRender()
+	if err != nil {
+		log.Fatal("unable to get template", err)
+	}
+	e := echo.New()
+	e.Renderer = renderer
 	app := App{
-		Echo: echo.New(),
+		Echo: e,
 	}
 	app.Use(middleware.Logger())
 	app.Use(middleware.Recover())
 	app.Static("/", "./public")
-	renderer := &TemplateRenderer{
-		templates: getRenderer(),
-	}
-
-	app.Renderer = renderer
 	routes.RegisterWeb(app.Echo, repositories.New(db.GetSession()))
 	routes.RegisterAdmin(app.Echo)
 	app.Echo.GET("/test", func(c echo.Context) error {
@@ -68,51 +68,4 @@ func serve(cmd *cobra.Command, args []string) {
 	})
 
 	app.Logger.Fatal(app.Start(config.GetString("APP_ADDR")))
-}
-
-func getRenderer() map[string]*template.Template {
-	t, err := parseHTML(filepath.Join("resources", "views"))
-	if err != nil {
-		panic(err)
-	}
-	ats, err := parseHTML(filepath.Join("resources", "views", "admin"))
-	if err != nil {
-		panic(err)
-	}
-	for n, at := range ats {
-		t[n] = at
-	}
-	return t
-}
-
-var functions = template.FuncMap{}
-
-func parseHTML(dir string) (map[string]*template.Template, error) {
-	cache := map[string]*template.Template{}
-	pages, err := filepath.Glob(filepath.Join(dir, "pages", "*.page.html"))
-	if err != nil {
-		return nil, err
-	}
-	for _, page := range pages {
-		name := filepath.Base(page)
-		ts := template.New(name).Funcs(functions)
-
-		ts, err = ts.ParseGlob(filepath.Join(dir, "*.layout.html"))
-		if err != nil {
-			return nil, err
-		}
-
-		ts, err = ts.ParseGlob(filepath.Join(dir, "partials", "*.partial.html"))
-		if err != nil {
-			return nil, err
-		}
-
-		ts, err = ts.ParseFiles(page)
-		if err != nil {
-			return nil, err
-		}
-
-		cache[name] = ts
-	}
-	return cache, nil
 }

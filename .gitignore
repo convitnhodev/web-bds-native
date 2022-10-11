@@ -9,4 +9,5 @@ go.work
 .DS_Store
 .env
 .idea
+tmp/
 vendor/
