@@ -10,3 +10,5 @@ go.work
 .env
 .idea
 vendor/
+tmp
+node_modules/
