@@ -2,6 +2,12 @@ package cmd
 
 import (
 	"errors"
+	"html/template"
+	"io"
+	"log"
+	"net/http"
+	"path/filepath"
+
 	"github.com/deeincom/deeincom/app/repositories"
 	configuration "github.com/deeincom/deeincom/config"
 	"github.com/deeincom/deeincom/database"
@@ -9,11 +15,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/spf13/cobra"
-	"html/template"
-	"io"
-	"log"
-	"net/http"
-	"path/filepath"
 )
 
 type App struct {
@@ -76,6 +77,13 @@ func getRenderer() map[string]*template.Template {
 		panic(err)
 	}
 	ats, err := parseHTML(filepath.Join("resources", "views", "admin"))
+	if err != nil {
+		panic(err)
+	}
+	for n, at := range ats {
+		t[n] = at
+	}
+	ats, err = parseHTML(filepath.Join("resources", "views", "web"))
 	if err != nil {
 		panic(err)
 	}
