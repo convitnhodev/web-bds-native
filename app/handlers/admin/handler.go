@@ -12,7 +12,7 @@ func NewHandler() *handler {
 }
 
 func (h *handler) Index(c echo.Context) error {
-	return c.Render(http.StatusOK, "dashboard.page.html", nil)
+	return c.Render(http.StatusOK, "admin.dashboard.page.html", nil)
 }
 
 func (h *handler) UserList(c echo.Context) error {
@@ -23,7 +23,7 @@ func (h *handler) UserList(c echo.Context) error {
 		Email       string `json:"email"`
 		PhoneNumber string `json:"phone_number"`
 	}
-	return c.Render(http.StatusOK, "user.list.page.html", map[string]interface{}{
+	return c.Render(http.StatusOK, "admin.user.list.page.html", map[string]interface{}{
 		"Users": []User{
 			{
 				ID:          1,

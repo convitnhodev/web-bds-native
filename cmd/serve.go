@@ -75,6 +75,13 @@ func getRenderer() map[string]*template.Template {
 	if err != nil {
 		panic(err)
 	}
+	ats, err := parseHTML(filepath.Join("resources", "views", "admin"))
+	if err != nil {
+		panic(err)
+	}
+	for n, at := range ats {
+		t[n] = at
+	}
 	return t
 }
 
