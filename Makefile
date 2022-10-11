@@ -2,7 +2,10 @@ project_name = deeincom
 image_name = deeincom:latest
 
 run-local:
-	go run app.go
+	./air serve
+
+run-css-dev:
+	cd node && pnpm dev
 
 requirements:
 	go mod tidy

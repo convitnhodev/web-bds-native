@@ -1,0 +1,17 @@
+{
+  "name": "deeincom",
+  "version": "1.0.0",
+  "private": true,
+  "description": "deeincom",
+  "license": "UNLICENSED",
+  "author": "deeincom",
+  "scripts": {
+    "dev": "unocss \"../resources/views/web/**/*.html\" --watch --config uno.config.js --out-file \"../public/assets/web/css/deeincom.css\"",
+    "build": "unocss \"../resources/views/web/**/*.html\" --config uno.config.js --out-file \"../public/assets/web/css/deeincom.css\""
+  },
+  "devDependencies": {
+    "@unocss/cli": "^0.45.29",
+    "@unocss/preset-uno": "^0.45.29",
+    "@unocss/preset-web-fonts": "^0.45.29"
+  }
+}

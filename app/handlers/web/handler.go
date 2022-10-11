@@ -1,10 +1,11 @@
 package web
 
 import (
+	"net/http"
+
 	"github.com/deeincom/deeincom/app/repositories"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
-	"net/http"
 )
 
 type handler struct {
@@ -21,7 +22,7 @@ func NewHandler(r *repositories.Repository) *handler {
 }
 
 func (h *handler) Index(c echo.Context) error {
-	return c.Render(http.StatusOK, "index.html", map[string]string{
+	return c.Render(http.StatusOK, "register.page.html", map[string]string{
 		"Title": "Hello, World!",
 	})
 }

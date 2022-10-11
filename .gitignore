@@ -9,5 +9,9 @@ go.work
 .DS_Store
 .env
 .idea
+.air.toml
+.editorconfig
 tmp/
 vendor/
+tmp
+node_modules/

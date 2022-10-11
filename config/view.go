@@ -36,7 +36,7 @@ func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c 
 func (c *Config) GetEmbedRender() (*TemplateRenderer, error) {
 	cache := map[string]*template.Template{}
 	viewPaths := []string{
-		filepath.Join("resources", "views"),
+		filepath.Join("resources", "views", "web"),
 		filepath.Join("resources", "views", "admin"),
 	}
 	for _, path := range viewPaths {
