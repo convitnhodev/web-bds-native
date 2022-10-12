@@ -13,12 +13,15 @@
 
   <link rel="stylesheet" href="https://esm.sh/@unocss/reset@latest/tailwind.css" />
   <link rel="stylesheet" href="/assets/web/css/deeincom.css" />
+  <script src="/assets/web/js/header.js" defer></script>
 </head>
 
-<body class="font-sans bg-gray-50 text-gray-700">
+<body class="font-sans bg-gray-50 text-gray-700 [&.dee--within-screen]:overflow-hidden">
   {{template "web.header" .}}
   {{template "web.content" .}}
   {{template "web.footer" .}}
+  {{block "scripts" . -}}
+  {{- end}}
 </body>
 
 </html>
