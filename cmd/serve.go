@@ -5,6 +5,7 @@ import (
 	"github.com/deeincom/deeincom/app/repositories"
 	configuration "github.com/deeincom/deeincom/config"
 	"github.com/deeincom/deeincom/database"
+	"github.com/deeincom/deeincom/pkg/jwt"
 	"github.com/deeincom/deeincom/routes"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -49,6 +50,7 @@ func serve(cmd *cobra.Command, args []string) {
 	if err := db.Connect(); err != nil {
 		log.Fatal("unable connect to db", err)
 	}
+	jwtAuth := jwt.NewAuth(config.GetString("AUTH_SECRET"), config.GetDuration("AUTH_EXPIRE_DURATION"))
 	renderer, err := config.GetEmbedRender()
 	if err != nil {
 		log.Fatal("unable to get template", err)
@@ -62,6 +64,7 @@ func serve(cmd *cobra.Command, args []string) {
 	app.Use(middleware.Recover())
 	app.Static("/", "./public")
 	routes.RegisterWeb(app.Echo, repositories.New(db.GetSession()))
+	routes.RegisterAPI(app.Echo, repositories.New(db.GetSession()), jwtAuth)
 	routes.RegisterAdmin(app.Echo)
 	app.Echo.GET("/test", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, app.Routes())

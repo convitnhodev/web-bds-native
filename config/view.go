@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"github.com/Masterminds/sprig/v3"
 	"github.com/labstack/echo/v4"
 	"html/template"
 	"io"
@@ -55,9 +56,13 @@ func (c *Config) getEmbedTemplate(path string) (map[string]*template.Template, e
 	cache := map[string]*template.Template{}
 	fd := os.DirFS(path)
 	pages, _ := fs.Glob(fd, filepath.Join("pages", "*.page.html"))
+
 	for _, page := range pages {
 		name := filepath.Base(page)
-		ts, err := template.New(name).Funcs(functions).ParseFS(fd, "pages/*.page.html", "*.layout.html", "partials/*.partial.html")
+		ts, err := template.New(name).
+			Funcs(functions).
+			Funcs(sprig.FuncMap()).
+			ParseFS(fd, "pages/*.page.html", "*.layout.html", "partials/*.partial.html")
 		if err != nil {
 			return nil, err
 		}
