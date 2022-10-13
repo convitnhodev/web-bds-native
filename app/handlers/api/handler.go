@@ -17,7 +17,7 @@ type Handler struct {
 	repository *repositories.Repository
 	common     handler
 
-	UserHandler UserHandler
+	UserHandler AccountHandler
 }
 
 type errorResp struct {
@@ -33,7 +33,7 @@ func NewHandler(r *repositories.Repository, jwt jwt.Authenticator) *Handler {
 		jwt:        jwt,
 	}
 	h.common.api = h
-	h.UserHandler = (*userHandler)(&h.common)
+	h.UserHandler = (*accountAPI)(&h.common)
 	return h
 }
 

@@ -11,6 +11,6 @@ func RegisterAPI(web *echo.Echo, r *repositories.Repository, jwt jwt.Authenticat
 	h := handlers.NewHandler(r, jwt)
 
 	api := web.Group("/api/v1")
-	api.POST("/users", h.UserHandler.Register)
-	api.POST("/users/auth", h.UserHandler.Auth)
+	api.POST("/accounts", h.UserHandler.Register)
+	api.POST("/accounts/auth", h.UserHandler.Auth)
 }

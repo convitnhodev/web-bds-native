@@ -10,12 +10,12 @@ import (
 	"time"
 )
 
-type UserHandler interface {
+type AccountHandler interface {
 	Register(c echo.Context) error
 	Auth(c echo.Context) error
 }
 
-type userHandler handler
+type accountAPI handler
 
 type registerReq struct {
 	FirstName            string `json:"first_name" validate:"required"`
@@ -30,7 +30,7 @@ type loginReq struct {
 	Password    string `json:"password" validate:"required"`
 }
 
-type userResp struct {
+type accountResp struct {
 	ID          int64     `json:"id"`
 	FirstName   string    `json:"first_name"`
 	LastName    string    `json:"last_name"`
@@ -47,7 +47,18 @@ type authResp struct {
 	Type  string `json:"type"`
 }
 
-func (h *userHandler) Register(c echo.Context) error {
+// Register godoc
+// @Summary      register
+// @Description  register an account
+// @Tags         accounts
+// @Accept       json
+// @Produce      json
+// @Param data body registerReq true "Register account information"
+// @Success      200  {object}  accountResp
+// @Failure      422  {object}  errorResp
+// @Failure      500  {object}  errorResp
+// @Router       /accounts [post]
+func (h *accountAPI) Register(c echo.Context) error {
 	var req registerReq
 	if err := c.Bind(&req); err != nil {
 		return errJson(c, http.StatusInternalServerError, err)
@@ -78,7 +89,7 @@ func (h *userHandler) Register(c echo.Context) error {
 		return errJson(c, http.StatusInternalServerError, err)
 	}
 
-	return c.JSON(http.StatusCreated, &userResp{
+	return c.JSON(http.StatusCreated, &accountResp{
 		ID:          user.ID,
 		FirstName:   user.FirstName,
 		LastName:    user.LastName,
@@ -91,7 +102,18 @@ func (h *userHandler) Register(c echo.Context) error {
 	})
 }
 
-func (h *userHandler) Auth(c echo.Context) error {
+// Auth godoc
+// @Summary      authenticate
+// @Description  get token using credentials
+// @Tags         accounts
+// @Accept       json
+// @Produce      json
+// @Param data body loginReq true "account credentials"
+// @Success      200  {object}  authResp
+// @Failure      422  {object}  errorResp
+// @Failure      500  {object}  errorResp
+// @Router       /accounts/auth [post]
+func (h *accountAPI) Auth(c echo.Context) error {
 	var req loginReq
 	if err := c.Bind(&req); err != nil {
 		return errJson(c, http.StatusInternalServerError, err)
