@@ -13,7 +13,7 @@ requirements:
 clean-packages:
 	go clean -modcache
 
-up: 
+up:
 	make up-silent
 	make shell
 

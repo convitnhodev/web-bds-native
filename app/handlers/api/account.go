@@ -2,18 +2,18 @@ package api
 
 import (
 	"errors"
+	"fmt"
 	"github.com/deeincom/deeincom/app/models"
+	authJwt "github.com/deeincom/deeincom/pkg/jwt"
+	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 	"github.com/upper/db/v4"
 	"golang.org/x/crypto/bcrypt"
+	"math/rand"
 	"net/http"
+	"strconv"
 	"time"
 )
-
-type AccountHandler interface {
-	Register(c echo.Context) error
-	Auth(c echo.Context) error
-}
 
 type accountAPI handler
 
@@ -34,9 +34,9 @@ type accountResp struct {
 	ID          int64     `json:"id"`
 	FirstName   string    `json:"first_name"`
 	LastName    string    `json:"last_name"`
-	Email       *string   `json:"email,omitempty"`
+	Email       string    `json:"email,omitempty"`
 	PhoneNumber string    `json:"phone_number"`
-	VerifiedAt  time.Time `json:"verified_at,omitempty"`
+	IsVerified  bool      `json:"is_verified"`
 	IsActivated bool      `json:"is_activated"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
@@ -55,8 +55,8 @@ type authResp struct {
 // @Produce      json
 // @Param data body registerReq true "Register account information"
 // @Success      200  {object}  accountResp
-// @Failure      422  {object}  errorResp
-// @Failure      500  {object}  errorResp
+// @Failure      422  {object}  defaultJsonResp
+// @Failure      500  {object}  defaultJsonResp
 // @Router       /accounts [post]
 func (h *accountAPI) Register(c echo.Context) error {
 	var req registerReq
@@ -67,10 +67,10 @@ func (h *accountAPI) Register(c echo.Context) error {
 		return errJson(c, http.StatusUnprocessableEntity, err)
 	}
 	user, err := h.api.repository.User.GetUserByPhoneNumber(req.PhoneNumber)
-	if err != nil {
-		if err != db.ErrNoMoreRows {
-			return errJson(c, http.StatusInternalServerError, err)
-		}
+	if err != nil && err != db.ErrNoMoreRows {
+		return errJson(c, http.StatusInternalServerError, err)
+	}
+	if user != nil {
 		return errJson(c, http.StatusUnprocessableEntity, errors.New("your phone number and password is incorrect"))
 	}
 	hash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
@@ -82,7 +82,7 @@ func (h *accountAPI) Register(c echo.Context) error {
 		LastName:    req.LastName,
 		PhoneNumber: req.PhoneNumber,
 		Password:    string(hash),
-		IsActivated: false,
+		IsActivated: true,
 	}
 	user, err = h.api.repository.User.CreateAnUser(&mu)
 	if err != nil {
@@ -95,7 +95,7 @@ func (h *accountAPI) Register(c echo.Context) error {
 		LastName:    user.LastName,
 		Email:       user.Email,
 		PhoneNumber: user.PhoneNumber,
-		VerifiedAt:  user.VerifiedAt,
+		IsVerified:  isAccountVerified(user.VerifiedAt),
 		IsActivated: user.IsActivated,
 		CreatedAt:   user.CreatedAt,
 		UpdatedAt:   user.UpdatedAt,
@@ -110,8 +110,8 @@ func (h *accountAPI) Register(c echo.Context) error {
 // @Produce      json
 // @Param data body loginReq true "account credentials"
 // @Success      200  {object}  authResp
-// @Failure      422  {object}  errorResp
-// @Failure      500  {object}  errorResp
+// @Failure      422  {object}  defaultJsonResp
+// @Failure      500  {object}  defaultJsonResp
 // @Router       /accounts/auth [post]
 func (h *accountAPI) Auth(c echo.Context) error {
 	var req loginReq
@@ -131,11 +131,7 @@ func (h *accountAPI) Auth(c echo.Context) error {
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
 		return errJson(c, http.StatusUnprocessableEntity, errors.New("your phone number and password is incorrect"))
 	}
-	isVerified := false
-	if user.VerifiedAt.After(time.Date(2001, 2, 3, 4, 5, 6, 700000000, time.UTC)) {
-		isVerified = true
-	}
-	jwtToken, err := h.api.jwt.Issue(user.PhoneNumber, isVerified)
+	jwtToken, err := h.api.jwt.Issue(user.PhoneNumber, isAccountVerified(user.VerifiedAt))
 	if err != nil {
 		return errJson(c, http.StatusInternalServerError, err)
 	}
@@ -143,4 +139,101 @@ func (h *accountAPI) Auth(c echo.Context) error {
 		Token: jwtToken,
 		Type:  "Bearer",
 	})
+}
+
+// Profile godoc
+// @Summary      account profiles
+// @Description  get account profile
+// @Tags         accounts
+// @Accept       json
+// @Produce      json
+// @Success		200  {object}  accountResp
+// @Failure     422  {object}  defaultJsonResp
+// @Failure		500  {object}  defaultJsonResp
+// @Security	ApiBearerKey
+// @Router		/accounts [get]
+func (h *accountAPI) Profile(c echo.Context) error {
+	claims := getClaims(c)
+	user, err := h.api.repository.User.GetUserByPhoneNumber(claims.PhoneNumber)
+	if err != nil {
+		if err != db.ErrNoMoreRows {
+			return errJson(c, http.StatusInternalServerError, err)
+		}
+		return errJson(c, http.StatusUnprocessableEntity, errors.New("your phone number and password is incorrect"))
+	}
+	fmt.Printf("USER: %+v\n", user)
+	return c.JSON(http.StatusOK, &accountResp{
+		ID:          user.ID,
+		FirstName:   user.FirstName,
+		LastName:    user.LastName,
+		Email:       user.Email,
+		PhoneNumber: user.PhoneNumber,
+		IsVerified:  isAccountVerified(user.VerifiedAt),
+		IsActivated: user.IsActivated,
+		CreatedAt:   user.CreatedAt,
+		UpdatedAt:   user.UpdatedAt,
+	})
+}
+
+func (h *accountAPI) SentCode(c echo.Context) error {
+	claims := getClaims(c)
+	user, err := h.api.repository.User.GetUserByPhoneNumber(claims.PhoneNumber)
+	if err != nil {
+		if err != db.ErrNoMoreRows {
+			return errJson(c, http.StatusInternalServerError, err)
+		}
+		return errJson(c, http.StatusUnprocessableEntity, errors.New("your phone number and password is incorrect"))
+	}
+	rand.Seed(time.Now().UnixNano())
+	min := 100000
+	max := 999999
+	rn := rand.Intn(max-min+1) + min
+	if err := h.api.repository.User.CreateVerifyCode(user.PhoneNumber, strconv.Itoa(rn)); err != nil {
+		return errJson(c, http.StatusInternalServerError, err)
+	}
+	// sent email or sms
+	return successJson(c, http.StatusCreated, "ok")
+}
+
+func (h *accountAPI) VerifyCode(c echo.Context) error {
+	token := c.Param("code")
+	claims := getClaims(c)
+	user, err := h.api.repository.User.GetUserByPhoneNumber(claims.PhoneNumber)
+	if err != nil {
+		if err != db.ErrNoMoreRows {
+			return errJson(c, http.StatusInternalServerError, err)
+		}
+		return errJson(c, http.StatusUnprocessableEntity, errors.New("your phone number and password is incorrect"))
+	}
+	if isAccountVerified(user.VerifiedAt) {
+		return errJson(c, http.StatusUnprocessableEntity, errors.New("this account has been verified"))
+	}
+	_, err = h.api.repository.User.GetVerifyCode(claims.PhoneNumber, token)
+	if err != nil {
+		if err != db.ErrNoMoreRows {
+			return errJson(c, http.StatusInternalServerError, err)
+		}
+		return errJson(c, http.StatusUnprocessableEntity, errors.New("your verify code has expired or invalid"))
+	}
+	if err := h.api.repository.User.UpdateVerified(claims.PhoneNumber); err != nil {
+		return errJson(c, http.StatusInternalServerError, err)
+	}
+	jwtToken, err := h.api.jwt.Issue(user.PhoneNumber, true)
+	if err != nil {
+		return errJson(c, http.StatusInternalServerError, err)
+	}
+	return c.JSON(http.StatusOK, &authResp{
+		Token: jwtToken,
+		Type:  "Bearer",
+	})
+}
+
+func getClaims(c echo.Context) *authJwt.Claim {
+	jwtToken := c.Get("user").(*jwt.Token)
+	return jwtToken.Claims.(*authJwt.Claim)
+}
+
+func isAccountVerified(t time.Time) bool {
+	fmt.Printf("is_zero %+v\n", t.IsZero())
+	return !t.IsZero()
 }

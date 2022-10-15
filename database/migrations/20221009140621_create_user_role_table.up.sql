@@ -1,9 +1,7 @@
-create table "user_role"
+create table "users_roles"
 (
-    "user_id"    bigint                         not null,
-    "role_id"    bigint                         not null,
-    "created_at" timestamp(0) without time zone null,
-    "updated_at" timestamp(0) without time zone null
+    "user_id" bigint not null default 0,
+    "role_id" bigint not null default 0
 );
-alter table "user_role"
-    add constraint "user_role_user_id_role_id_unique" unique ("user_id", "role_id");
+alter table "users_roles"
+    add constraint "users_roles_user_id_role_id_unique" unique ("user_id", "role_id");

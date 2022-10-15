@@ -12,13 +12,13 @@ definitions:
         type: integer
       is_activated:
         type: boolean
+      is_verified:
+        type: boolean
       last_name:
         type: string
       phone_number:
         type: string
       updated_at:
-        type: string
-      verified_at:
         type: string
     type: object
   api.authResp:
@@ -75,6 +75,30 @@ info:
   version: "1.0"
 paths:
   /accounts:
+    get:
+      consumes:
+      - application/json
+      description: get account profile
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.accountResp'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/api.errorResp'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.errorResp'
+      security:
+      - ApiBearerKey: []
+      summary: account profiles
+      tags:
+      - accounts
     post:
       consumes:
       - application/json
@@ -137,4 +161,9 @@ paths:
 schemes:
 - http
 - https
+securityDefinitions:
+  ApiBearerKey:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

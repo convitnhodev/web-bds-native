@@ -5,8 +5,8 @@ import (
 	"github.com/deeincom/deeincom/app/repositories"
 	configuration "github.com/deeincom/deeincom/config"
 	"github.com/deeincom/deeincom/database"
-	"github.com/deeincom/deeincom/pkg/jwt"
 	"github.com/deeincom/deeincom/routes"
+	"github.com/golang-migrate/migrate/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/spf13/cobra"
@@ -14,6 +14,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 )
 
 type App struct {
@@ -46,11 +47,21 @@ func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c 
 
 func serve(cmd *cobra.Command, args []string) {
 	config := configuration.New()
+	if config.Get("APP_ENV") == "local" {
+		os.Setenv("TZ", "Etc/UTC")
+	}
 	db := database.NewDB(config.GetString("DB_URI"))
 	if err := db.Connect(); err != nil {
 		log.Fatal("unable connect to db", err)
 	}
-	jwtAuth := jwt.NewAuth(config.GetString("AUTH_SECRET"), config.GetDuration("AUTH_EXPIRE_DURATION"))
+	defer func() {
+		_ = db.Close()
+	}()
+	if config.GetString("APP_ENV") != "local" {
+		if err := db.Migrate(); err != nil && err != migrate.ErrNoChange {
+			log.Fatal("migrate db has error", err)
+		}
+	}
 	renderer, err := config.GetEmbedRender()
 	if err != nil {
 		log.Fatal("unable to get template", err)
@@ -64,7 +75,7 @@ func serve(cmd *cobra.Command, args []string) {
 	app.Use(middleware.Recover())
 	app.Static("/", "./public")
 	routes.RegisterWeb(app.Echo, repositories.New(db.GetSession()))
-	routes.RegisterAPI(app.Echo, repositories.New(db.GetSession()), jwtAuth)
+	routes.RegisterAPI(app.Echo, repositories.New(db.GetSession()), config)
 	routes.RegisterAdmin(app.Echo)
 	app.Echo.GET("/test", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, app.Routes())

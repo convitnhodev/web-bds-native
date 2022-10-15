@@ -17,10 +17,10 @@ type Handler struct {
 	repository *repositories.Repository
 	common     handler
 
-	UserHandler AccountHandler
+	AccountHandler *accountAPI
 }
 
-type errorResp struct {
+type defaultJsonResp struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
 }
@@ -33,13 +33,20 @@ func NewHandler(r *repositories.Repository, jwt jwt.Authenticator) *Handler {
 		jwt:        jwt,
 	}
 	h.common.api = h
-	h.UserHandler = (*accountAPI)(&h.common)
+	h.AccountHandler = (*accountAPI)(&h.common)
 	return h
 }
 
 func errJson(c echo.Context, code int, err error) error {
-	return c.JSON(code, &errorResp{
+	return c.JSON(code, &defaultJsonResp{
 		Code:    code,
 		Message: err.Error(),
+	})
+}
+
+func successJson(c echo.Context, code int, msg string) error {
+	return c.JSON(code, &defaultJsonResp{
+		Code:    code,
+		Message: msg,
 	})
 }

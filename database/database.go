@@ -32,6 +32,8 @@ type DB struct {
 }
 
 func (d *DB) Connect() error {
+	db.LC().SetLevel(db.LogLevelTrace)
+
 	database, err := sqlx.Open("postgres", d.uri)
 	if err != nil {
 		return err

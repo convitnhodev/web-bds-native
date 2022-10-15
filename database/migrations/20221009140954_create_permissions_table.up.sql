@@ -1,11 +1,9 @@
 create table "permissions"
 (
-    "id"          bigserial primary key          not null,
-    "name"        varchar(255)                   not null,
-    "slug"        varchar(255)                   not null,
-    "description" varchar(255)                   not null,
-    "created_at"  timestamp(0) without time zone null,
-    "updated_at"  timestamp(0) without time zone null
+    "id"          bigserial primary key,
+    "name"        varchar(255) not null default '',
+    "slug"        varchar(255) not null default '',
+    "description" varchar(255) not null default ''
 );
 alter table "permissions"
     add constraint "permissions_slug_unique" unique ("slug");

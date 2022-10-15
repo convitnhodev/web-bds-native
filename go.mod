@@ -6,7 +6,7 @@ require (
 	github.com/go-playground/validator/v10 v10.11.1
 	github.com/golang-migrate/migrate/v4 v4.15.2
 	github.com/jmoiron/sqlx v1.3.5
-	github.com/labstack/echo/v4 v4.9.0
+	github.com/labstack/echo/v4 v4.9.1
 	github.com/lib/pq v1.10.7
 	github.com/spf13/cobra v1.5.0
 	github.com/spf13/viper v1.13.0
