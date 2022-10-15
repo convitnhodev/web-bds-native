@@ -22,7 +22,25 @@ func NewHandler(r *repositories.Repository) *handler {
 }
 
 func (h *handler) Index(c echo.Context) error {
+	return c.Render(http.StatusOK, "home.page.html", map[string]string{
+		"Title": "Hello, World!",
+	})
+}
+
+func (h *handler) Detail(c echo.Context) error {
+	return c.Render(http.StatusOK, "detail.page.html", map[string]string{
+		"Title": "Hello, World!",
+	})
+}
+
+func (h *handler) Register(c echo.Context) error {
 	return c.Render(http.StatusOK, "register.page.html", map[string]string{
+		"Title": "Hello, World!",
+	})
+}
+
+func (h *handler) Login(c echo.Context) error {
+	return c.Render(http.StatusOK, "login.page.html", map[string]string{
 		"Title": "Hello, World!",
 	})
 }
