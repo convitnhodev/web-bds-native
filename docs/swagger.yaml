@@ -28,7 +28,7 @@ definitions:
       type:
         type: string
     type: object
-  api.errorResp:
+  api.defaultJsonResp:
     properties:
       code:
         type: integer
@@ -75,30 +75,6 @@ info:
   version: "1.0"
 paths:
   /accounts:
-    get:
-      consumes:
-      - application/json
-      description: get account profile
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/api.accountResp'
-        "422":
-          description: Unprocessable Entity
-          schema:
-            $ref: '#/definitions/api.errorResp'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/api.errorResp'
-      security:
-      - ApiBearerKey: []
-      summary: account profiles
-      tags:
-      - accounts
     post:
       consumes:
       - application/json
@@ -120,11 +96,11 @@ paths:
         "422":
           description: Unprocessable Entity
           schema:
-            $ref: '#/definitions/api.errorResp'
+            $ref: '#/definitions/api.defaultJsonResp'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/api.errorResp'
+            $ref: '#/definitions/api.defaultJsonResp'
       summary: register
       tags:
       - accounts
@@ -150,12 +126,93 @@ paths:
         "422":
           description: Unprocessable Entity
           schema:
-            $ref: '#/definitions/api.errorResp'
+            $ref: '#/definitions/api.defaultJsonResp'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/api.errorResp'
+            $ref: '#/definitions/api.defaultJsonResp'
       summary: authenticate
+      tags:
+      - accounts
+  /accounts/profile:
+    get:
+      consumes:
+      - application/json
+      description: get account profile
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.accountResp'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/api.defaultJsonResp'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.defaultJsonResp'
+      security:
+      - ApiBearerKey: []
+      summary: account profiles
+      tags:
+      - accounts
+  /accounts/verification:
+    get:
+      consumes:
+      - application/json
+      description: sent sms verify code
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.defaultJsonResp'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/api.defaultJsonResp'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.defaultJsonResp'
+      security:
+      - ApiBearerKey: []
+      summary: sent verify code
+      tags:
+      - accounts
+  /accounts/verification/{code}/code:
+    get:
+      consumes:
+      - application/json
+      description: sent sms verify code
+      parameters:
+      - description: verify code
+        in: path
+        name: code
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.authResp'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/api.defaultJsonResp'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.defaultJsonResp'
+      security:
+      - ApiBearerKey: []
+      summary: sent verify code
       tags:
       - accounts
 schemes:

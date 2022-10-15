@@ -21,44 +21,6 @@ const docTemplate = `{
     "basePath": "{{.BasePath}}",
     "paths": {
         "/accounts": {
-            "get": {
-                "security": [
-                    {
-                        "ApiBearerKey": []
-                    }
-                ],
-                "description": "get account profile",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "accounts"
-                ],
-                "summary": "account profiles",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/api.accountResp"
-                        }
-                    },
-                    "422": {
-                        "description": "Unprocessable Entity",
-                        "schema": {
-                            "$ref": "#/definitions/api.errorResp"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/api.errorResp"
-                        }
-                    }
-                }
-            },
             "post": {
                 "description": "register an account",
                 "consumes": [
@@ -92,13 +54,13 @@ const docTemplate = `{
                     "422": {
                         "description": "Unprocessable Entity",
                         "schema": {
-                            "$ref": "#/definitions/api.errorResp"
+                            "$ref": "#/definitions/api.defaultJsonResp"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/api.errorResp"
+                            "$ref": "#/definitions/api.defaultJsonResp"
                         }
                     }
                 }
@@ -138,13 +100,142 @@ const docTemplate = `{
                     "422": {
                         "description": "Unprocessable Entity",
                         "schema": {
-                            "$ref": "#/definitions/api.errorResp"
+                            "$ref": "#/definitions/api.defaultJsonResp"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/api.errorResp"
+                            "$ref": "#/definitions/api.defaultJsonResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/accounts/profile": {
+            "get": {
+                "security": [
+                    {
+                        "ApiBearerKey": []
+                    }
+                ],
+                "description": "get account profile",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "accounts"
+                ],
+                "summary": "account profiles",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.accountResp"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/api.defaultJsonResp"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.defaultJsonResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/accounts/verification": {
+            "get": {
+                "security": [
+                    {
+                        "ApiBearerKey": []
+                    }
+                ],
+                "description": "sent sms verify code",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "accounts"
+                ],
+                "summary": "sent verify code",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.defaultJsonResp"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/api.defaultJsonResp"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.defaultJsonResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/accounts/verification/{code}/code": {
+            "get": {
+                "security": [
+                    {
+                        "ApiBearerKey": []
+                    }
+                ],
+                "description": "sent sms verify code",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "accounts"
+                ],
+                "summary": "sent verify code",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "verify code",
+                        "name": "code",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.authResp"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/api.defaultJsonResp"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.defaultJsonResp"
                         }
                     }
                 }
@@ -195,7 +286,7 @@ const docTemplate = `{
                 }
             }
         },
-        "api.errorResp": {
+        "api.defaultJsonResp": {
             "type": "object",
             "properties": {
                 "code": {

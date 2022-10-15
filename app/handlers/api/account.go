@@ -151,7 +151,7 @@ func (h *accountAPI) Auth(c echo.Context) error {
 // @Failure     422  {object}  defaultJsonResp
 // @Failure		500  {object}  defaultJsonResp
 // @Security	ApiBearerKey
-// @Router		/accounts [get]
+// @Router		/accounts/profile [get]
 func (h *accountAPI) Profile(c echo.Context) error {
 	claims := getClaims(c)
 	user, err := h.api.repository.User.GetUserByPhoneNumber(claims.PhoneNumber)
@@ -175,6 +175,17 @@ func (h *accountAPI) Profile(c echo.Context) error {
 	})
 }
 
+// SentCode godoc
+// @Summary      sent verify code
+// @Description  sent sms verify code
+// @Tags         accounts
+// @Accept       json
+// @Produce      json
+// @Success		200  {object}  defaultJsonResp
+// @Failure     422  {object}  defaultJsonResp
+// @Failure		500  {object}  defaultJsonResp
+// @Security	ApiBearerKey
+// @Router		/accounts/verification [get]
 func (h *accountAPI) SentCode(c echo.Context) error {
 	claims := getClaims(c)
 	user, err := h.api.repository.User.GetUserByPhoneNumber(claims.PhoneNumber)
@@ -192,9 +203,21 @@ func (h *accountAPI) SentCode(c echo.Context) error {
 		return errJson(c, http.StatusInternalServerError, err)
 	}
 	// sent email or sms
-	return successJson(c, http.StatusCreated, "ok")
+	return successJson(c, http.StatusCreated, "sms has been send")
 }
 
+// VerifyCode godoc
+// @Summary      sent verify code
+// @Description  sent sms verify code
+// @Tags         accounts
+// @Accept       json
+// @Produce      json
+// @Param        code   path      int  true  "verify code"
+// @Success		200  {object}  authResp
+// @Failure     422  {object}  defaultJsonResp
+// @Failure		500  {object}  defaultJsonResp
+// @Security	ApiBearerKey
+// @Router		/accounts/verification/{code}/code [get]
 func (h *accountAPI) VerifyCode(c echo.Context) error {
 	token := c.Param("code")
 	claims := getClaims(c)
