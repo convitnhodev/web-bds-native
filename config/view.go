@@ -2,14 +2,15 @@ package config
 
 import (
 	"fmt"
-	"github.com/Masterminds/sprig/v3"
-	"github.com/labstack/echo/v4"
 	"html/template"
 	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/Masterminds/sprig/v3"
+	"github.com/labstack/echo/v4"
 )
 
 type TemplateRenderer struct {
@@ -62,7 +63,7 @@ func (c *Config) getEmbedTemplate(path string) (map[string]*template.Template, e
 		ts, err := template.New(name).
 			Funcs(functions).
 			Funcs(sprig.FuncMap()).
-			ParseFS(fd, "pages/*.page.html", "*.layout.html", "partials/*.partial.html")
+			ParseFS(fd, filepath.Join("pages", name), "*.layout.html", "partials/*.partial.html")
 		if err != nil {
 			return nil, err
 		}
