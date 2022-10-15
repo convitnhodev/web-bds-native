@@ -21,14 +21,15 @@
   </head>
 
   <body
-    class="font-sans bg-gray-50 text-gray-700 [&.dee--within-screen]:overflow-hidden [.preload_*]:transition-none"
+    class="font-sans bg-white text-gray-700 [&.dee--within-screen]:overflow-hidden"
   >
+    <!-- / -->
     {{template "web.header" .}}
-
+    <!-- / -->
     {{template "web.content" .}}
-
+    <!-- / -->
     {{template "web.footer" .}}
-
+    <!-- / -->
     {{block "scripts" . -}}{{- end}}
   </body>
 </html>

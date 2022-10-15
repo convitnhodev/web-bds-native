@@ -11,4 +11,13 @@ export default {
       },
     }),
   ],
+  preflights: [
+    {
+      getCSS: () => `
+.preload * {
+  transition-property: none;
+}
+      `,
+    },
+  ],
 };
