@@ -11,6 +11,7 @@ go.work
 .idea
 .air.toml
 .editorconfig
+.prettierrc
 tmp/
 vendor/
 tmp
