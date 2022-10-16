@@ -7,21 +7,28 @@
 
     <title>deeincom</title>
 
-    <link rel="preconnect" href="https://esm.sh/" crossorigin />
+    <link rel="preconnect" href="https://unpkg.com/" crossorigin />
     <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin />
 
     <link
       rel="stylesheet"
-      href="https://esm.sh/@unocss/reset@latest/tailwind.css"
+      href="https://unpkg.com/@unocss/reset/tailwind.css"
     />
+
     <link rel="stylesheet" href="/assets/web/css/deeincom.css" />
+
+    <script
+      src="https://unpkg.com/embla-carousel/embla-carousel.umd.js"
+      defer
+    ></script>
+
     <script src="/assets/web/js/preload.js"></script>
     <script src="/assets/web/js/disclosure.js" defer></script>
     <script src="/assets/web/js/header.js" defer></script>
   </head>
 
   <body
-    class="font-sans bg-white text-gray-700 [&.dee--within-screen]:overflow-hidden"
+    class="font-sans bg-white text-gray-700 [&.dee--within-screen]:overflow-hidden preload"
   >
     <!-- / -->
     {{template "web.header" .}}
