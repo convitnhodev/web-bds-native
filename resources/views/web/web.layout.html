@@ -14,19 +14,19 @@
       rel="stylesheet"
       href="https://unpkg.com/@unocss/reset/tailwind.css"
     />
+    {{block "web.header.css-before" . -}}{{- end}}
 
     <link rel="stylesheet" href="/assets/web/css/deeincom.css" />
-    <link rel="stylesheet" href="/assets/web/css/carousel.css" />
 
-    <script
-      src="https://unpkg.com/embla-carousel/embla-carousel.umd.js"
-      defer
-    ></script>
+    {{block "web.header.css-after" . -}}{{- end}}
+
+    {{block "web.header.scripts-before" . -}}{{- end}}
 
     <script src="/assets/web/js/preload.js"></script>
     <script src="/assets/web/js/disclosure.js" defer></script>
     <script src="/assets/web/js/header.js" defer></script>
-    <script src="/assets/web/js/carousel.js" defer></script>
+
+    {{block "web.header.scripts-after" . -}}{{- end}}
   </head>
 
   <body
@@ -39,7 +39,7 @@
     <!-- / -->
     {{template "web.footer" .}}
     <!-- / -->
-    {{block "scripts" . -}}{{- end}}
+    {{block "web.scripts" . -}}{{- end}}
   </body>
 </html>
 {{- end}}

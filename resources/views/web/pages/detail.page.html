@@ -1,4 +1,19 @@
 {{ template "web" .}}
+<!-- web.header.css-after -->
+{{define "web.header.css-after" -}}
+<link rel="stylesheet" href="/assets/web/css/carousel.css" />
+{{- end}}
+<!-- web.header.scripts-before -->
+{{define "web.header.scripts-before" -}}
+<script
+  src="https://unpkg.com/embla-carousel/embla-carousel.umd.js"
+  defer
+></script>
+{{- end}}
+<!-- web.header.scripts-after -->
+{{define "web.header.scripts-after" -}}
+<script src="/assets/web/js/carousel.js" defer></script>
+{{- end}}
 <!-- web.content -->
 {{define "web.content" -}}
 <main>
@@ -293,11 +308,15 @@
         </div>
         <div class="mt-4 border-t pt-4">
           <div class="text-gray-400">Valuation cap</div>
-          <div class="font-bold text-xl blur hover:blur-none transition-all">Login to view</div>
+          <div class="font-bold text-xl blur hover:blur-none transition-all">
+            Login to view
+          </div>
         </div>
         <div class="mt-4 border-t pt-4">
           <div class="text-gray-400">Valuation cap</div>
-          <div class="font-bold text-xl blur hover:blur-none transition-all">Login to view</div>
+          <div class="font-bold text-xl blur hover:blur-none transition-all">
+            Login to view
+          </div>
         </div>
       </div>
       <div
