@@ -11,4 +11,6 @@ func RegisterAdmin(web *echo.Echo) {
 	r := web.Group("/admin")
 	r.GET("", h.Index)
 	r.GET("/users", h.UserList)
+	r.GET("/products/create", h.ProductCreate)
+	r.POST("/products", h.ProductCreate)
 }

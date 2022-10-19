@@ -30,6 +30,16 @@
                         <li class="nav-item"><a href="/admin/users/create" class="nav-link">Create</a></li>
                     </ul>
                 </li>
+                <li class="nav-item nav-item-submenu {{- if (currentPathPrefixMatch .Context "/admin/products")}} nav-item-open {{ end -}}">
+                    <a href="#" class="nav-link"><i class="icon-stack2"></i> <span>Products</span></a>
+                    <ul class="nav nav-group-sub"
+                        data-submenu-title="Page layouts" {{- if (currentPathPrefixMatch .Context "/admin/products")}} style="display: block;" {{ end -}}>
+                        <li class="nav-item"><a href="/admin/products"
+                                                class="nav-link {{- if (currentPathMatch .Context "/admin/products")}} active {{ end -}}">List</a>
+                        </li>
+                        <li class="nav-item"><a href="/admin/products/create" class="nav-link">Create</a></li>
+                    </ul>
+                </li>
                 <!-- /layout -->
 
             </ul>

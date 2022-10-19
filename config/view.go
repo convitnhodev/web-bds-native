@@ -63,7 +63,7 @@ func (c *Config) getEmbedTemplate(path string) (map[string]*template.Template, e
 		ts, err := template.New(name).
 			Funcs(functions).
 			Funcs(sprig.FuncMap()).
-			ParseFS(fd, filepath.Join("pages", name), "*.layout.html", "partials/*.partial.html")
+			ParseFS(fd, "*.layout.html", "partials/*.partial.html", filepath.Join("pages", name))
 		if err != nil {
 			return nil, err
 		}

@@ -17,7 +17,8 @@ type Handler struct {
 	repository *repositories.Repository
 	common     handler
 
-	AccountHandler *accountAPI
+	AccountHandler  *accountAPI
+	LocationHandler *locationAPI
 }
 
 type defaultJsonResp struct {
@@ -34,6 +35,7 @@ func NewHandler(r *repositories.Repository, jwt jwt.Authenticator) *Handler {
 	}
 	h.common.api = h
 	h.AccountHandler = (*accountAPI)(&h.common)
+	h.LocationHandler = (*locationAPI)(&h.common)
 	return h
 }
 
