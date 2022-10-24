@@ -12,6 +12,7 @@ async function requestCode() {
   try {
     const token = localStorage.getItem('token');
     const resp = await fetch('/api/v1/accounts/verification', {
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
@@ -75,6 +76,7 @@ verifyForm.addEventListener('submit', async (e) => {
   try {
     const token = localStorage.getItem('token');
     const resp = await fetch(`/api/v1/accounts/verification/${code}/code`, {
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
