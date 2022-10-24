@@ -96,7 +96,6 @@ loginForm.addEventListener('submit', async (e) => {
 
     throw new Error();
   } catch (error) {
-    console.log(error);
     loginFormOverlay.classList.add('hidden');
     loginFormSubmit.removeAttribute('disabled');
     loginFormErr.classList.remove('hidden');
