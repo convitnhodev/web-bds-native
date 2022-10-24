@@ -83,7 +83,7 @@ loginForm.addEventListener('submit', async (e) => {
     });
 
     if (profileResp.ok) {
-      const json = await resp.json();
+      const json = await profileResp.json();
 
       if (json.is_verified) {
         location.href = '/';
@@ -96,8 +96,8 @@ loginForm.addEventListener('submit', async (e) => {
 
     throw new Error();
   } catch (error) {
-    loginFormErr.classList.remove('hidden');
     loginFormOverlay.classList.add('hidden');
     loginFormSubmit.removeAttribute('disabled');
+    loginFormErr.classList.remove('hidden');
   }
 });

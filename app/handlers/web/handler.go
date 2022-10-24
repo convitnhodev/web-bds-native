@@ -47,7 +47,7 @@ func (h *handler) Index(c echo.Context) error {
 	fmt.Printf("products: %+v\n", products)
 
 	return c.Render(http.StatusOK, "home.page.html", echo.Map{
-		"Title":    "Hello, World!",
+		"Title":    "Đang mở bán",
 		"Products": products,
 	})
 }
