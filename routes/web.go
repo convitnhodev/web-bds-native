@@ -14,4 +14,5 @@ func RegisterWeb(web *echo.Echo, r *repositories.Repository) {
 
 	web.GET("/register", h.Register)
 	web.GET("/login", h.Login)
+	web.GET("/verify", h.Verify)
 }

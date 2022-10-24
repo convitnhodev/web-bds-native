@@ -10,8 +10,8 @@
     "build": "unocss \"../resources/views/web/**/*.html\" --config uno.config.js --out-file \"../public/assets/web/css/deeincom.css\""
   },
   "devDependencies": {
-    "@unocss/cli": "^0.45.29",
-    "@unocss/preset-uno": "^0.45.29",
-    "@unocss/preset-web-fonts": "^0.45.29"
+    "@unocss/cli": "^0.45.30",
+    "@unocss/preset-uno": "^0.45.30",
+    "@unocss/preset-web-fonts": "^0.45.30"
   }
 }
