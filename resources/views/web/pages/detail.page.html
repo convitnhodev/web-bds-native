@@ -23,22 +23,23 @@
     >
       <div>
         <div class="flex items-center gap-4">
-          <img
+          <!-- <img
             class="rounded border w-10 h-10"
             src="https://uploads.republic.com/p/offerings/logos/small_2x/000/001/368/1368-1643713542-e4a0d3ced8d8f7a2714f8664ade321aeb8d57aa4.png"
             alt=""
-          />
-          <div class="text-5xl font-bold">Lambs</div>
+          /> -->
+          <div class="text-5xl font-bold">{{ .Product.Title }}</div>
         </div>
         <div class="mt-4 text-2xl text-gray-500">
-          Apparel that boosts your immune health, cognition, recovery, and sleep
+          {{ .Product.AddressNumber }} {{ .Product.Street }}, {{ .Product.Ward
+          }}, {{ .Product.District }}, {{ .Product.City }}
         </div>
         <div class="mt-4 space-x-1 text-sm">
           <span class="px-2 py-1 bg-blue-100 text-blue-500 uppercase rounded">
-            Health care
+            Diện tích: {{ .Product.Area }}m<sup>2</sup>
           </span>
           <span class="px-2 py-1 bg-green-100 text-green-500 uppercase rounded">
-            Health care
+            Hướng: {{ .Product.HouseDirection }}
           </span>
         </div>
       </div>
@@ -250,23 +251,27 @@
           </div>
         </div>
         <div class="mt-10 px-4 sm:mt-16 sm:px-0 lg:mt-0">
-          <div class="text-6xl font-bold tracking-tight text-green-500">
-            $555,555
+          <div class="text-5xl font-bold tracking-tight text-green-500">
+            {{ .Product.FinancialPlan }}
           </div>
           <div class="mt-2">
             <p class="text-xl tracking-tight text-gray-400">
-              555% of minimum goal raised.
+              Kế hoạch tài chính
             </p>
           </div>
-          <div class="mt-2 h-[5px] bg-green-400 w-full rounded-full"></div>
+          <!-- <div class="mt-2 h-[5px] bg-green-400 w-full rounded-full"></div> -->
           <div class="mt-6">
             <div class="">
-              <p class="font-bold text-5xl">706</p>
-              <p>investors</p>
+              <p>Lợi thế kinh doanh</p>
+              <p class="font-bold text-3xl">{{ .Product.BusinessAdvantage }}</p>
             </div>
             <div class="mt-6">
-              <p class="font-bold text-5xl">156</p>
-              <p>days left to invest</p>
+              <p>Loại hình</p>
+              <p class="font-bold text-3xl">{{ .Product.CategoryID }}</p>
+            </div>
+            <div class="mt-6">
+              <p>Tình trạng pháp lý</p>
+              <p class="font-bold text-3xl">{{ .Product.DocumentType }}</p>
             </div>
           </div>
           <form class="mt-6">
@@ -275,12 +280,9 @@
                 type="submit"
                 class="flex w-full flex-1 items-center justify-center rounded-md border border-transparent bg-sky-600 py-3 px-8 text-2xl font-bold text-white hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-gray-50 sm:w-full"
               >
-                Invest in Lambs
+                Đầu tư
               </button>
             </div>
-            <p class="mt-1 text-center text-gray-500">
-              <strong>$250</strong> minimum investment
-            </p>
           </form>
         </div>
       </div>
@@ -290,93 +292,55 @@
     >
       <div class="lg:col-span-2 lg:border-r lg:border-gray-200 lg:pr-8">
         <h1 class="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
-          Highlights
+          {{ .Product.Title }}
         </h1>
       </div>
       <div class="mt-4 lg:row-span-3 lg:mt-0">
         <div>
-          <div class="text-gray-400">Valuation cap</div>
-          <div class="font-bold text-xl">$30,000,000</div>
+          <div class="text-gray-400">Diện tích</div>
+          <div class="font-bold text-xl">{{ .Product.Area }}m<sup>2</sup></div>
         </div>
         <div class="mt-4 border-t pt-4">
-          <div class="text-gray-400">Valuation cap</div>
-          <div class="font-bold text-xl">$30,000,000</div>
+          <div class="text-gray-400">Mặt tiền</div>
+          <div class="font-bold text-xl">{{ .Product.FrontWidth }}m</div>
         </div>
         <div class="mt-4 border-t pt-4">
-          <div class="text-gray-400">Valuation cap</div>
-          <div class="font-bold text-xl">$30,000,000</div>
+          <div class="text-gray-400">Đường trước nhà</div>
+          <div class="font-bold text-xl">{{ .Product.StreetWidth }}m</div>
         </div>
         <div class="mt-4 border-t pt-4">
+          <div class="text-gray-400">Độ rộng vỉa hè</div>
+          <div class="font-bold text-xl">{{ .Product.PavementWidth }}m</div>
+        </div>
+        <div class="mt-4 border-t pt-4">
+          <div class="text-gray-400">Số phòng ngủ</div>
+          <div class="font-bold text-xl">{{ .Product.Bedroom }}</div>
+        </div>
+        <div class="mt-4 border-t pt-4">
+          <div class="text-gray-400">Kết cấu tài sản</div>
+          <div class="font-bold text-xl">{{ .Product.Furniture }}</div>
+        </div>
+        <div class="mt-4 border-t pt-4">
+          <div class="text-gray-400">Số toilet</div>
+          <div class="font-bold text-xl">{{ .Product.Toilet }}</div>
+        </div>
+        <div class="mt-4 border-t pt-4">
+          <div class="text-gray-400">Hướng nhà</div>
+          <div class="font-bold text-xl">{{ .Product.HouseDirection }}</div>
+        </div>
+        <!-- <div class="mt-4 border-t pt-4">
           <div class="text-gray-400">Valuation cap</div>
           <div class="font-bold text-xl blur hover:blur-none transition-all">
             Login to view
           </div>
-        </div>
-        <div class="mt-4 border-t pt-4">
-          <div class="text-gray-400">Valuation cap</div>
-          <div class="font-bold text-xl blur hover:blur-none transition-all">
-            Login to view
-          </div>
-        </div>
+        </div> -->
       </div>
       <div
         class="py-10 lg:col-span-2 lg:col-start-1 lg:border-r lg:border-gray-200 lg:pt-6 lg:pb-16 lg:pr-8"
       >
         <div>
           <div class="space-y-6">
-            <p class="text-base text-gray-900">
-              Lorem ipsum dolor sit amet consectetur adipisicing elit.
-              Consequuntur suscipit autem consequatur magnam vero voluptatem cum
-              maxime quibusdam velit iste soluta animi, minima, debitis sit nam,
-              molestiae alias. Deserunt, dolor!
-            </p>
-          </div>
-        </div>
-        <div class="mt-10">
-          <div class="mt-4">
-            <ul role="list" class="list-disc space-y-2 pl-4">
-              <li class="text-gray-400">
-                <span class="text-gray-600">
-                  Apparel that boosts your immune system, performance,
-                  cognition, and sleep
-                </span>
-              </li>
-              <li class="text-gray-400">
-                <span class="text-gray-600">
-                  Scientifically proven to block UV & wireless radiation
-                  (5G/Wi-Fi/Bluetooth)
-                </span>
-              </li>
-              <li class="text-gray-400">
-                <span class="text-gray-600">
-                  7x growth in 2020, on track for $15M revenue in 2022
-                </span>
-              </li>
-              <li class="text-gray-400">
-                <span class="text-gray-600">
-                  Backed by A-list investors and industry leaders: Lululemon
-                  exec, etc.
-                </span>
-              </li>
-              <li class="text-gray-400">
-                <span class="text-gray-600">
-                  Backed by A-list investors and industry leaders: Lululemon
-                  exec, etc.
-                </span>
-              </li>
-              <li class="text-gray-400">
-                <span class="text-gray-600">
-                  Trusted by professional athletes from major leagues: NFL, NBA,
-                  NHL, UFC
-                </span>
-              </li>
-              <li class="text-gray-400">
-                <span class="text-gray-600">
-                  Minimized downside: the company is already profitable & owns
-                  valuable IP
-                </span>
-              </li>
-            </ul>
+            <p class="text-base text-gray-900">{{ .Product.Description }}</p>
           </div>
         </div>
       </div>

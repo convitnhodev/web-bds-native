@@ -84,7 +84,6 @@
 @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 .animate-spin{animation:spin 1s linear infinite;}
 .select-none{user-select:none;}
-.list-disc{list-style-type:disc;}
 .appearance-none{appearance:none;-webkit-appearance:none;}
 .items-center{align-items:center;}
 .justify-end{justify-content:flex-end;}
@@ -97,7 +96,6 @@
 .gap-x-6{grid-column-gap:1.5rem;column-gap:1.5rem;}
 .space-x-1>:not([hidden])~:not([hidden]){--un-space-x-reverse:0;margin-left:calc(0.25rem * calc(1 - var(--un-space-x-reverse)));margin-right:calc(0.25rem * var(--un-space-x-reverse));}
 .space-y-10>:not([hidden])~:not([hidden]){--un-space-y-reverse:0;margin-top:calc(2.5rem * calc(1 - var(--un-space-y-reverse)));margin-bottom:calc(2.5rem * var(--un-space-y-reverse));}
-.space-y-2>:not([hidden])~:not([hidden]){--un-space-y-reverse:0;margin-top:calc(0.5rem * calc(1 - var(--un-space-y-reverse)));margin-bottom:calc(0.5rem * var(--un-space-y-reverse));}
 .space-y-4>:not([hidden])~:not([hidden]){--un-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--un-space-y-reverse)));margin-bottom:calc(1rem * var(--un-space-y-reverse));}
 .space-y-6>:not([hidden])~:not([hidden]){--un-space-y-reverse:0;margin-top:calc(1.5rem * calc(1 - var(--un-space-y-reverse)));margin-bottom:calc(1.5rem * var(--un-space-y-reverse));}
 .divide-y-2>:not([hidden])~:not([hidden]){--un-divide-y-reverse:0;border-top-width:calc(2px * calc(1 - var(--un-divide-y-reverse)));border-bottom-width:calc(2px * var(--un-divide-y-reverse));border-top-style:solid;border-bottom-style:solid;}
@@ -161,7 +159,6 @@
 .pb-16{padding-bottom:4rem;}
 .pb-20{padding-bottom:5rem;}
 .pb-8{padding-bottom:2rem;}
-.pl-4{padding-left:1rem;}
 .pt-10{padding-top:2.5rem;}
 .pt-16{padding-top:4rem;}
 .pt-18{padding-top:4.5rem;}
@@ -173,7 +170,6 @@
 .text-3xl{font-size:1.875rem;line-height:2.25rem;}
 .text-4xl{font-size:2.25rem;line-height:2.5rem;}
 .text-5xl{font-size:3rem;line-height:1;}
-.text-6xl{font-size:3.75rem;line-height:1;}
 .text-base{font-size:1rem;line-height:1.5rem;}
 .text-lg{font-size:1.125rem;line-height:1.75rem;}
 .text-sm{font-size:0.875rem;line-height:1.25rem;}
