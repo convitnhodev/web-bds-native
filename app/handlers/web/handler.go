@@ -44,3 +44,9 @@ func (h *handler) Login(c echo.Context) error {
 		"Title": "Hello, World!",
 	})
 }
+
+func (h *handler) Verify(c echo.Context) error {
+	return c.Render(http.StatusOK, "verify.page.html", map[string]string{
+		"Title": "Hello, World!",
+	})
+}
