@@ -6,6 +6,7 @@ import (
 	"github.com/deeincom/deeincom/app/models"
 	authJwt "github.com/deeincom/deeincom/pkg/jwt"
 	"github.com/golang-jwt/jwt"
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/upper/db/v4"
 	"golang.org/x/crypto/bcrypt"
@@ -88,6 +89,11 @@ func (h *accountAPI) Register(c echo.Context) error {
 	if err != nil {
 		return errJson(c, http.StatusInternalServerError, err)
 	}
+
+	sess, _ := session.Get("auth", c)
+	sess.Values["user_id"] = user.ID
+	sess.Values["user_is_verified"] = isAccountVerified(user.VerifiedAt)
+	_ = sess.Save(c.Request(), c.Response())
 
 	return c.JSON(http.StatusCreated, &accountResp{
 		ID:          user.ID,

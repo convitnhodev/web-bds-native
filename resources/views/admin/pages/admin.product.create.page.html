@@ -9,177 +9,7 @@
 
 {{- end}}
 {{ define "js-after-app" -}}
-    <script type="application/javascript">
-        var Select2Selects = function () {
-            var _componentSelect2 = function () {
-                if (!$().select2) {
-                    console.warn('Warning - select2.min.js is not loaded.');
-                    return;
-                }
-                $('.select').select2({
-                    minimumResultsForSearch: Infinity
-                });
-                $('.provinces-select-remote').select2({
-                    placeholder: "Chọn tỉnh/thành phố",
-                    ajax: {
-                        url: '/api/v1/locations/provinces',
-                        dataType: 'json',
-                        delay: 250,
-                        processResults: function (data, params) {
-                            return {
-                                results: $.map(data, function (item) {
-                                    return {
-                                        text: item.name,
-                                        id: item.code,
-                                        data: item
-                                    };
-                                })
-                            };
-                        },
-                        cache: true
-                    },
-                });
-                $('.cities-select-remote').select2({placeholder: "Chọn Quận/huyện"});
-                $('.wards-select-remote').select2({placeholder: "Chọn Xã/phường"});
-                $('.select-remote-data').select2({
-                    ajax: {
-                        url: 'https://api.github.com/search/repositories',
-                        dataType: 'json',
-                        delay: 250,
-                        data: function (params) {
-                            return {
-                                q: params.term, // search term
-                                page: params.page
-                            };
-                        },
-                        processResults: function (data, params) {
-                            params.page = params.page || 1;
-                            return {
-                                results: data.items,
-                                pagination: {
-                                    more: (params.page * 30) < data.total_count
-                                }
-                            };
-                        },
-                        cache: true
-                    },
-                    escapeMarkup: function (markup) {
-                        return markup;
-                    }, // let our custom formatter work
-                    minimumInputLength: 1,
-                });
-            };
-
-            return {
-                init: function () {
-                    _componentSelect2();
-                }
-            }
-        }();
-
-        var Plupload = function () {
-            var _componentPlupload = function () {
-                if (!$().pluploadQueue) {
-                    console.warn('Warning - Plupload files are not loaded.');
-                    return;
-                }
-                // Setup html5 version
-                $('.html5-uploader').pluploadQueue({
-                    runtimes: 'html5',
-                    url: '/assets/admin/global_assets/demo_data/uploader/plupload.json',
-                    chunk_size: '300Kb',
-                    unique_names: true,
-                    filters: {
-                        max_file_size: '300Kb',
-                        mime_types: [{
-                            title: 'Image files',
-                            extensions: 'jpg,gif,png'
-                        }]
-                    },
-                    resize: {
-                        width: 320,
-                        height: 240,
-                        quality: 90
-                    }
-                });
-            };
-
-            return {
-                init: function () {
-                    _componentPlupload();
-                }
-            }
-        }();
-
-        var InputGroups = function () {
-            var _componentTouchspin = function () {
-                $('.touchspin-step').TouchSpin({
-                    min: 0,
-                    max: 100,
-                });
-            }
-            return {
-                init: function () {
-                    _componentTouchspin();
-                }
-            }
-        }();
-
-        document.addEventListener('DOMContentLoaded', function () {
-            Select2Selects.init();
-            Plupload.init();
-            InputGroups.init();
-        });
-
-        $(document).ready(function () {
-            $(".provinces-select-remote").change(function () {
-                var province = $(".provinces-select-remote").val();
-                $('.cities-select-remote').select2({
-                    placeholder: "Chọn Quận/huyện",
-                    ajax: {
-                        url: '/api/v1/locations/provinces/' + province + '/districts',
-                        dataType: 'json',
-                        delay: 250,
-                        processResults: function (data, params) {
-                            return {
-                                results: $.map(data, function (item) {
-                                    return {
-                                        text: item.full_name,
-                                        id: item.code,
-                                        data: item
-                                    };
-                                })
-                            };
-                        },
-                        cache: true
-                    },
-                });
-            });
-            $(".cities-select-remote").change(function () {
-                var districts = $(".cities-select-remote").val();
-                $('.wards-select-remote').select2({
-                    placeholder: "Chọn Xã/phường",
-                    ajax: {
-                        url: '/api/v1/locations/districts/' + districts + '/wards',
-                        dataType: 'json',
-                        delay: 250,
-                        processResults: function (data, params) {
-                            return {
-                                results: $.map(data, function (item) {
-                                    return {
-                                        text: item.full_name,
-                                        id: item.code,
-                                        data: item
-                                    };
-                                })
-                            };
-                        },
-                        cache: true
-                    },
-                });
-            });
-        });
-    </script>
+    <script src="/assets/admin/assets/js/product-create.js"></script>
 {{- end}}
 {{ define "page-header" -}}
     <div class="page-header-content header-elements-lg-inline container">
@@ -429,11 +259,9 @@
                                 <label>Nội thất:</label>
                                 <div class="input-group">
                                     <select class="form-control select">
-                                        <option value="1" selected>Nội thất đầy đủ</option>
-                                        <option value="2">Nội thất cơ bản</option>
-                                        <option value="3">Không nội thất</option>
-                                        <option value="4">Nhà thô</option>
-                                        <option value="5">Khác</option>
+                                        {{range  .Furniture}}
+                                            <option value="{{.ID}}">{{.Value}}</option>
+                                        {{end}}
                                     </select>
                                 </div>
                             </div>
@@ -444,7 +272,7 @@
                             <div class="form-group">
                                 <label>Lợi thế kinh doanh:</label>
                                 <div class="input-group">
-                                    <input type="text" class="form-control" placeholder="Karaoke, massage">
+                                    <input type="text" class="form-control" placeholder="Văn phòng, Karaoke...">
                                 </div>
                             </div>
                         </div>
@@ -461,20 +289,22 @@
                         <label class="d-block">Điều khoản mua chung:</label>
 
                         <label class="custom-control custom-radio custom-control-inline">
-                            <input type="radio" class="custom-control-input" name="gender" checked=""
-                                   data-enpassusermodified="yes">
+                            <input type="radio" class="custom-control-input" name="general_purchase_terms_select"
+                                   checked=""
+                                   data-enpassusermodified="yes" value="url">
                             <span class="custom-control-label">Nhập đường dẫn</span>
                         </label>
 
                         <label class="custom-control custom-radio custom-control-inline">
-                            <input type="radio" class="custom-control-input" name="gender"
-                                   data-enpassusermodified="yes">
+                            <input type="radio" class="custom-control-input" name="general_purchase_terms_select"
+                                   value="upload_file">
                             <span class="custom-control-label">Tải file lên</span>
                         </label>
                     </div>
                     <div class="form-group">
-                        <div class="input-group">
-                            <input type="text" class="form-control" placeholder="100">
+                        <div class="input-group general_purchase_terms">
+                            <input type="text" name="general_purchase_terms" class="form-control"
+                                   placeholder="đường dẫn file">
                         </div>
                     </div>
                 </div>
