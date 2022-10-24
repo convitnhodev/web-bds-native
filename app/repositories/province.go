@@ -54,3 +54,44 @@ func (r *LocationRepository) ListWardsByDistrictID(id string) ([]models.Ward, er
 	}
 	return ds, nil
 }
+
+type Location struct {
+	WardID       string `db:"ward_id"`
+	WardName     string `db:"ward_name"`
+	DistrictID   string `db:"district_id"`
+	DistrictName string `db:"district_name"`
+	ProvinceID   string `db:"province_id"`
+	ProvinceName string `db:"province_name"`
+}
+
+func (r *LocationRepository) ListLocationByWardIDs(ids []string) (map[string]Location, error) {
+	rms := make([]Location, 0)
+
+	rmm := make(map[string]Location, 0)
+
+	is := make([]interface{}, len(ids))
+	for _, id := range ids {
+		is = append(is, id)
+	}
+
+	err := r.r.db.SQL().Select(
+		"w.code as ward_id",
+		"w.full_name as ward_name",
+		"d.code as district_id",
+		"d.full_name as district_name",
+		"p.code as province_id",
+		"p.full_name as province_name",
+	).
+		From("wards AS w").
+		Join("districts as d").On("w.district_code = d.code").
+		Join("provinces as p").On("d.province_code = p.code").
+		Where(db.Cond{"w.code": db.In(is...)}).
+		All(&rms)
+	if err != nil {
+		return nil, err
+	}
+	for _, rm := range rms {
+		rmm[rm.WardID] = rm
+	}
+	return rmm, nil
+}

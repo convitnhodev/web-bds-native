@@ -252,7 +252,7 @@ func (h *accountAPI) VerifyCode(c echo.Context) error {
 	if err != nil {
 		return errJson(c, http.StatusInternalServerError, err)
 	}
-	
+
 	sess, _ := session.Get("auth", c)
 	sess.Values["user_is_verified"] = isAccountVerified(user.VerifiedAt)
 	_ = sess.Save(c.Request(), c.Response())
@@ -264,6 +264,8 @@ func (h *accountAPI) VerifyCode(c echo.Context) error {
 }
 
 func getClaims(c echo.Context) *authJwt.Claim {
+	u := c.Get("user")
+	fmt.Printf("user: %+v\n", u)
 	jwtToken := c.Get("user").(*jwt.Token)
 	return jwtToken.Claims.(*authJwt.Claim)
 }

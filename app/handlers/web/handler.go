@@ -1,6 +1,7 @@
 package web
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/deeincom/deeincom/app/repositories"
@@ -22,8 +23,32 @@ func NewHandler(r *repositories.Repository) *handler {
 }
 
 func (h *handler) Index(c echo.Context) error {
-	return c.Render(http.StatusOK, "home.page.html", map[string]string{
-		"Title": "Hello, World!",
+	products, err := h.repository.Product.ListProducts()
+	if err != nil {
+		//handle error
+	}
+	wards := make([]string, len(products))
+	for _, product := range products {
+		wards = append(wards, product.Ward)
+	}
+
+	locations, err := h.repository.Location.ListLocationByWardIDs(wards)
+	if err != nil {
+		//handle error
+	}
+	for i, product := range products {
+		if l, ok := locations[product.Ward]; ok {
+			products[i].Ward = l.WardName
+			products[i].District = l.DistrictName
+			products[i].City = l.ProvinceName
+		}
+	}
+
+	fmt.Printf("products: %+v\n", products)
+
+	return c.Render(http.StatusOK, "home.page.html", echo.Map{
+		"Title":    "Hello, World!",
+		"Products": products,
 	})
 }
 

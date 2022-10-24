@@ -50,7 +50,7 @@
                 <div class="card-body">
                     <div class="form-group">
                         <label>Loại hình bất động sản:</label>
-                        <select class="form-control select">
+                        <select class="form-control select" name="category_id">
                             <option value="1" selected>Căn hộ chung cư</option>
                             <option value="2" selected>Nhà riêng</option>
                             <option value="3" selected>Nhà biệt thự, liền kề</option>
@@ -147,7 +147,7 @@
                         <div class="col-lg-4">
                             <div class="form-group">
                                 <label>Giấy tờ pháp lý:</label>
-                                <select class="form-control select">
+                                <select class="form-control select" name="document_type">
                                     <option value="1" selected>Sổ đỏ, sổ hồng</option>
                                     <option value="2" selected>Hợp đồng mua bán</option>
                                     <option value="3" selected>Đang chờ sổ</option>
@@ -204,16 +204,30 @@
                         <div class="col-lg-6">
                             <div class="form-group">
                                 <label>Hướng nhà:</label>
-                                <select class="form-control select">
-                                    <option value="1" selected>Tây Nam</option>
+                                <select class="form-control select" name="house_direction">
+                                    <option value="1" selected>Bắc</option>
+                                    <option value="2" selected>Nam</option>
+                                    <option value="3" selected>Đông</option>
+                                    <option value="4" selected>Tây</option>
+                                    <option value="5" selected>Đông Bắc</option>
+                                    <option value="6" selected>Đông Nam</option>
+                                    <option value="7" selected>Tây Bắc</option>
+                                    <option value="8" selected>Tây Nam</option>
                                 </select>
                             </div>
                         </div>
                         <div class="col-lg-6">
                             <div class="form-group">
                                 <label>Hướng ban công:</label>
-                                <select class="form-control select">
-                                    <option value="1" selected>Đông Nam</option>
+                                <select class="form-control select" name="balcony_direction">
+                                    <option value="1" selected>Bắc</option>
+                                    <option value="2" selected>Nam</option>
+                                    <option value="3" selected>Đông</option>
+                                    <option value="4" selected>Tây</option>
+                                    <option value="5" selected>Đông Bắc</option>
+                                    <option value="6" selected>Đông Nam</option>
+                                    <option value="7" selected>Tây Bắc</option>
+                                    <option value="8" selected>Tây Nam</option>
                                 </select>
                             </div>
                         </div>

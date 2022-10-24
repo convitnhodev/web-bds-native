@@ -16,6 +16,7 @@ type Repository struct {
 
 	User     *UserRepository
 	Location *LocationRepository
+	Product  *ProductRepository
 }
 
 func New(db db.Session) *Repository {
@@ -25,5 +26,6 @@ func New(db db.Session) *Repository {
 	r.common.r = r
 	r.User = (*UserRepository)(&repository{r: r, Collection: r.db.Collection(models.UserTable)})
 	r.Location = (*LocationRepository)(&repository{r: r, Collection: r.db.Collection(models.UserTable)})
+	r.Product = (*ProductRepository)(&repository{r: r, Collection: r.db.Collection(models.ProductTable)})
 	return r
 }

@@ -41,3 +41,74 @@ func (p *Product) Store(sess db.Session) db.Store {
 }
 
 var _ = db.Record(&Product{})
+
+func (p *Product) GetCategoryDisplay() string {
+	categories := map[string]string{
+		"1":  "Căn hộ chung cư",
+		"2":  "Nhà riêng",
+		"3":  "Nhà biệt thự, liền kề",
+		"4":  "Nhà mặt phố",
+		"5":  "Shop house, nhà phố thương mại",
+		"6":  "Đất nền dự án",
+		"7":  "Đất",
+		"8":  "Trang trại, khu nghỉ dưỡng",
+		"9":  "Condotel",
+		"10": "Kho, nhà xưởng",
+		"99": "Các loại hình bất động sản khác",
+	}
+
+	if v, ok := categories[p.CategoryID]; ok {
+		return v
+	}
+	return categories["99"]
+}
+
+func (p *Product) GetDocumentTypeDisplay() string {
+	docTypes := map[string]string{
+		"1": "Sổ đỏ, sổ hồng",
+		"2": "Hợp đồng mua bán",
+		"3": "Đang chờ sổ",
+		"4": "Khác",
+	}
+
+	if v, ok := docTypes[p.DocumentType]; ok {
+		return v
+	}
+	return docTypes["4"]
+}
+
+func (p *Product) GetHouseDirectionDisplay() string {
+	docTypes := map[string]string{
+		"1": "Bắc",
+		"2": "Nam",
+		"3": "Đông",
+		"4": "Tây",
+		"5": "Đông Bắc",
+		"6": "Đông Nam",
+		"7": "Tây Bắc",
+		"8": "Tây Nam",
+	}
+
+	if v, ok := docTypes[p.HouseDirection]; ok {
+		return v
+	}
+	return "unknown"
+}
+
+func (p *Product) GetBalconyDirectionDisplay() string {
+	docTypes := map[string]string{
+		"1": "Bắc",
+		"2": "Nam",
+		"3": "Đông",
+		"4": "Tây",
+		"5": "Đông Bắc",
+		"6": "Đông Nam",
+		"7": "Tây Bắc",
+		"8": "Tây Nam",
+	}
+
+	if v, ok := docTypes[p.BalconyDirection]; ok {
+		return v
+	}
+	return "unknown"
+}
