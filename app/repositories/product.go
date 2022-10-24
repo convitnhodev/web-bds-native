@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"github.com/deeincom/deeincom/app/models"
+	"github.com/upper/db/v4"
 )
 
 type ProductRepository repository
@@ -19,4 +20,12 @@ func (r *ProductRepository) ListProducts() ([]models.Product, error) {
 		return nil, err
 	}
 	return ps, nil
+}
+
+func (r *ProductRepository) FindByID(id string) (*models.Product, error) {
+	var p models.Product
+	if err := r.Find(db.Cond{"id": id}).One(&p); err != nil {
+		return nil, err
+	}
+	return &p, nil
 }
