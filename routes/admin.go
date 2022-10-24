@@ -13,4 +13,5 @@ func RegisterAdmin(web *echo.Echo) {
 	r.GET("/users", h.UserList)
 	r.GET("/products/create", h.ProductCreate)
 	r.POST("/products", h.ProductCreate)
+	r.POST("/products/images/upload", h.ProductUpload)
 }

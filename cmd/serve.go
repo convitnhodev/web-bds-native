@@ -7,6 +7,8 @@ import (
 	"github.com/deeincom/deeincom/database"
 	"github.com/deeincom/deeincom/routes"
 	"github.com/golang-migrate/migrate/v4"
+	"github.com/gorilla/sessions"
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/spf13/cobra"
@@ -73,6 +75,7 @@ func serve(cmd *cobra.Command, args []string) {
 	}
 	app.Use(middleware.Logger())
 	app.Use(middleware.Recover())
+	app.Use(session.Middleware(sessions.NewCookieStore([]byte(config.GetString("AUTH_SECRET")))))
 	app.Static("/", "./public")
 	routes.RegisterWeb(app.Echo, repositories.New(db.GetSession()))
 	routes.RegisterAPI(app.Echo, repositories.New(db.GetSession()), config)
