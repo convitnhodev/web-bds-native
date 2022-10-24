@@ -1,4 +1,9 @@
 {{template "web" .}}
+<!-- web.header.scripts-after -->
+{{define "web.header.scripts-after" -}}
+<script src="/assets/web/js/utils.js" defer></script>
+<script src="/assets/web/js/login.js" defer></script>
+{{- end}}
 <!-- web.content -->
 {{define "web.content" -}}
 <main class="px-4">
@@ -11,15 +16,17 @@
     <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
       <form class="space-y-6" action="#" method="POST">
         <div>
-          <label for="email" class="block text-sm font-medium text-gray-700">
-            Email address
+          <label
+            for="phone-number"
+            class="block text-sm font-medium text-gray-700"
+          >
+            Phone number
           </label>
           <div class="mt-1">
             <input
-              id="email"
-              name="email"
-              type="email"
-              autocomplete="email"
+              id="phone-number"
+              name="phone-number"
+              type="text"
               required
               class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm"
             />
@@ -34,7 +41,6 @@
               id="password"
               name="password"
               type="password"
-              autocomplete="current-password"
               required
               class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm"
             />
