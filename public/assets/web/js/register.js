@@ -102,8 +102,8 @@ registerForm.addEventListener('submit', async (e) => {
 
     throw new Error();
   } catch (error) {
-    registerFormErr.classList.remove('hidden');
     registerFormOverlay.classList.add('hidden');
     registerFormSubmit.removeAttribute('disabled');
+    registerFormErr.classList.remove('hidden');
   }
 });
