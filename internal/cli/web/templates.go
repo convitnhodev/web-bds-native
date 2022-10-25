@@ -2,8 +2,10 @@ package web
 
 import (
 	"html/template"
+	"net/http"
 	"path/filepath"
 
+	"github.com/deeincom/deeincom/pkg/form"
 	"github.com/deeincom/deeincom/pkg/models"
 	"github.com/deeincom/deeincom/pkg/models/db"
 	"github.com/microcosm-cc/bluemonday"
@@ -14,12 +16,22 @@ var strictPolicy = bluemonday.StrictPolicy()
 type templateData struct {
 	User       *models.User
 	Pagination *db.Pagination
+
 	HomePage   bool
 	Localhost  bool
 	CurrentURL string
+
+	Form *form.Form
 }
 
 var functions = template.FuncMap{}
+
+func use(h http.HandlerFunc, middleware ...func(http.HandlerFunc) http.HandlerFunc) http.HandlerFunc {
+	for _, m := range middleware {
+		h = m(h)
+	}
+	return h
+}
 
 func parseHTML(dir string) (map[string]*template.Template, error) {
 	cache := map[string]*template.Template{}

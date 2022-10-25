@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/deeincom/deeincom/internal/root"
+	"github.com/deeincom/deeincom/internal/cli/root"
 )
 
 func init() {

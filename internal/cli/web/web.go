@@ -14,9 +14,13 @@ import (
 	"time"
 
 	"github.com/bmizerany/pat"
-	"github.com/deeincom/deeincom/internal/root"
+	"github.com/deeincom/deeincom/internal/cli/root"
+	"github.com/deeincom/deeincom/pkg/form"
 	"github.com/golangcollege/sessions"
 )
+
+var ui string   // đường dẫn đến thư mục ui
+var port string // port web sẽ chạy
 
 type router struct {
 	*root.Cmd
@@ -27,9 +31,10 @@ type router struct {
 func init() {
 	rand.Seed(time.Now().UnixNano())
 	cmd := root.New("web")
-	port := cmd.String("port", ":3000", "web listen port")
+	cmd.StringVar(&port, "port", ":3000", "port của web")
+	cmd.StringVar(&ui, "ui", "ui/basic", "thư mục chứa theme cho ui")
 	cmd.Action(func() error {
-		return run(cmd, *port)
+		return run(cmd)
 	})
 }
 
@@ -74,6 +79,47 @@ func (a *router) home(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func (a *router) register(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "POST" {
+		if err := r.ParseForm(); err != nil {
+			log.Println(err)
+			a.render(w, r, "register.page.html", &templateData{})
+			return
+		}
+	}
+	a.render(w, r, "register.page.html", &templateData{
+		HomePage: true,
+	})
+}
+
+func (a *router) login(w http.ResponseWriter, r *http.Request) {
+	f := form.New(r.PostForm)
+	f.Required("phone", "password")
+
+	var ok bool
+	defer func() {
+		if !ok {
+			a.render(w, r, "login.page.html", &templateData{
+				Form: f,
+			})
+		}
+	}()
+
+	if r.Method == "POST" {
+		if err := r.ParseForm(); err != nil {
+			f.Errors.Add("err", "err_parse_form")
+			return
+		}
+
+		if !f.Valid() {
+			f.Errors.Add("err", "err_invalid_form")
+			return
+		}
+
+	}
+
+}
+
 func (a *router) robots(w http.ResponseWriter, r *http.Request) {
 	f, err := os.Open("./robots.txt")
 	if err == nil {
@@ -85,21 +131,19 @@ func (a *router) robots(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Disallow: /")
 }
 
-func run(c *root.Cmd, port string) error {
-	begin := time.Now().UnixNano()
+func run(c *root.Cmd) error {
+	begin := time.Now().UnixNano() // bắt đầu tính thời gian
 
-	// runs all pending migrations before starting the app
-	// failed to do so result in panic
 	if err := c.App.Migration.Migrate(); err != nil {
 		panic(err)
 	}
 
 	mux := pat.New()
 
-	session := sessions.New([]byte("rat_la_bi_mat"))
-	session.Lifetime = 24 * time.Hour * 30 // 1 month
+	session := sessions.New([]byte("rat_la_bi_mat")) // uy tín
+	session.Lifetime = 24 * time.Hour * 30           // user login 1 tháng mới bị out
 
-	html, err := parseHTML(filepath.Join("ui", "html"))
+	html, err := parseHTML(filepath.Join(ui, "html"))
 	if err != nil {
 		return err
 	}
@@ -110,10 +154,19 @@ func run(c *root.Cmd, port string) error {
 		session: session,
 	}
 
-	mux.Get("/", http.HandlerFunc(a.home))
-	mux.Get("/robots.txt", http.HandlerFunc(a.robots))
+	mux.Get("/", use(a.home))
 
-	fs := http.FileServer(http.Dir(filepath.Join("ui", "static")))
+	// đăng ký
+	mux.Post("/register", use(a.register))
+	mux.Get("/register", use(a.register))
+
+	// đăng nhập
+	mux.Post("/login", use(a.login))
+	mux.Get("/login", use(a.login))
+
+	mux.Get("/robots.txt", use(a.robots))
+
+	fs := http.FileServer(http.Dir(filepath.Join(ui, "static")))
 	mux.Get("/static/", http.StripPrefix("/static", fs))
 
 	srv := &http.Server{
