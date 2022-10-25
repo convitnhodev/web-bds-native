@@ -22,6 +22,26 @@
       </div>
       <form class="space-y-6" id="verify-form">
         <div>
+          <label
+            for="phone-number"
+            class="block text-sm font-medium text-gray-700"
+          >
+            Số điện thoại
+          </label>
+          <div class="mt-1">
+            <input
+              id="phone-number"
+              name="phone-number"
+              type="text"
+              required
+              class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm"
+            />
+          </div>
+          <p class="hidden mt-2 text-sm text-red-500" id="phone-number-error">
+            Số điện thoại không chính xác
+          </p>
+        </div>
+        <div>
           <label for="code" class="block text-sm font-medium text-gray-700">
             Code
           </label>
