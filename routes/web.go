@@ -10,7 +10,7 @@ func RegisterWeb(web *echo.Echo, r *repositories.Repository) {
 	h := handlers.NewHandler(r)
 	// Homepage
 	web.GET("/", h.Index)
-	web.GET("/detail", h.Detail)
+	web.GET("/detail/:id", h.Detail)
 
 	web.GET("/register", h.Register)
 	web.GET("/login", h.Login)

@@ -24,23 +24,29 @@ func NewHandler(r *repositories.Repository) *handler {
 
 func (h *handler) Index(c echo.Context) error {
 	products, err := h.repository.Product.ListProducts()
+
 	if err != nil {
 		//handle error
 	}
+
 	wards := make([]string, len(products))
+
 	for _, product := range products {
 		wards = append(wards, product.Ward)
 	}
 
 	locations, err := h.repository.Location.ListLocationByWardIDs(wards)
+
 	if err != nil {
 		//handle error
 	}
+
 	for i, product := range products {
 		if l, ok := locations[product.Ward]; ok {
 			products[i].Ward = l.WardName
 			products[i].District = l.DistrictName
 			products[i].City = l.ProvinceName
+			products[i].HouseDirection = product.GetHouseDirectionDisplay()
 		}
 	}
 
@@ -53,8 +59,37 @@ func (h *handler) Index(c echo.Context) error {
 }
 
 func (h *handler) Detail(c echo.Context) error {
-	return c.Render(http.StatusOK, "detail.page.html", map[string]string{
-		"Title": "Hello, World!",
+	id := c.Param("id")
+	product, err := h.repository.Product.FindByID(id)
+
+	if err != nil {
+		//handle error
+	}
+
+	wards := []string{
+		product.Ward,
+	}
+
+	locations, err := h.repository.Location.ListLocationByWardIDs(wards)
+
+	if err != nil {
+		//handle error
+	}
+
+	if l, ok := locations[product.Ward]; ok {
+		product.Ward = l.WardName
+		product.District = l.DistrictName
+		product.City = l.ProvinceName
+	}
+
+	product.CategoryID = product.GetCategoryDisplay()
+	product.HouseDirection = product.GetHouseDirectionDisplay()
+	product.DocumentType = product.GetDocumentTypeDisplay()
+
+	fmt.Printf("product: %+v\n", product)
+
+	return c.Render(http.StatusOK, "detail.page.html", echo.Map{
+		"Product": product,
 	})
 }
 
