@@ -81,7 +81,7 @@ var InputGroups = function () {
 
 document.addEventListener('DOMContentLoaded', function () {
     Select2Selects.init();
-    Plupload.init();
+    // Plupload.init();
     InputGroups.init();
 });
 
@@ -141,44 +141,28 @@ $(document).ready(function () {
             $("div.general_purchase_terms").html('<input type="file" class="form-control h-auto">');
         }
     });
-});
 
-var Plupload = function () {
-    var _componentPlupload = function () {
-        if (!$().pluploadQueue) {
-            console.warn('Warning - Plupload files are not loaded.');
-            return;
-        }
-        $('.html5-uploader').pluploadQueue({
-            runtimes: 'html5',
-            url: '/admin/products/images/upload',
-            multipart: true,
-            // headers: {
-            //     'Authorization': '4_002026794d2122d000000000c_01a7db21_e946f4_upld_m-LO5JxTyAezjALAkk8i1iyk43g=',
-            //     'X-Bz-Content-Sha1': 'do_not_verify',
-            //     'X-Bz-File-Name': 'test/test.jpg',
-            //     'Content-Type': 'image/jpeg',
-            //     'X-Bz-Info-Author': 'huy',
-            //     'X-Bz-Server-Side-Encryption': 'AES256'
-            // },
-            file_data_name: 'file',
-            filters: {
-                max_file_size: '10mb',
-                mime_types: [
-                    {title: "Image files", extensions: "jpg,jpeg"}
-                ]
+    var uploader = "";
+
+    $('.html5-uploader').pluploadQueue({
+        runtimes: 'html5',
+        url: '/admin/products/images/upload',
+        multipart: true,
+        file_data_name: 'file',
+        filters: {
+            max_file_size: '10mb',
+            mime_types: [
+                {title: "Image files", extensions: "jpg,jpeg"}
+            ]
+        },
+        init: {
+            FilesAdded: function (up, files) {
+                uploader = up
             },
-            // init: {
-            //     BeforeUpload: function (up, files) {
-            //         console.log(up)
-            //     },
-            // }
-        });
-    };
-
-    return {
-        init: function () {
-            _componentPlupload();
         }
-    }
-}();
+    });
+
+    $("#submit").click(function () {
+        uploader.start();
+    })
+});

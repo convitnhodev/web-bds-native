@@ -5,13 +5,19 @@ import (
 	"github.com/deeincom/deeincom/app/repositories"
 	"github.com/deeincom/deeincom/config"
 	"github.com/deeincom/deeincom/pkg/jwt"
+	"github.com/deeincom/deeincom/pkg/sms"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
 
 func RegisterAPI(web *echo.Echo, r *repositories.Repository, cfg *config.Config) {
 	jwtAuth := jwt.NewAuth(cfg.GetString("AUTH_SECRET"), cfg.GetDuration("AUTH_EXPIRE_DURATION"))
-	h := handlers.NewHandler(r, jwtAuth)
+	smsClient := sms.NewSMSClient(
+		cfg.GetString("SMS_KEY"),
+		cfg.GetString("SMS_SECRET_KEY"),
+		cfg.GetString("SMS_BRAND_NAME"),
+	)
+	h := handlers.NewHandler(r, jwtAuth, smsClient)
 	api := web.Group("/api/v1")
 	api.POST("/accounts", h.AccountHandler.Register)
 	api.POST("/accounts/auth", h.AccountHandler.Auth)

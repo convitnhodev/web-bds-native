@@ -210,6 +210,22 @@ func (h *accountAPI) SentCode(c echo.Context) error {
 		return errJson(c, http.StatusInternalServerError, err)
 	}
 	// sent email or sms
+	content := fmt.Sprintf("%d la ma xac minh dang ky Baotrixemay cua ban", rn)
+	ar, err := h.api.smsSender.Sent(user.PhoneNumber, content)
+	if err != nil {
+		return errJson(c, http.StatusInternalServerError, err)
+	}
+	if err := h.api.repository.SMS.Create(&models.SMS{
+		PhoneNumber: user.PhoneNumber,
+		Content:     content,
+		RequestID:   ar.ID,
+		SmsID:       ar.SmsID,
+		CodeResult:  ar.CodeResult,
+		SentStatus:  "200",
+		TelcoID:     "",
+	}); err != nil {
+		return errJson(c, http.StatusInternalServerError, err)
+	}
 	return successJson(c, http.StatusCreated, "sms has been send")
 }
 
