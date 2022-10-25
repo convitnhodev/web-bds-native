@@ -168,7 +168,6 @@ func (h *accountAPI) Profile(c echo.Context) error {
 		}
 		return errJson(c, http.StatusUnprocessableEntity, errors.New("your phone number and password is incorrect"))
 	}
-	fmt.Printf("USER: %+v\n", user)
 	return c.JSON(http.StatusOK, &accountResp{
 		ID:          user.ID,
 		FirstName:   user.FirstName,

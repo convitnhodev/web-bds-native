@@ -41,7 +41,7 @@
 
 {{define "content" -}}
     <div class="row">
-        <form action="/admin/products">
+        <form action="/admin/products" method="POST">
             <div class="col-lg-12">
                 <div class="card">
                     <div class="card-header">
@@ -103,7 +103,7 @@
                             <div class="col-lg-10">
                                 <div class="form-group">
                                     <label>Đường, phố:</label>
-                                    <input type="text" name="address" class="form-control" placeholder="Mai Chí Thọ"/>
+                                    <input type="text" name="street" class="form-control" placeholder="Mai Chí Thọ"/>
                                 </div>
                             </div>
                         </div>
@@ -177,28 +177,28 @@
                         <div class="form-group row">
                             <label class="col-lg-8 col-form-label">Số phòng ngủ:</label>
                             <div class="col-lg-4">
-                                <input type="text" value="3" class="form-control touchspin-step">
+                                <input type="text" name="bedroom" value="1" class="form-control touchspin-step">
                             </div>
                         </div>
 
                         <div class="form-group row">
                             <label class="col-lg-8 col-form-label">Số toilet:</label>
                             <div class="col-lg-4">
-                                <input type="text" value="5" class="form-control touchspin-step">
+                                <input type="text" name="toilet" value="1" class="form-control touchspin-step">
                             </div>
                         </div>
 
                         <div class="form-group row">
                             <label class="col-lg-8 col-form-label">Số tầng:</label>
                             <div class="col-lg-4">
-                                <input type="text" value="4" class="form-control touchspin-step">
+                                <input type="text" name="floor" value="1" class="form-control touchspin-step">
                             </div>
                         </div>
 
                         <div class="form-group row">
                             <label class="col-lg-8 col-form-label">Số hầm:</label>
                             <div class="col-lg-4">
-                                <input type="text" value="4" class="form-control touchspin-step">
+                                <input type="text" name="basement" value="0" class="form-control touchspin-step">
                             </div>
                         </div>
                         <legend class="text-uppercase font-size-sm font-weight-bold">Mô tả bổ sung</legend>
@@ -239,7 +239,7 @@
                                 <div class="form-group">
                                     <label>Đường vào:</label>
                                     <div class="input-group">
-                                        <input type="text" class="form-control" placeholder="32">
+                                        <input type="text" class="form-control" name="street_width" placeholder="32">
                                         <span class="input-group-append">
                                             <span class="input-group-text">m</span>
                                         </span>
@@ -250,7 +250,7 @@
                                 <div class="form-group">
                                     <label>Mặt tiền:</label>
                                     <div class="input-group">
-                                        <input type="text" class="form-control" placeholder="5">
+                                        <input type="text" class="form-control" name="front_width" placeholder="5">
                                         <span class="input-group-append">
                                             <span class="input-group-text">m</span>
                                         </span>
@@ -263,7 +263,7 @@
                                 <div class="form-group">
                                     <label>Độ rộng vỉa hè:</label>
                                     <div class="input-group">
-                                        <input type="text" class="form-control" placeholder="3">
+                                        <input type="text" name="pavement_width" class="form-control" placeholder="3">
                                         <span class="input-group-append">
                                             <span class="input-group-text">m</span>
                                         </span>
@@ -274,7 +274,7 @@
                                 <div class="form-group">
                                     <label>Nội thất:</label>
                                     <div class="input-group">
-                                        <select class="form-control select">
+                                        <select class="form-control select" name="furniture">
                                             {{range  .Furniture}}
                                                 <option value="{{.ID}}">{{.Value}}</option>
                                             {{end}}
@@ -288,7 +288,7 @@
                                 <div class="form-group">
                                     <label>Lợi thế kinh doanh:</label>
                                     <div class="input-group">
-                                        <input type="text" class="form-control" placeholder="Văn phòng, Karaoke...">
+                                        <input type="text" name="business_advantage" class="form-control" placeholder="Văn phòng, Karaoke...">
                                     </div>
                                 </div>
                             </div>
@@ -296,14 +296,13 @@
                                 <div class="form-group">
                                     <label>Kế hoạch tài chính:</label>
                                     <div class="input-group">
-                                        <input type="text" class="form-control" placeholder="mức dự kiến dòng tiền">
+                                        <input type="text" name="financial_plan" class="form-control" placeholder="mức dự kiến dòng tiền">
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="d-block">Điều khoản mua chung:</label>
-
                             <label class="custom-control custom-radio custom-control-inline">
                                 <input type="radio" class="custom-control-input" name="general_purchase_terms_select"
                                        checked=""

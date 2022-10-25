@@ -2,7 +2,9 @@ package web
 
 import (
 	"context"
+	"github.com/deeincom/deeincom/app/models"
 	"github.com/kurin/blazer/b2"
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"io"
 	"log"
@@ -17,32 +19,82 @@ func (h *handler) ProductCreate(c echo.Context) error {
 }
 
 type Product struct {
-	Title             string `json:"title" form:"title"`
-	CategoryID        string `json:"category_id" form:"category_id"`
-	Description       string `json:"description" form:"description"`
-	City              string `json:"city" form:"city"`
-	District          string `json:"district" form:"district"`
-	Ward              string `json:"ward" form:"ward"`
-	AddressNumber     string `json:"address_number" form:"address_number"`
-	Street            string `json:"street" form:"street"`
-	Area              int64  `json:"area" form:"area"`
-	DocumentType      string `json:"document_type" form:"document_type"`
-	DocumentProof     string `json:"document_proof" form:"document_proof"`
-	Bedroom           int64  `json:"bedroom" form:"bedroom"`
-	Toilet            int64  `json:"toilet" form:"toilet"`
-	Floor             int64  `json:"floor" form:"floor"`
-	HouseDirection    string `json:"house_direction" form:"house_direction"`
-	BalconyDirection  string `json:"balcony_direction" form:"balcony_direction"`
-	FrontWidth        int64  `json:"front_width" form:"front_width"`
-	StreetWidth       int64  `json:"street_width" form:"street_width"`
-	PavementWidth     int64  `json:"pavement_width" form:"pavement_width"`
-	BusinessAdvantage string `json:"business_advantage" form:"business_advantage"`
-	FinancialPlan     string `json:"financial_plan" form:"financial_plan"`
-	Furniture         string `json:"furniture" form:"furniture"`
+	Title                string `json:"title" form:"title" validate:"required"`
+	CategoryID           string `json:"category_id" form:"category_id" validate:"required"`
+	Description          string `json:"description" form:"description" validate:"required"`
+	City                 string `json:"city" form:"city" validate:"required"`
+	District             string `json:"district" form:"district" validate:"required"`
+	Ward                 string `json:"ward" form:"ward" validate:"required"`
+	AddressNumber        string `json:"address_number" form:"address_number" validate:"required"`
+	Street               string `json:"street" form:"street" validate:"required"`
+	Area                 int64  `json:"area" form:"area" validate:"required"`
+	DocumentType         string `json:"document_type" form:"document_type" validate:"required"`
+	DocumentProof        string `json:"document_proof" form:"document_proof" validate:"required"`
+	Bedroom              int64  `json:"bedroom" form:"bedroom" validate:"required"`
+	Toilet               int64  `json:"toilet" form:"toilet" validate:"required"`
+	Floor                int64  `json:"floor" form:"floor" validate:"required"`
+	HouseDirection       string `json:"house_direction" form:"house_direction" validate:"required"`
+	BalconyDirection     string `json:"balcony_direction" form:"balcony_direction" validate:"required"`
+	FrontWidth           int64  `json:"front_width" form:"front_width" validate:"required"`
+	StreetWidth          int64  `json:"street_width" form:"street_width" validate:"required"`
+	PavementWidth        int64  `json:"pavement_width" form:"pavement_width" validate:"required"`
+	BusinessAdvantage    string `json:"business_advantage" form:"business_advantage" validate:"required"`
+	FinancialPlan        string `json:"financial_plan" form:"financial_plan" validate:"required"`
+	GeneralPurchaseTerms string `json:"general_purchase_terms" form:"general_purchase_terms" validate:"required"`
+	Furniture            string `json:"furniture" form:"furniture" validate:"required"`
 }
 
 func (h *handler) ProductStore(c echo.Context) error {
-	return nil
+	var p Product
+	if err := c.Bind(&p); err != nil {
+		sess, _ := session.Get("error_message", c)
+		sess.AddFlash(err.Error(), "message")
+		_ = sess.Save(c.Request(), c.Response())
+		return c.Redirect(301, "/admin/products/create")
+	}
+	if err := h.validator.Struct(&p); err != nil {
+		sess, _ := session.Get("error_message", c)
+		sess.AddFlash(err.Error(), "message")
+		_ = sess.Save(c.Request(), c.Response())
+		return c.Redirect(301, "/admin/products/create")
+	}
+
+	if err := h.repository.Product.Create(models.Product{
+		Title:                p.Title,
+		CategoryID:           p.CategoryID,
+		Description:          p.Description,
+		City:                 p.City,
+		District:             p.District,
+		Ward:                 p.Ward,
+		AddressNumber:        p.AddressNumber,
+		Street:               p.Street,
+		Area:                 p.Area,
+		DocumentType:         p.DocumentType,
+		DocumentProof:        p.DocumentProof,
+		Bedroom:              p.Bedroom,
+		Toilet:               p.Toilet,
+		Floor:                p.Floor,
+		HouseDirection:       p.HouseDirection,
+		BalconyDirection:     p.BalconyDirection,
+		FrontWidth:           p.FrontWidth,
+		StreetWidth:          p.StreetWidth,
+		PavementWidth:        p.PavementWidth,
+		BusinessAdvantage:    p.BusinessAdvantage,
+		FinancialPlan:        p.FinancialPlan,
+		Furniture:            p.Furniture,
+		GeneralPurchaseTerms: p.GeneralPurchaseTerms,
+		IsActivated:          true,
+	}); err != nil {
+		sess, _ := session.Get("error_message", c)
+		sess.AddFlash(err.Error(), "message")
+		_ = sess.Save(c.Request(), c.Response())
+		return c.Redirect(301, "/admin/products/create")
+	}
+	sess, _ := session.Get("success_message", c)
+	sess.AddFlash("tạo sản phẩm thành công", "message")
+	_ = sess.Save(c.Request(), c.Response())
+	return c.Redirect(301, "/admin/products/create")
+
 }
 
 func (h *handler) ProductUpload(c echo.Context) error {

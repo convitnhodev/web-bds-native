@@ -77,9 +77,10 @@ func serve(cmd *cobra.Command, args []string) {
 	app.Use(middleware.Recover())
 	app.Use(session.Middleware(sessions.NewCookieStore([]byte(config.GetString("AUTH_SECRET")))))
 	app.Static("/", "./public")
-	routes.RegisterWeb(app.Echo, repositories.New(db.GetSession()))
-	routes.RegisterAPI(app.Echo, repositories.New(db.GetSession()), config)
-	routes.RegisterAdmin(app.Echo)
+	rp := repositories.New(db.GetSession())
+	routes.RegisterWeb(app.Echo, rp)
+	routes.RegisterAPI(app.Echo, rp, config)
+	routes.RegisterAdmin(app.Echo, rp)
 	app.Echo.GET("/test", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, app.Routes())
 	})

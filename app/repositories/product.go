@@ -3,6 +3,7 @@ package repositories
 import (
 	"github.com/deeincom/deeincom/app/models"
 	"github.com/upper/db/v4"
+	"time"
 )
 
 type ProductRepository repository
@@ -28,4 +29,13 @@ func (r *ProductRepository) FindByID(id string) (*models.Product, error) {
 		return nil, err
 	}
 	return &p, nil
+}
+
+func (r *ProductRepository) Create(p models.Product) error {
+	p.CreatedAt = time.Now()
+	p.UpdatedAt = time.Now()
+	if err := r.r.db.Collection(models.ProductTable).InsertReturning(p); err != nil {
+		return err
+	}
+	return nil
 }
