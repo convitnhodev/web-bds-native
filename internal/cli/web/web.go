@@ -73,6 +73,12 @@ func (a *router) render(w http.ResponseWriter, r *http.Request, name string, td 
 
 	buf.WriteTo(w)
 }
+func (a *router) terms(w http.ResponseWriter, r *http.Request) {
+	a.render(w, r, "terms.page.html", &templateData{})
+}
+func (a *router) privacy(w http.ResponseWriter, r *http.Request) {
+	a.render(w, r, "privacy.page.html", &templateData{})
+}
 
 func (a *router) home(w http.ResponseWriter, r *http.Request) {
 	a.render(w, r, "home.page.html", &templateData{
@@ -252,6 +258,11 @@ func run(c *root.Cmd) error {
 	mux.Get("/verify-phone", use(a.verifyPhone))
 
 	mux.Get("/robots.txt", use(a.robots))
+
+	// mấy trang linh tinh legal
+	mux.Get("/privacy-notice", use(a.privacy))
+	mux.Get("/terms-of-service", use(a.terms))
+
 	fs := http.FileServer(http.Dir(filepath.Join(ui, "static")))
 	mux.Get("/static/", http.StripPrefix("/static", fs))
 
