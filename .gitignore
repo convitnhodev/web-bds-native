@@ -6,3 +6,6 @@ tmp
 build
 .vscode
 deploy/*
+.editorconfig
+.prettierrc
+node_modules
