@@ -5,8 +5,10 @@ import "time"
 type User struct {
 	ID        int
 	Email     string
-	Role      string
-	Password  string `json:"password"`
-	Name      string
+	Phone     string
+	Password  string
+	FirstName string
+	LastName  string
 	CreatedAt time.Time
+	UpdatedAt time.Time
 }

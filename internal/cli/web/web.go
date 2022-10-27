@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -79,6 +80,56 @@ func (a *router) home(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func (a *router) productDetail(w http.ResponseWriter, r *http.Request) {
+	a.render(w, r, "product.page.html", &templateData{})
+}
+
+func (a *router) verifyEmail(w http.ResponseWriter, r *http.Request) {
+	f := form.New(r.PostForm)
+
+	defer func() {
+		a.render(w, r, "verify.email.page.html", &templateData{
+			Form: f,
+		})
+
+	}()
+
+	// nếu ko có, hoặc ko parse dc iat, thì xem như expired
+	iat, err := strconv.ParseInt(r.URL.Query().Get("iat"), 10, 64)
+	if err != nil {
+		log.Println(err)
+		f.Errors.Add("err", "err_token_expired")
+		return
+	}
+
+	// token của email sẽ expired sau 1 tuần
+	isExpired := time.Unix(iat+3600*24*7, 0).UTC().Before(time.Now().UTC())
+	if isExpired {
+		log.Println(err)
+		f.Errors.Add("err", "err_token_expired")
+		return
+	}
+
+	token := r.URL.Query().Get("token")
+
+	// tìm user với cái token này
+	user, err := a.App.Users.GetByEmailToken(token)
+	if err != nil {
+		log.Println(err)
+		f.Errors.Add("err", "err_token_invalid")
+	}
+
+	// update user đã verify email
+	if err := a.App.Users.AddRole(user.ID, "verified_email"); err != nil {
+		log.Println(err)
+		f.Errors.Add("err", "err_could_not_verified_email")
+	}
+}
+
+func (a *router) verifyPhone(w http.ResponseWriter, r *http.Request) {
+	a.render(w, r, "verify.phone.page.html", &templateData{})
+}
+
 func (a *router) register(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		if err := r.ParseForm(); err != nil {
@@ -87,9 +138,7 @@ func (a *router) register(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	a.render(w, r, "register.page.html", &templateData{
-		HomePage: true,
-	})
+	a.render(w, r, "register.page.html", &templateData{})
 }
 
 func (a *router) login(w http.ResponseWriter, r *http.Request) {
@@ -117,7 +166,6 @@ func (a *router) login(w http.ResponseWriter, r *http.Request) {
 		}
 
 	}
-
 }
 
 func (a *router) robots(w http.ResponseWriter, r *http.Request) {
@@ -154,7 +202,11 @@ func run(c *root.Cmd) error {
 		session: session,
 	}
 
+	// homepage
 	mux.Get("/", use(a.home))
+
+	// product detail
+	mux.Get("/real-estate/:slug", use(a.productDetail))
 
 	// đăng ký
 	mux.Post("/register", use(a.register))
@@ -164,8 +216,11 @@ func run(c *root.Cmd) error {
 	mux.Post("/login", use(a.login))
 	mux.Get("/login", use(a.login))
 
-	mux.Get("/robots.txt", use(a.robots))
+	// verify
+	mux.Get("/verify-email", use(a.verifyEmail))
+	mux.Get("/verify-phone", use(a.verifyPhone))
 
+	mux.Get("/robots.txt", use(a.robots))
 	fs := http.FileServer(http.Dir(filepath.Join(ui, "static")))
 	mux.Get("/static/", http.StripPrefix("/static", fs))
 

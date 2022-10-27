@@ -8,11 +8,11 @@ import (
 
 	deein "github.com/deeincom/deeincom"
 	"github.com/deeincom/deeincom/config"
-	"github.com/deeincom/deeincom/internal/root"
+	"github.com/deeincom/deeincom/internal/cli/root"
 
 	// commands
-	_ "github.com/deeincom/deeincom/internal/api"
-	_ "github.com/deeincom/deeincom/internal/web"
+	_ "github.com/deeincom/deeincom/internal/cli/api"
+	_ "github.com/deeincom/deeincom/internal/cli/web"
 )
 
 func main() {
