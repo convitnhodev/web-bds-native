@@ -172,9 +172,8 @@ func (a *router) verifyEmail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token := r.URL.Query().Get("token")
-
 	// tìm user với cái token này
+	token := r.URL.Query().Get("token")
 	user, err := a.App.Users.GetByEmailToken(token)
 	if err != nil {
 		log.Println(err)

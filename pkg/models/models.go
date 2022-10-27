@@ -19,5 +19,8 @@ type User struct {
 }
 
 type Product struct {
-	ID int
+	ID               int
+	Name             string
+	ShortDescription string
+	FullDescription  string
 }
