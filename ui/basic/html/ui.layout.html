@@ -34,15 +34,15 @@
       rel="stylesheet"
       href="https://unpkg.com/@unocss/reset/tailwind.css"
     />
-    {{block "web.header.css-before" . -}} {{- end}}
+    {{block "header.css-before" . -}} {{- end}}
     <link rel="stylesheet" href="/static/css/style.css?v=1" />
-    {{block "web.header.css-after" . -}} {{- end}}
+    {{block "header.css-after" . -}} {{- end}}
     <!---->
-    {{block "web.header.scripts-before" . -}} {{- end}}
+    {{block "header.scripts-before" . -}} {{- end}}
     <script src="/static/js/preload.js"></script>
     <script src="/static/js/disclosure.js" defer></script>
     <script src="/static/js/header.js" defer></script>
-    {{block "web.header.scripts-after" . -}} {{- end}}
+    {{block "header.scripts-after" . -}} {{- end}}
     <!---->
     {{if not .Localhost -}}
     <!-- Google Analytics -->
