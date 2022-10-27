@@ -17,3 +17,7 @@ type User struct {
 	SendVerifiedEmailAt time.Time
 	SendVerifiedPhoneAt time.Time
 }
+
+type Product struct {
+	ID int
+}

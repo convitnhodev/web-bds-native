@@ -18,11 +18,14 @@ type templateData struct {
 	User       *models.User
 	Pagination *db.Pagination
 
-	HomePage   bool
 	Localhost  bool
 	CurrentURL string
 
-	Form *form.Form
+	Flash string
+
+	Form     *form.Form
+	Products []*models.Product
+	Product  *models.Product
 }
 
 var functions = template.FuncMap{
@@ -32,6 +35,16 @@ var functions = template.FuncMap{
 	"title":    strings.Title,
 	"split":    strings.Split,
 	"contains": strings.Contains,
+	"has_role": hasRole,
+}
+
+func hasRole(user *models.User, test string) bool {
+	for _, role := range user.Roles {
+		if role == test {
+			return true
+		}
+	}
+	return false
 }
 
 func translate(s string) string {

@@ -16,6 +16,7 @@ import (
 
 	"github.com/bmizerany/pat"
 	"github.com/deeincom/deeincom/internal/cli/root"
+	"github.com/deeincom/deeincom/pkg/email"
 	"github.com/deeincom/deeincom/pkg/form"
 	"github.com/golangcollege/sessions"
 )
@@ -47,6 +48,9 @@ func (a *router) render(w http.ResponseWriter, r *http.Request, name string, td 
 	}
 	// apply global data, such as url, description etc..
 	td.CurrentURL = r.RequestURI
+
+	// flash msg
+	td.Flash = a.session.PopString(r, "flash")
 
 	if r.Header.Get("X-Forwarded-For") == "" && (strings.Contains(r.Host, "local") || strings.Contains(r.Host, "127.0.0.1")) {
 		td.Localhost = true
@@ -81,13 +85,30 @@ func (a *router) privacy(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *router) home(w http.ResponseWriter, r *http.Request) {
+	products, err := a.App.Products.Find()
+	if err != nil {
+		log.Println(err)
+		a.render(w, r, "404.page.html", &templateData{})
+		return
+	}
+
 	a.render(w, r, "home.page.html", &templateData{
-		HomePage: true,
+		Products: products,
 	})
 }
 
 func (a *router) productDetail(w http.ResponseWriter, r *http.Request) {
-	a.render(w, r, "product.page.html", &templateData{})
+	slug := r.URL.Query().Get(":slug")
+	product, err := a.App.Products.GetBySlug(slug)
+	if err != nil {
+		log.Println(err)
+		a.render(w, r, "404.page.html", &templateData{})
+		return
+	}
+
+	a.render(w, r, "product.page.html", &templateData{
+		Product: product,
+	})
 }
 
 func (a *router) verifyEmail(w http.ResponseWriter, r *http.Request) {
@@ -100,6 +121,7 @@ func (a *router) verifyEmail(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	// nếu req là post thì đó là user muốn nhập lại email
+	// dùng flash session để trả feedback, tránh bị nhầm với form
 	if r.Method == "POST" {
 		f.Required("Email")
 
@@ -115,6 +137,7 @@ func (a *router) verifyEmail(w http.ResponseWriter, r *http.Request) {
 
 		// thao tác này luôn thành công
 		// hệ thống sẽ ko bao giờ báo cho user biết email có tồn tại hay không
+		a.session.Put(r, "flash", "msg_verify_email_success")
 
 		// lấy user bằng email
 		user, err := a.App.Users.GetByEmail(f.Get("Email"))
@@ -128,7 +151,9 @@ func (a *router) verifyEmail(w http.ResponseWriter, r *http.Request) {
 		if !user.SendVerifiedEmailAt.Add(60 * time.Second).UTC().Before(time.Now().UTC()) {
 			return
 		}
-		// email.send()
+
+		// bắn email
+		email.Send()
 	}
 
 	// nếu ko có, hoặc ko parse dc iat, thì xem như expired

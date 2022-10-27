@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -27,7 +28,11 @@ var userColumes = []string{
 }
 
 func (m *UserModel) query(s string) string {
-	return fmt.Sprintf(`SELECT %s FROM users`, strings.Join(userColumes, ","))
+	return fmt.Sprintf(`SELECT %s FROM users %s`, strings.Join(userColumes, ","), s)
+}
+
+func (m *UserModel) count(s string) string {
+	return fmt.Sprintf(`SELECT count(*) FROM users %s`, s)
 }
 
 func scanUser(r scanner, o *models.User) error {
@@ -96,7 +101,7 @@ func (m *UserModel) GetByEmailToken(token string) (*models.User, error) {
 	row := m.DB.QueryRow(q, token)
 	o := new(models.User)
 	if err := scanUser(row, o); err != nil {
-		return nil, errors.Wrap(err, "user.ID")
+		return nil, errors.Wrap(err, "user.GetByEmailToken")
 	}
 	return o, nil
 }
@@ -106,11 +111,35 @@ func (m *UserModel) GetByEmail(email string) (*models.User, error) {
 	row := m.DB.QueryRow(q, email)
 	o := new(models.User)
 	if err := scanUser(row, o); err != nil {
-		return nil, errors.Wrap(err, "user.ID")
+		return nil, errors.Wrap(err, "user.GetByEmail")
 	}
 	return o, nil
 }
 
 func (m *UserModel) AddRole(id int, role string) error {
 	return nil
+}
+
+func (m *UserModel) Find() ([]*models.User, error) {
+	q := m.query("order by user_id desc")
+	count := m.count("")
+
+	if err := m.Pagination.Count(count); err != nil {
+		return nil, err
+	}
+	rows, err := m.DB.Query(m.Pagination.Generate(q))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	list := []*models.User{}
+	for rows.Next() {
+		o := &models.User{}
+		if err := scanUser(rows, o); err != nil {
+			log.Println(err)
+		}
+		list = append(list, o)
+	}
+	return list, nil
 }
