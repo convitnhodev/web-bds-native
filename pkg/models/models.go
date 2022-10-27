@@ -17,3 +17,10 @@ type User struct {
 	SendVerifiedEmailAt time.Time
 	SendVerifiedPhoneAt time.Time
 }
+
+type Product struct {
+	ID               int
+	Name             string
+	ShortDescription string
+	FullDescription  string
+}
