@@ -91,8 +91,39 @@ func (a *router) verifyEmail(w http.ResponseWriter, r *http.Request) {
 		a.render(w, r, "verify.email.page.html", &templateData{
 			Form: f,
 		})
-
 	}()
+
+	// nếu req là post thì đó là user muốn nhập lại email
+	if r.Method == "POST" {
+		f.Required("Email")
+
+		if err := r.ParseForm(); err != nil {
+			f.Errors.Add("err", "err_parse_form")
+			return
+		}
+
+		if !f.Valid() {
+			f.Errors.Add("err", "err_invalid_form")
+			return
+		}
+
+		// thao tác này luôn thành công
+		// hệ thống sẽ ko bao giờ báo cho user biết email có tồn tại hay không
+
+		// lấy user bằng email
+		user, err := a.App.Users.GetByEmail(f.Get("Email"))
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		// kiểm tra coi lần trước user yêu cầu verify email là lúc nào
+		// mổi lần yêu cầu phải cách 60s
+		if !user.SendVerifiedEmailAt.Add(60 * time.Second).UTC().Before(time.Now().UTC()) {
+			return
+		}
+		// email.send()
+	}
 
 	// nếu ko có, hoặc ko parse dc iat, thì xem như expired
 	iat, err := strconv.ParseInt(r.URL.Query().Get("iat"), 10, 64)

@@ -92,7 +92,23 @@ func (m *UserModel) ID(id int) (*models.User, error) {
 }
 
 func (m *UserModel) GetByEmailToken(token string) (*models.User, error) {
-	return nil, nil
+	q := m.query(`where users.user_email_token = $1`)
+	row := m.DB.QueryRow(q, token)
+	o := new(models.User)
+	if err := scanUser(row, o); err != nil {
+		return nil, errors.Wrap(err, "user.ID")
+	}
+	return o, nil
+}
+
+func (m *UserModel) GetByEmail(email string) (*models.User, error) {
+	q := m.query(`where users.user_email = $1`)
+	row := m.DB.QueryRow(q, email)
+	o := new(models.User)
+	if err := scanUser(row, o); err != nil {
+		return nil, errors.Wrap(err, "user.ID")
+	}
+	return o, nil
 }
 
 func (m *UserModel) AddRole(id int, role string) error {

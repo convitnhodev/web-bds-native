@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"net/http"
 	"path/filepath"
+	"strings"
 
 	"github.com/deeincom/deeincom/pkg/form"
 	"github.com/deeincom/deeincom/pkg/models"
@@ -24,7 +25,18 @@ type templateData struct {
 	Form *form.Form
 }
 
-var functions = template.FuncMap{}
+var functions = template.FuncMap{
+	"__":       translate,
+	"upper":    strings.ToUpper,
+	"lower":    strings.ToLower,
+	"title":    strings.Title,
+	"split":    strings.Split,
+	"contains": strings.Contains,
+}
+
+func translate(s string) string {
+	return s
+}
 
 func use(h http.HandlerFunc, middleware ...func(http.HandlerFunc) http.HandlerFunc) http.HandlerFunc {
 	for _, m := range middleware {
