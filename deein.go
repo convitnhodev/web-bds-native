@@ -15,11 +15,12 @@ import (
 
 // App represent an app
 type App struct {
-	Config    *config.Config
-	Telegram  *telegram.Telegram
-	Migration *db.MigrationModel
-	Users     *db.UserModel
-	Products  *db.ProductModel
+	Config        *config.Config
+	Telegram      *telegram.Telegram
+	Migration     *db.MigrationModel
+	Users         *db.UserModel
+	Products      *db.ProductModel
+	AdminProducts *db.ProductModel
 }
 
 // New return an app instance
@@ -47,6 +48,16 @@ func New(c *config.Config) (*App, error) {
 			},
 		},
 		Products: &db.ProductModel{
+			DB: conn,
+			Pagination: &db.Pagination{
+				DB:      conn,
+				Min:     25,
+				Max:     100,
+				Default: 25,
+				Data:    &db.PaginationData{Limit: 25},
+			},
+		},
+		AdminProducts: &db.ProductModel{
 			DB: conn,
 			Pagination: &db.Pagination{
 				DB:      conn,

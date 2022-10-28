@@ -21,12 +21,14 @@ import (
 	"github.com/golangcollege/sessions"
 )
 
-var ui string   // đường dẫn đến thư mục ui
+var fe string   // đường dẫn đến thư mục theme cho fe
+var be string   // đường dẫn đến thư mục theme cho be
 var port string // port web sẽ chạy
 
 type router struct {
 	*root.Cmd
-	html    map[string]*template.Template
+	fe      map[string]*template.Template
+	be      map[string]*template.Template
 	session *sessions.Session
 }
 
@@ -34,14 +36,15 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 	cmd := root.New("web")
 	cmd.StringVar(&port, "port", ":3000", "port của web")
-	cmd.StringVar(&ui, "ui", "ui/basic", "thư mục chứa theme cho ui")
+	cmd.StringVar(&fe, "fe", "ui/basic", "thư mục chứa theme cho fe")
+	cmd.StringVar(&be, "be", "ui/admin", "thư mục chứa theme cho be")
 	cmd.Action(func() error {
 		return run(cmd)
 	})
 }
 
 func (a *router) render(w http.ResponseWriter, r *http.Request, name string, td *templateData) {
-	ts, ok := a.html[name]
+	ts, ok := a.fe[name]
 	if !ok {
 		a.render(w, r, "500.page.html", &templateData{})
 		return
@@ -316,14 +319,19 @@ func run(c *root.Cmd) error {
 	session := sessions.New([]byte("rat_la_bi_mat")) // uy tín
 	session.Lifetime = 24 * time.Hour * 30           // user login 1 tháng mới bị out
 
-	html, err := parseHTML(filepath.Join(ui, "html"))
+	feHTML, err := parseHTML(filepath.Join(fe, "html"))
+	if err != nil {
+		return err
+	}
+	beHTML, err := parseHTML(filepath.Join(be, "html"))
 	if err != nil {
 		return err
 	}
 
 	a := &router{
 		Cmd:     c,
-		html:    html,
+		fe:      feHTML,
+		be:      beHTML,
 		session: session,
 	}
 
@@ -354,8 +362,12 @@ func run(c *root.Cmd) error {
 	mux.Get("/privacy-notice", use(a.privacy))
 	mux.Get("/terms-of-service", use(a.terms))
 
-	fs := http.FileServer(http.Dir(filepath.Join(ui, "static")))
-	mux.Get("/static/", http.StripPrefix("/static", fs))
+	fefs := http.FileServer(http.Dir(filepath.Join(fe, "static")))
+	befs := http.FileServer(http.Dir(filepath.Join(be, "static")))
+	mux.Get("/static/", http.StripPrefix("/static", fefs))
+	mux.Get("/be/", http.StripPrefix("/be", befs))
+
+	registerAdminRoute(mux, a)
 
 	srv := &http.Server{
 		Addr:         port,

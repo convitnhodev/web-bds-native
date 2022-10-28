@@ -3,6 +3,7 @@ module github.com/deeincom/deeincom
 go 1.16
 
 require (
+	github.com/Machiel/slugify v1.0.1 // indirect
 	github.com/bmizerany/pat v0.0.0-20210406213842-e4b6760bdd6f
 	github.com/golangcollege/sessions v1.2.0
 	github.com/hashicorp/go-retryablehttp v0.7.1

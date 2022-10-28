@@ -1,0 +1,54 @@
+{{template "ui" .}}
+{{define "body"}}
+{{$label := split "accent:success:attention:severe:danger:open:closed:done:sponsors" ":"  }}
+
+<div class="container-lg">
+  <div class="col-12">
+
+    <div class="d-flex flex-items-center mb-3">
+      <h1 class="overflow-hidden flex-auto">
+        Sites
+        <span class="Counter Counter-gray">{{.Pagination.Data.Total}}</span>
+      </h1>
+
+      <details class="dropdown details-reset details-overlay d-inline-block">
+        <summary class="btn btn-primary" aria-haspopup="true">
+            Tạo mới
+            <div class="dropdown-caret"></div>
+        </summary>
+
+        <ul class="dropdown-menu dropdown-menu-se">
+            <li><a href="/sites/create?type=link" class="dropdown-item" role="menuitem">Tài sản</a></li>
+        </ul>
+      </details>
+    </div>
+
+    {{if .Products}}
+    <div class="Box">
+      <div>
+        {{range .Products}}
+        <div class="Box-row Box-row--hover-gray d-flex flex-items-center">
+          <span class="mr-3">{{.Title}}</span>
+          <div class="flex-auto">
+          </div>
+
+          <a class="btn btn-danger btn-xs" href="/admin/products/{{.ID}}/remove" onclick="return confirm('chắc nghen?');">xóa</a>
+        </div>
+        {{end}}
+      </div>
+    </div>
+
+    {{else}}
+    <div class="blankslate">
+        <img referrerpolicy="no-referrer"
+            src="https://media.discordapp.net/attachments/523522129296097290/981393406934806568/cry-min.jpg?width=112&height=112"
+            alt="anime not found" class="blankslate-image" />
+        <h3 class="blankslate-heading">Chưa có tài sản nào</h3>
+        <p>Nhấn vào nút tạo mới bên trên để thêm tài sản mới.</p>
+    </div>
+    {{end}}
+
+  {{template "pagination" . }}
+</div>
+</div>
+{{end}}

@@ -29,28 +29,27 @@ type Attachment struct {
 }
 
 type Product struct {
-	ID                   int
-	Title                string
-	Short                string
-	Full                 string
-	City                 string
-	District             string
-	Ward                 string
-	AddressNumber        string
-	Street               string
-	HouseDirection       string
-	BalconyDirection     string
-	BusinessAdvantage    string
-	FinancialPlan        string
-	Furniture            string
-	GeneralPurchaseTerms string
-	Area                 int
-	Bedroom              int
-	Toilet               int
-	Floor                int
-	FrontWidth           int
-	StreetWidth          int
-	PavementWidth        int
-	CreatedAt            time.Time
-	UpdatedAt            time.Time
+	ID                int
+	Title             string
+	Short             string
+	Full              string
+	City              string
+	District          string
+	Ward              string
+	AddressNumber     string
+	Street            string
+	HouseDirection    string
+	BalconyDirection  string
+	BusinessAdvantage string
+	FinancialPlan     string
+	Furniture         string
+	Area              int
+	Bedroom           int
+	Toilet            int
+	Floor             int
+	FrontWidth        int
+	StreetWidth       int
+	PavementWidth     int
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
 }

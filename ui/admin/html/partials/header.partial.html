@@ -1,0 +1,13 @@
+{{define "header"}}
+
+<div class="color-bg-subtle mb-3">
+  <nav class="UnderlineNav">
+    <div class="UnderlineNav-body" role="tablist">
+      <a class="UnderlineNav-item ml-3" {{if contains .CurrentURL `/tasks` }} aria-current="page" {{end}} href="/tasks">Quản lý task</a>
+
+      <a class="UnderlineNav-item ml-3" {{if contains .CurrentURL `/sites` }} aria-current="page" {{end}} href="/sites">Danh sách site</a>
+
+    </div>
+  </nav>
+</div>
+{{end}}

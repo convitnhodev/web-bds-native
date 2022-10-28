@@ -1,3 +1,5 @@
+github.com/Machiel/slugify v1.0.1 h1:EfWSlRWstMadsgzmiV7d0yVd2IFlagWH68Q+DcYCm4E=
+github.com/Machiel/slugify v1.0.1/go.mod h1:fTFGn5uWEynW4CUMG7sWkYXOf1UgDxyTM3DbR6Qfg3k=
 github.com/aymerick/douceur v0.2.0 h1:Mv+mAeH1Q+n9Fr+oyamOlAkUNPWPlA8PPGR0QAaYuPk=
 github.com/aymerick/douceur v0.2.0/go.mod h1:wlT5vV2O3h55X9m7iVYN0TBM0NH/MmbLnd30/FjWUq4=
 github.com/bmizerany/pat v0.0.0-20210406213842-e4b6760bdd6f h1:gOO/tNZMjjvTKZWpY7YnXC72ULNLErRtp94LountVE8=
