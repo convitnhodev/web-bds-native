@@ -19,12 +19,12 @@ type UserModel struct {
 }
 
 var userColumes = []string{
-	"users.user_id",
-	"users.user_first_name",
-	"users.user_last_name",
-	"users.user_email",
-	"users.user_phone",
-	"users.user_password",
+	"users.id",
+	"users.first_name",
+	"users.last_name",
+	"users.email",
+	"users.phone",
+	"users.password",
 }
 
 func (m *UserModel) query(s string) string {
@@ -53,18 +53,18 @@ func scanUser(r scanner, o *models.User) error {
 func (m *UserModel) Create(f *form.Form) (*models.User, error) {
 	q := `
 	insert into users (
-		user_first_name,
-		user_last_name,
-		user_email,
-		user_phone,
-		user_password
+		first_name,
+		last_name,
+		email,
+		phone,
+		password
 	) values (
 		$1,
 		$2,
 		$3,
 		$4,
 		$5,
-	) returning user_id
+	) returning id
 	`
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(f.Get("Password")), 12)
 	if err != nil {
@@ -87,7 +87,7 @@ func (m *UserModel) Create(f *form.Form) (*models.User, error) {
 }
 
 func (m *UserModel) ID(id int) (*models.User, error) {
-	q := m.query(`where users.user_id = $1`)
+	q := m.query(`where users.id = $1`)
 	row := m.DB.QueryRow(q, id)
 	o := new(models.User)
 	if err := scanUser(row, o); err != nil {
@@ -97,7 +97,7 @@ func (m *UserModel) ID(id int) (*models.User, error) {
 }
 
 func (m *UserModel) GetByEmailToken(token string) (*models.User, error) {
-	q := m.query(`where users.user_email_token = $1`)
+	q := m.query(`where users.email_token = $1`)
 	row := m.DB.QueryRow(q, token)
 	o := new(models.User)
 	if err := scanUser(row, o); err != nil {
@@ -107,7 +107,7 @@ func (m *UserModel) GetByEmailToken(token string) (*models.User, error) {
 }
 
 func (m *UserModel) GetByEmail(email string) (*models.User, error) {
-	q := m.query(`where users.user_email = $1`)
+	q := m.query(`where users.email = $1`)
 	row := m.DB.QueryRow(q, email)
 	o := new(models.User)
 	if err := scanUser(row, o); err != nil {
@@ -121,7 +121,7 @@ func (m *UserModel) AddRole(id int, role string) error {
 }
 
 func (m *UserModel) Find() ([]*models.User, error) {
-	q := m.query("order by user_id desc")
+	q := m.query("order by id desc")
 	count := m.count("")
 
 	if err := m.Pagination.Count(count); err != nil {
