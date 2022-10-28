@@ -192,19 +192,62 @@ func (a *router) verifyPhone(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *router) register(w http.ResponseWriter, r *http.Request) {
+	f := form.New(nil)
+
+	var ok bool
+	defer func() {
+		if !ok {
+			a.render(w, r, "register.page.html", &templateData{
+				Form: f,
+			})
+			return
+		}
+
+	}()
+
+	// nếu đã login thì ko show nữa
+	if a.session.GetInt(r, "user") > 0 {
+		ok = true
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
 	if r.Method == "POST" {
 		if err := r.ParseForm(); err != nil {
 			log.Println(err)
-			a.render(w, r, "register.page.html", &templateData{})
+			f.Errors.Add("err", "err_parse_form")
 			return
 		}
+
+		f.Values = r.PostForm
+		f.Required("Phone", "Password", "FirstName", "LastName")
+
+		if !f.Valid() {
+			log.Println("form invalid", f.Errors)
+			f.Errors.Add("err", "err_invalid_form")
+			return
+		}
+
+		if user, err := a.App.Users.Create(f); err != nil {
+			log.Println(err)
+			f.Errors.Add("err", "err_could_not_create_user")
+			return
+		} else {
+			a.session.Put(r, "user", user.ID)
+		}
+
+		ok = true
+		http.Redirect(w, r, r.Header.Get("Referer"), http.StatusSeeOther)
 	}
-	a.render(w, r, "register.page.html", &templateData{})
+}
+
+func (a *router) logout(w http.ResponseWriter, r *http.Request) {
+	a.session.Remove(r, "user")
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func (a *router) login(w http.ResponseWriter, r *http.Request) {
-	f := form.New(r.PostForm)
-	f.Required("phone", "password")
+	f := form.New(nil)
 
 	var ok bool
 	defer func() {
@@ -215,17 +258,38 @@ func (a *router) login(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
+	// nếu đã login thì ko show nữa
+	if a.session.GetInt(r, "user") > 0 {
+		ok = true
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
 	if r.Method == "POST" {
 		if err := r.ParseForm(); err != nil {
 			f.Errors.Add("err", "err_parse_form")
 			return
 		}
 
+		f.Values = r.PostForm
+		f.Required("Phone", "Password")
+
 		if !f.Valid() {
+			log.Println("form invalid", f.Errors)
 			f.Errors.Add("err", "err_invalid_form")
 			return
 		}
 
+		user, err := a.App.Users.Auth(f)
+		if err != nil {
+			log.Println(err)
+			f.Errors.Add("err", "msg_invalid_login")
+			return
+		}
+		fmt.Println("DEBUG", "login", "success", user.ID)
+		ok = true
+		a.session.Put(r, "user", user.ID)
+		http.Redirect(w, r, r.Header.Get("Referer"), http.StatusSeeOther)
 	}
 }
 
@@ -276,6 +340,9 @@ func run(c *root.Cmd) error {
 	// đăng nhập
 	mux.Post("/login", use(a.login))
 	mux.Get("/login", use(a.login))
+
+	// out
+	mux.Get("/logout", use(a.logout))
 
 	// verify
 	mux.Get("/verify-email", use(a.verifyEmail))

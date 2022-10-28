@@ -10,6 +10,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/deeincom/deeincom/pkg/form"
+	"github.com/deeincom/deeincom/pkg/helper"
 	"github.com/deeincom/deeincom/pkg/models"
 )
 
@@ -50,6 +51,24 @@ func scanUser(r scanner, o *models.User) error {
 	return nil
 }
 
+func (m *UserModel) Auth(f *form.Form) (*models.User, error) {
+	q := `
+		select id, password from users where phone = $1
+	`
+	var id int
+	var hashed []byte
+	row := m.DB.QueryRow(q, f.Get("Phone"))
+	if err := row.Scan(&id, &hashed); err != nil {
+		return nil, err
+	}
+
+	if err := bcrypt.CompareHashAndPassword(hashed, []byte(f.Get("Password"))); err != nil {
+		return nil, err
+	}
+
+	return &models.User{ID: id}, nil
+}
+
 func (m *UserModel) Create(f *form.Form) (*models.User, error) {
 	q := `
 	insert into users (
@@ -57,13 +76,17 @@ func (m *UserModel) Create(f *form.Form) (*models.User, error) {
 		last_name,
 		email,
 		phone,
-		password
+		password,
+		email_token,
+		phone_token
 	) values (
 		$1,
 		$2,
 		$3,
 		$4,
 		$5,
+		$6,
+		$7
 	) returning id
 	`
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(f.Get("Password")), 12)
@@ -77,6 +100,8 @@ func (m *UserModel) Create(f *form.Form) (*models.User, error) {
 		f.Get("Email"),
 		f.Get("Phone"),
 		string(hashedPassword),
+		helper.RandString(6),
+		helper.RandString(6),
 	)
 	o := new(models.User)
 	if err := row.Scan(&o.ID); err != nil {
