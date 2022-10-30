@@ -29,7 +29,7 @@
         </div>
       </div>
       {{end}}
-
+      <!---->
       {{if .User}}
       <div
         class="flex items-center h-full text-lg transition-all hover:text-sky-500"
@@ -61,12 +61,20 @@
       id="mobile-menu"
       class="[&.dee--open]:block hidden fixed inset-0 top-16 bg-slate-50"
     >
+      {{if not .User}}
       <a href="/login">
         <div class="px-6 py-3 text-gray-500 text-lg">Đăng nhập</div>
       </a>
       <a href="/register">
         <div class="px-6 py-3 text-gray-500 text-lg">Đăng ký</div>
       </a>
+      {{end}}
+      <!---->
+      {{if .User}}
+      <a href="/login">
+        <div class="px-6 py-3 text-gray-500 text-lg">Thoát</div>
+      </a>
+      {{end}}
     </div>
   </div>
 </header>
