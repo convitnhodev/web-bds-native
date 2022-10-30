@@ -1,6 +1,105 @@
-{{ template "ui" .}}
-
-
-{{ define "body" -}}
-<h1>trang verify phone</h1>
-{{- end }}
+{{template "ui" .}}
+<!---->
+{{define "body" -}}
+<main class="px-4">
+  <div class="flex flex-col justify-center mt-16 mb-8 sm:px-6 lg:px-8">
+    <h2 class="text-center text-3xl font-bold tracking-tight text-gray-900">
+      Xác nhận số điện thoại
+    </h2>
+  </div>
+  <div class="mt-8 mb-16 sm:mx-auto sm:w-full sm:max-w-md relative">
+    <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+      <form class="space-y-6" id="verify-phone-form" method="post">
+        <div>
+          <label
+            for="phone-number"
+            class="block text-sm font-medium text-gray-700"
+          >
+            Số điện thoại
+          </label>
+          <div class="relative mt-1 rounded-md shadow-sm">
+            <div class="absolute inset-y-0 left-0 flex items-center">
+              <select
+                id="country"
+                name="country"
+                autocomplete="country"
+                class="h-full rounded-md border-transparent bg-transparent py-0 text-gray-500 focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
+              >
+                <option>VN</option>
+              </select>
+            </div>
+            <input
+              id="phone-number"
+              name="Phone"
+              type="text"
+              placeholder="0987654321"
+              required
+              class="pl-18 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm"
+            />
+          </div>
+        </div>
+        <div class="flex items-center justify-between">
+          <div class="text-sm inline-flex space-x-2">
+            <span class="text-gray-500">Chưa nhận được mã?</span>
+            <button
+              type="button"
+              class="font-medium text-sky-600 hover:text-sky-500"
+              id="send-code"
+            >
+              Gửi lại mã <span id="countdown-timer"></span>
+            </button>
+          </div>
+        </div>
+        <div>
+          <label for="code" class="block text-sm font-medium text-gray-700">
+            Mã xác nhận
+          </label>
+          <div class="mt-1">
+            <input
+              id="code"
+              name="Code"
+              type="text"
+              required
+              class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm"
+            />
+          </div>
+        </div>
+        <div>
+          <button
+            type="submit"
+            class="flex w-full justify-center rounded-md border border-transparent bg-sky-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2"
+            id="register-form-submit"
+          >
+            Xác nhận
+          </button>
+        </div>
+      </form>
+    </div>
+    <div class="absolute inset-0 select-none hidden" id="register-form-overlay">
+      <div class="absolute inset-0 w-full h-full bg-white opacity-50"></div>
+      <div class="flex h-full items-center justify-center">
+        <svg
+          class="animate-spin h-8 w-8 text-black"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            class="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="4"
+          ></circle>
+          <path
+            class="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+          ></path>
+        </svg>
+      </div>
+    </div>
+  </div>
+</main>
+{{- end}}
