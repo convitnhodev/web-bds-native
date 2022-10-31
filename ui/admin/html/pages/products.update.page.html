@@ -1,0 +1,338 @@
+{{template "admin" .}}
+
+{{define "body"}}
+
+<div class="container-lg">
+    <div class="col-12">
+
+        <h1>Thêm tài sản</h1>
+
+        {{with .Form.Errors.Get `form` }}
+        <div class="alert alert-error">
+            {{.}}
+        </div>
+        {{end}}
+        {{with .Form.Errors.Get `form` }}
+        <div class="alert alert-error">
+            {{.}}
+        </div>
+        {{end}}
+
+
+        <form method="POST">
+            {{with .Form}}
+            <div class="Subhead">
+                <h2 class="Subhead-heading">Phần thông tin chung</h2>
+            </div>
+            <div class="clearfix">
+                <div class="col-6 pr-2 float-left">
+                    <div class="form-group {{with .Errors.Get `Title`}}errored{{end}}">
+                        <div class="form-group-header">
+                            <label>Tên tài sản *</label>
+                        </div>
+                        <div class="form-group-body">
+                            <input class="form-control" autocomplete="off" spellcheck="false" name="Title"
+                                value="{{.Get `Title`}}">
+                        </div>
+                        {{with .Errors.Get `Title`}}
+                        <p class="note error">{{.}}</p>
+                        {{else}}
+                        <p class="note">Vd: Nhà mặt phố Nguyễn Ngọc Nại, 78 tỷ, 33%/3 năm. Sổ đỏ, pháp lý chuẩn, mặt
+                            tiền 8m</p>
+                        {{end}}
+                    </div>
+
+                    <div class="form-group {{with .Errors.Get `Short`}}errored{{end}}">
+                        <div class="form-group-header">
+                            <label>Mô tả ngắn gọn</label>
+                        </div>
+                        <div class="form-group-body">
+                            <input class="form-control" autocomplete="off" spellcheck="false" name="Short"
+                                value="{{.Get `Short`}}">
+                        </div>
+                        {{with .Errors.Get `Short`}}
+                        <p class="note error">{{.}}</p>
+                        {{else}}
+                        <p class="note">Vd: Mặt tiền Nguyễn Ngọc Nại, phố kinh doanh sầm uất, thuận lợi mở văn phòng,
+                            cho thuê ngân hàng, làm hotel</p>
+                        {{end}}
+                    </div>
+
+                    <div class="form-group {{with .Errors.Get `Street`}}errored{{end}}">
+                        <div class="form-group-header">
+                            <label>Hướng nhà</label>
+                        </div>
+                        <div class="form-group-body">
+                            <input class="form-control" autocomplete="off" spellcheck="false" name="HouseDirection"
+                                value="{{.Get `HouseDirection`}}">
+                        </div>
+                        {{with .Errors.Get `HouseDirection`}}
+                        <p class="note error">{{.}}</p>
+                        {{else}}
+                        <p class="note">Nhà hướng Đông Nam</p>
+                        {{end}}
+                    </div>
+
+                    <div class="form-group {{with .Errors.Get `BusinessAdvantage`}}errored{{end}}">
+                        <div class="form-group-header">
+                            <label>Lợi thế kinh doanh</label>
+                        </div>
+                        <div class="form-group-body">
+                            <input class="form-control" autocomplete="off" spellcheck="false" name="BusinessAdvantage"
+                                value="{{.Get `BusinessAdvantage`}}">
+                        </div>
+                        {{with .Errors.Get `BusinessAdvantage`}}
+                        <p class="note error">{{.}}</p>
+                        {{else}}
+                        <p class="note">Vd: văn phòng đang cho thuê với doanh thu...</p>
+                        {{end}}
+                    </div>
+
+                    <div class="form-group {{with .Errors.Get `FinancialPlan`}}errored{{end}}">
+                        <div class="form-group-header">
+                            <label>Kế hoạch tài chính</label>
+                        </div>
+                        <div class="form-group-body">
+                            <input class="form-control" autocomplete="off" spellcheck="false" name="FinancialPlan"
+                                value="{{.Get `FinancialPlan`}}">
+                        </div>
+                        {{with .Errors.Get `FinancialPlan`}}
+                        <p class="note error">{{.}}</p>
+                        {{else}}
+                        <p class="note">Vd: Giá mua: 78 tỷ. Tăng giá 7%/năm. Cho thuê 2.5 tỷ/năm</p>
+                        {{end}}
+                    </div>
+
+                    <div class="form-group {{with .Errors.Get `Furniture`}}errored{{end}}">
+                        <div class="form-group-header">
+                            <label>Kết cấu tài sản</label>
+                        </div>
+                        <div class="form-group-body">
+                            <input class="form-control" autocomplete="off" spellcheck="false" name="Furniture"
+                                value="{{.Get `Furniture`}}">
+                        </div>
+                        {{with .Errors.Get `Furniture`}}
+                        <p class="note error">{{.}}</p>
+                        {{else}}
+                        <p class="note">Vd: 1 hầm, 8 nổi, sân thượng rộng</p>
+                        {{end}}
+                    </div>
+
+                </div>
+                <div class="col-6 pr-2 float-left">
+                    <div class="form-group {{with .Errors.Get `Type`}}errored{{end}}">
+                        <div class="form-group-header">
+                            <label>Loại hình </label>
+                        </div>
+                        <div class="form-group-body">
+                            <select name="Type" class="form-control">
+                                {{$type := .Get `Type`}}
+                                {{range $t := $.Config.ProductTypes}}
+                                <option value="{{$t}}" {{if eq $t $type}}selected{{end}}>{{$t | upper}}</option>
+                                {{end}}
+                            </select>
+                        </div>
+                        {{with .Errors.Get `FinancialPlan`}}
+                        <p class="note error">{{.}}</p>
+                        {{end}}
+                    </div>
+
+                    <div class="form-group {{with .Errors.Get `Legal`}}errored{{end}}">
+                        <div class="form-group-header">
+                            <label>Tình trạng pháp lý</label>
+                        </div>
+                        <div class="form-group-body">
+                            <input class="form-control" autocomplete="off" spellcheck="false" name="Legal"
+                                value="{{.Get `Legal`}}">
+                        </div>
+                        {{with .Errors.Get `Legal`}}
+                        <p class="note error">{{.}}</p>
+                        {{else}}
+                        <p class="note">Vd: Sổ đỏ công chứng trong ngày</p>
+                        {{end}}
+                    </div>
+
+                    <div class="form-group {{with .Errors.Get `Area`}}errored{{end}}">
+                        <div class="form-group-header">
+                            <label>Diện tích</label>
+                        </div>
+                        <div class="form-group-body">
+                            <input type="number" class="form-control" autocomplete="off" spellcheck="false" name="Area"
+                                value="{{.Get `Area`}}">
+                        </div>
+                        {{with .Errors.Get `Area`}}
+                        <p class="note error">{{.}}</p>
+                        {{end}}
+                    </div>
+
+                    <div class="form-group {{with .Errors.Get `FrontWidth`}}errored{{end}}">
+                        <div class="form-group-header">
+                            <label>Mặt tiền</label>
+                        </div>
+                        <div class="form-group-body">
+                            <input type="number" class="form-control" autocomplete="off" spellcheck="false" name="FrontWidth"
+                                value="{{.Get `FrontWidth`}}">
+                        </div>
+                        {{with .Errors.Get `FrontWidth`}}
+                        <p class="note error">{{.}}</p>
+                        {{end}}
+                    </div>
+
+                    <div class="form-group {{with .Errors.Get `StreetWidth`}}errored{{end}}">
+                        <div class="form-group-header">
+                            <label>Đường trước nhà</label>
+                        </div>
+                        <div class="form-group-body">
+                            <input type="number" class="form-control" autocomplete="off" spellcheck="false" name="StreetWidth"
+                                value="{{.Get `StreetWidth`}}">
+                        </div>
+                        {{with .Errors.Get `StreetWidth`}}
+                        <p class="note error">{{.}}</p>
+                        {{end}}
+                    </div>
+
+                    <div class="form-group {{with .Errors.Get `PavementWidth`}}errored{{end}}">
+                        <div class="form-group-header">
+                            <label>Độ rộng vỉa hè</label>
+                        </div>
+                        <div class="form-group-body">
+                            <input type="number" class="form-control" autocomplete="off" spellcheck="false" name="PavementWidth"
+                                value="{{.Get `PavementWidth`}}">
+                        </div>
+                        {{with .Errors.Get `PavementWidth`}}
+                        <p class="note error">{{.}}</p>
+                        {{end}}
+                    </div>
+
+                    <div class="form-group {{with .Errors.Get `Bedroom`}}errored{{end}}">
+                        <div class="form-group-header">
+                            <label>Số phòng ngủ</label>
+                        </div>
+                        <div class="form-group-body">
+                            <input type="number" class="form-control" autocomplete="off" spellcheck="false" name="Bedroom"
+                                value="{{.Get `Bedroom`}}">
+                        </div>
+                        {{with .Errors.Get `Bedroom`}}
+                        <p class="note error">{{.}}</p>
+                        {{end}}
+                    </div>
+
+                    <div class="form-group {{with .Errors.Get `Toilet`}}errored{{end}}">
+                        <div class="form-group-header">
+                            <label>Số toilet</label>
+                        </div>
+                        <div class="form-group-body">
+                            <input type="number" class="form-control" autocomplete="off" spellcheck="false" name="Toilet"
+                                value="{{.Get `Toilet`}}">
+                        </div>
+                        {{with .Errors.Get `Toilet`}}
+                        <p class="note error">{{.}}</p>
+                        {{end}}
+                    </div>
+                </div>
+            </div>
+
+            <div class="Subhead">
+                <h2 class="Subhead-heading">Phần thông tin chi tiết</h2>
+            </div>
+
+            <div class="form-group {{with .Errors.Get `City`}}errored{{end}}">
+                <div class="form-group-header">
+                    <label>Tỉnh/thành phố</label>
+                </div>
+                <div class="form-group-body">
+                    <input class="form-control" autocomplete="off" spellcheck="false" name="City"
+                        value="{{.Get `City`}}">
+                </div>
+                {{with .Errors.Get `City`}}
+                <p class="note error">{{.}}</p>
+                {{else}}
+                <p class="note">Vd: Hà Nội</p>
+                {{end}}
+            </div>
+
+            <div class="form-group {{with .Errors.Get `District`}}errored{{end}}">
+                <div class="form-group-header">
+                    <label>Quận/huyện</label>
+                </div>
+                <div class="form-group-body">
+                    <input class="form-control" autocomplete="off" spellcheck="false" name="District"
+                        value="{{.Get `District`}}">
+                </div>
+                {{with .Errors.Get `District`}}
+                <p class="note error">{{.}}</p>
+                {{else}}
+                <p class="note">Vd: Thanh Xuân</p>
+                {{end}}
+            </div>
+
+            <div class="form-group {{with .Errors.Get `Ward`}}errored{{end}}">
+                <div class="form-group-header">
+                    <label>Phường/xã</label>
+                </div>
+                <div class="form-group-body">
+                    <input class="form-control" autocomplete="off" spellcheck="false" name="Ward"
+                        value="{{.Get `Ward`}}">
+                </div>
+                {{with .Errors.Get `Ward`}}
+                <p class="note error">{{.}}</p>
+                {{else}}
+                <p class="note">Vd: Khương Mai</p>
+                {{end}}
+            </div>
+
+            <div class="form-group {{with .Errors.Get `Street`}}errored{{end}}">
+                <div class="form-group-header">
+                    <label>Đường</label>
+                </div>
+                <div class="form-group-body">
+                    <input class="form-control" autocomplete="off" spellcheck="false" name="Street"
+                        value="{{.Get `Street`}}">
+                </div>
+                {{with .Errors.Get `Street`}}
+                <p class="note error">{{.}}</p>
+                {{else}}
+                <p class="note">Vd: Nguyễn Ngọc Nại</p>
+                {{end}}
+            </div>
+
+
+            <div class="form-group {{with .Errors.Get `AddressNumber`}}errored{{end}}">
+                <div class="form-group-header">
+                    <label>Số nhà, ngõ</label>
+                </div>
+                <div class="form-group-body">
+                    <input class="form-control" autocomplete="off" spellcheck="false" name="AddressNumber"
+                        value="{{.Get `AddressNumber`}}">
+                </div>
+                {{with .Errors.Get `AddressNumber`}}
+                <p class="note error">{{.}}</p>
+                {{else}}
+                <p class="note">Vd: số 58</p>
+                {{end}}
+            </div>
+
+
+
+
+            <div class="Subhead">
+                <h2 class="Subhead-heading">Mô tả chi tiết tài sản</h2>
+            </div>
+
+            <div class="form-group">
+                <div class="form-group-body">
+                    <textarea class="form-control wysiwyg" name="FullContent">{{.Get `FullContent`}}</textarea>
+                </div>
+                {{with .Errors.Get `FullContent`}}
+                <p class="note error">{{.}}</p>
+                {{end}}
+            </div>
+
+            <button class="btn btn-primary" type="submit">Cập nhật</button>
+            {{end}}
+        </form>
+
+    </div>
+</div>
+</div>
+{{end}}

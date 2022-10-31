@@ -10,6 +10,7 @@ import (
 // Config for this project
 type Config struct {
 	DB             string
+	ProductTypes   []string
 	TelegramChatID string
 	TelegramToken  string
 }
@@ -18,6 +19,22 @@ type Config struct {
 func (c *Config) Default() error {
 	if c.DB == "" {
 		return errors.New("please config postgres db (config.json)")
+	}
+
+	if len(c.ProductTypes) == 0 {
+		c.ProductTypes = []string{
+			"Căn hộ chung cư",
+			"Nhà riêng",
+			"Nhà biệt thự, liền kề",
+			"Nhà mặt phố",
+			"Shop house, nhà phố thương mại",
+			"Đất nền dự án",
+			"Đất",
+			"Trang trại, khu nghỉ dưỡng",
+			"Condotel",
+			"Kho, nhà xưởng",
+			"Các loại hình bất động sản khác",
+		}
 	}
 
 	return nil

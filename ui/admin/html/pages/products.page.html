@@ -1,4 +1,5 @@
-{{template "ui" .}}
+{{template "admin" .}}
+
 {{define "body"}}
 {{$label := split "accent:success:attention:severe:danger:open:closed:done:sponsors" ":"  }}
 
@@ -7,7 +8,7 @@
 
     <div class="d-flex flex-items-center mb-3">
       <h1 class="overflow-hidden flex-auto">
-        Sites
+        Tài sản
         <span class="Counter Counter-gray">{{.Pagination.Data.Total}}</span>
       </h1>
 
@@ -18,7 +19,7 @@
         </summary>
 
         <ul class="dropdown-menu dropdown-menu-se">
-            <li><a href="/sites/create?type=link" class="dropdown-item" role="menuitem">Tài sản</a></li>
+            <li><a href="/admin/products/create" class="dropdown-item" role="menuitem">Tài sản</a></li>
         </ul>
       </details>
     </div>
@@ -31,7 +32,7 @@
           <span class="mr-3">{{.Title}}</span>
           <div class="flex-auto">
           </div>
-
+          <a class="btn btn-xs mr-2" href="/admin/products/{{.ID}}/update">sửa</a>
           <a class="btn btn-danger btn-xs" href="/admin/products/{{.ID}}/remove" onclick="return confirm('chắc nghen?');">xóa</a>
         </div>
         {{end}}

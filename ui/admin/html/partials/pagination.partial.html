@@ -1,0 +1,36 @@
+{{ define "pagination" }}
+
+  {{if .Pagination}}
+    {{$current_url := .CurrentURL}}
+    {{$current_page := .Pagination.Data.CurrentPage }}
+
+    {{with .Pagination.Data}}
+    <nav class="paginate-container d-none d-sm-flex flex-sm-justify-center" aria-label="Pagination">
+      <div class="pagination">
+      {{if .Prev}}
+        <a class="previous_page" href="{{buildPagination $current_url .Prev}}" aria-label="Previous Page">
+          Previous
+        </a>
+      {{else}}
+        <span class="previous_page" aria-disabled="true">Previous</span>
+      {{end}}
+
+      {{range $p := .Pages}}
+        {{if eq $current_page $p}}
+          <em aria-current="page">{{$p}}</em>
+        {{else}}
+          <a href="{{buildPagination $current_url $p}}">{{$p}}</a>
+        {{end}}
+      {{end}}
+
+      {{if .Next}}
+        <a class="next_page" href="{{buildPagination $current_url .Next}}" aria-label="Next Page">
+          Next
+        </a>
+      {{else}}
+      <span class="next_page" aria-disabled="true">Next</span>
+      {{end}}
+    </div>
+    {{end}}
+  {{end}}
+{{end}}

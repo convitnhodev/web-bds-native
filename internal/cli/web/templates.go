@@ -1,11 +1,13 @@
 package web
 
 import (
+	"fmt"
 	"html/template"
 	"net/http"
 	"path/filepath"
 	"strings"
 
+	"github.com/deeincom/deeincom/config"
 	"github.com/deeincom/deeincom/pkg/form"
 	"github.com/deeincom/deeincom/pkg/models"
 	"github.com/deeincom/deeincom/pkg/models/db"
@@ -26,16 +28,50 @@ type templateData struct {
 	Form     *form.Form
 	Products []*models.Product
 	Product  *models.Product
+
+	//Config
+	Config *config.Config
 }
 
 var functions = template.FuncMap{
-	"__":       translate,
-	"upper":    strings.ToUpper,
-	"lower":    strings.ToLower,
-	"title":    strings.Title,
-	"split":    strings.Split,
-	"contains": strings.Contains,
-	"has_role": hasRole,
+	"__":              translate,
+	"upper":           strings.ToUpper,
+	"lower":           strings.ToLower,
+	"title":           strings.Title,
+	"split":           strings.Split,
+	"contains":        strings.Contains,
+	"has_role":        hasRole,
+	"html":            html,
+	"buildPagination": buildPagination,
+}
+
+func html(s string) template.HTML {
+	return template.HTML(s)
+}
+
+func buildPagination(url string, page int) string {
+	if !strings.Contains(url, "?") {
+		return fmt.Sprintf("%s?page=%d", url, page)
+	}
+	if !strings.Contains(url, "page") {
+		return fmt.Sprintf("%s&page=%d", url, page)
+	}
+	if !strings.Contains(url, "&") {
+		return strings.Split(url, "?")[0] + fmt.Sprintf("?page=%d", page)
+	}
+	s := []string{}
+	if strings.Contains(url, "page") {
+		cURL := strings.Split(url, "&")
+		for _, v := range cURL {
+			if strings.Contains(v, "page") {
+				v = fmt.Sprintf("page=%d", page)
+			}
+			s = append(s, v)
+		}
+		return strings.Join(s, "&")
+	}
+
+	return ""
 }
 
 func hasRole(user *models.User, test string) bool {

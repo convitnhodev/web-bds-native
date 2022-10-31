@@ -2,6 +2,7 @@ package web
 
 import (
 	"bytes"
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -17,7 +18,7 @@ func (a *router) adminrender(w http.ResponseWriter, r *http.Request, name string
 	}
 	// apply global data, such as url, description etc..
 	td.CurrentURL = r.RequestURI
-
+	td.Config = a.App.Config
 	// flash msg
 	td.Flash = a.session.PopString(r, "flash")
 
@@ -73,11 +74,9 @@ func (a *router) isadmin(next http.HandlerFunc) http.HandlerFunc {
 			log.Println("user do not have role admin")
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
-
 		}
 
 		next.ServeHTTP(w, r)
-		return
 	})
 }
 
@@ -100,7 +99,67 @@ func (a *router) adminProducts(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func (a *router) adminCreateProduct(w http.ResponseWriter, r *http.Request) {
+	product, err := a.App.Products.Create()
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "500 - internal server error", 500)
+		return
+	}
+
+	http.Redirect(w, r, fmt.Sprintf("/admin/products/%d/update", product.ID), http.StatusSeeOther)
+}
+
+func (a *router) adminUpdateProduct(w http.ResponseWriter, r *http.Request) {
+	product, err := a.App.Products.ID(r.URL.Query().Get(":id"))
+	if err != nil {
+		log.Println(err)
+		http.Redirect(w, r, "/admin/products", http.StatusSeeOther)
+		return
+	}
+
+	f := product.Form()
+
+	ok := false
+	defer func() {
+		if !ok {
+			a.adminrender(w, r, "products.update.page.html", &templateData{
+				Form: f,
+			})
+		}
+	}()
+
+	if r.Method == "POST" {
+		if err := r.ParseForm(); err != nil {
+			f.Errors.Add("err", "err_parse_form")
+			return
+		}
+
+		f.Values = r.PostForm
+		f.Required("Title")
+
+		if !f.Valid() {
+			log.Println("form invalid", f.Errors)
+			// f.Errors.Add("err", "err_invalid_form")
+			return
+		}
+
+		if err := a.App.Products.Update(product, f); err != nil {
+			log.Println(err)
+			f.Errors.Add("err", "could_not_update_product")
+			return
+		}
+
+		ok = true
+		http.Redirect(w, r, "/admin/products", http.StatusSeeOther)
+	}
+
+}
+
 func registerAdminRoute(mux *pat.PatternServeMux, a *router) {
 	mux.Get("/admin", use(a.adminHome, a.isadmin))
 	mux.Get("/admin/products", use(a.adminProducts, a.isadmin))
+	mux.Post("/admin/products/:id/update", use(a.adminUpdateProduct, a.isadmin))
+	mux.Get("/admin/products/:id/update", use(a.adminUpdateProduct, a.isadmin))
+	mux.Get("/admin/products/create", use(a.adminCreateProduct, a.isadmin))
 }

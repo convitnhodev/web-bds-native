@@ -51,6 +51,7 @@ func (a *router) render(w http.ResponseWriter, r *http.Request, name string, td 
 	}
 	// apply global data, such as url, description etc..
 	td.CurrentURL = r.RequestURI
+	td.Config = a.App.Config
 
 	// flash msg
 	td.Flash = a.session.PopString(r, "flash")
@@ -109,7 +110,7 @@ func (a *router) productDetail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	a.render(w, r, "product.page.html", &templateData{
+	a.render(w, r, "detail.page.html", &templateData{
 		Product: product,
 	})
 }

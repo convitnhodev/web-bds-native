@@ -39,6 +39,12 @@ var productColumes = []string{
 	"products.pavement_width",
 	"products.created_at",
 	"products.updated_at",
+	"products.slug",
+	"products.full_content",
+	"products.product_type",
+	"products.business_advantage",
+	"products.legal",
+	"products.area",
 }
 
 func (m *ProductModel) query(s string) string {
@@ -72,6 +78,12 @@ func scanProduct(r scanner, o *models.Product) error {
 		&o.PavementWidth,
 		&o.CreatedAt,
 		&o.UpdatedAt,
+		&o.Slug,
+		&o.FullContent,
+		&o.Type,
+		&o.BusinessAdvantage,
+		&o.Legal,
+		&o.Area,
 	); err != nil {
 		return errors.Wrap(err, "scanProduct")
 	}
@@ -80,7 +92,7 @@ func scanProduct(r scanner, o *models.Product) error {
 }
 
 func (m *ProductModel) Find() ([]*models.Product, error) {
-	q := m.query("order by id desc")
+	q := m.query("where updated_at > '0001-01-01 00:00:00+00'::date order by id desc")
 	count := m.count("")
 
 	if err := m.Pagination.Count(count); err != nil {
@@ -113,7 +125,17 @@ func (m *ProductModel) GetBySlug(slug string) (*models.Product, error) {
 	return o, nil
 }
 
-func (m *ProductModel) Create(f *form.Form) (*models.Product, error) {
+func (m *ProductModel) ID(id string) (*models.Product, error) {
+	q := m.query(`where products.id = $1`)
+	row := m.DB.QueryRow(q, id)
+	o := new(models.Product)
+	if err := scanProduct(row, o); err != nil {
+		return nil, errors.Wrap(err, "Products.ID")
+	}
+	return o, nil
+}
+
+func (m *ProductModel) Create() (*models.Product, error) {
 	q := `insert into products (title) values ('') returning id`
 	row := m.DB.QueryRow(q)
 	o := new(models.Product)
@@ -146,7 +168,12 @@ func (m *ProductModel) Update(o *models.Product, f *form.Form) error {
 			front_width = $17,
 			street_width = $18,
 			pavement_width = $19,
-			slug = $20
+			slug = $20,
+			full_content = $21,
+			business_advantage = $22,
+			product_type = $23,
+			legal = $24,
+			area = $25
 		where
 			id = $1
 	`
@@ -171,6 +198,11 @@ func (m *ProductModel) Update(o *models.Product, f *form.Form) error {
 		f.GetInt("StreetWidth"),
 		f.GetInt("PavementWidth"),
 		slugify.Slugify(f.Get("Title")),
+		f.Get("FullContent"),
+		f.Get("BusinessAdvantage"),
+		f.Get("Type"),
+		f.Get("Legal"),
+		f.Get("Area"),
 	)
 
 	return err

@@ -6,6 +6,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/lib/pq"
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/bcrypt"
 
@@ -26,6 +27,7 @@ var userColumes = []string{
 	"users.email",
 	"users.phone",
 	"users.password",
+	"users.roles",
 }
 
 func (m *UserModel) query(s string) string {
@@ -44,6 +46,7 @@ func scanUser(r scanner, o *models.User) error {
 		&o.Email,
 		&o.Phone,
 		&o.Password,
+		pq.Array(&o.Roles),
 	); err != nil {
 		return errors.Wrap(err, "scanUser")
 	}
