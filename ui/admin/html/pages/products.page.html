@@ -9,7 +9,6 @@
     <div class="d-flex flex-items-center mb-3">
       <h1 class="overflow-hidden flex-auto">
         Tài sản
-        <span class="Counter Counter-gray">{{.Pagination.Data.Total}}</span>
       </h1>
 
       <details class="dropdown details-reset details-overlay d-inline-block">
@@ -33,7 +32,7 @@
           <div class="flex-auto">
           </div>
           <a class="btn btn-xs mr-2" href="/admin/products/{{.ID}}/update">sửa</a>
-          <a class="btn btn-danger btn-xs" href="/admin/products/{{.ID}}/remove" onclick="return confirm('chắc nghen?');">xóa</a>
+          <!-- <a class="btn btn-danger btn-xs" href="/admin/products/{{.ID}}/remove" onclick="return confirm('chắc nghen?');">xóa</a> -->
         </div>
         {{end}}
       </div>

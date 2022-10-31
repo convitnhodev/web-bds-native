@@ -93,7 +93,7 @@ func scanProduct(r scanner, o *models.Product) error {
 
 func (m *ProductModel) Find() ([]*models.Product, error) {
 	q := m.query("where updated_at > '0001-01-01 00:00:00+00'::date order by id desc")
-	count := m.count("")
+	count := m.count("where updated_at > '0001-01-01 00:00:00+00'::date")
 
 	if err := m.Pagination.Count(count); err != nil {
 		return nil, err
@@ -150,6 +150,7 @@ func (m *ProductModel) Update(o *models.Product, f *form.Form) error {
 		update
 			products
 		set
+			updated_at = now(),
 			title = $2,
 			short_description = $3,
 			full_description = $4,
