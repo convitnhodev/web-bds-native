@@ -29,7 +29,7 @@ func (a *router) adminrender(w http.ResponseWriter, r *http.Request, name string
 	id := a.session.GetInt(r, "user")
 	if id > 0 {
 		// Get user by id
-		u, err := a.App.Users.ID(id)
+		u, err := a.App.Users.ID(fmt.Sprint(id))
 		if err != nil {
 			log.Println(err)
 			// user has been deleted? remove session anyway
@@ -56,7 +56,7 @@ func (a *router) isadmin(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		user, err := a.App.Users.ID(id)
+		user, err := a.App.Users.ID(fmt.Sprint(id))
 		if err != nil {
 			log.Println(err)
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
@@ -96,6 +96,35 @@ func (a *router) adminProducts(w http.ResponseWriter, r *http.Request) {
 	a.adminrender(w, r, "products.page.html", &templateData{
 		Products:   products,
 		Pagination: p,
+	})
+}
+
+func (a *router) adminUsers(w http.ResponseWriter, r *http.Request) {
+	p := a.App.AdminUsers.Pagination.Query(r.URL)
+
+	users, err := a.App.AdminUsers.Find()
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "bad request", 400)
+		return
+	}
+	a.adminrender(w, r, "users.page.html", &templateData{
+		Users:      users,
+		Pagination: p,
+	})
+}
+
+func (a *router) adminUsersDetail(w http.ResponseWriter, r *http.Request) {
+	user, err := a.App.AdminUsers.ID(r.URL.Query().Get(":id"))
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "bad request", 400)
+		return
+	}
+
+	a.adminrender(w, r, "users.detail.page.html", &templateData{
+		User: user,
+		Logs: nil,
 	})
 }
 
@@ -162,4 +191,7 @@ func registerAdminRoute(mux *pat.PatternServeMux, a *router) {
 	mux.Post("/admin/products/:id/update", use(a.adminUpdateProduct, a.isadmin))
 	mux.Get("/admin/products/:id/update", use(a.adminUpdateProduct, a.isadmin))
 	mux.Get("/admin/products/create", use(a.adminCreateProduct, a.isadmin))
+
+	mux.Get("/admin/users", use(a.adminUsers, a.isadmin))
+	mux.Get("/admin/users/:id/detail", use(a.adminUsersDetail, a.isadmin))
 }

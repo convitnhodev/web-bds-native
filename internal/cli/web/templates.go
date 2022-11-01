@@ -3,6 +3,7 @@ package web
 import (
 	"fmt"
 	"html/template"
+	"math/rand"
 	"net/http"
 	"path/filepath"
 	"strings"
@@ -18,6 +19,7 @@ var strictPolicy = bluemonday.StrictPolicy()
 
 type templateData struct {
 	User       *models.User
+	Users      []*models.User
 	Pagination *db.Pagination
 
 	Localhost  bool
@@ -28,6 +30,9 @@ type templateData struct {
 	Form     *form.Form
 	Products []*models.Product
 	Product  *models.Product
+
+	Log  *models.Log
+	Logs []*models.Log
 
 	//Config
 	Config *config.Config
@@ -43,6 +48,32 @@ var functions = template.FuncMap{
 	"has_role":        hasRole,
 	"html":            html,
 	"buildPagination": buildPagination,
+	"sureFind":        sureFind,
+}
+
+// sureFind always find an element in list l
+// no matter what string s is
+// it also find same element in `l` when passing same s
+// return empty string if `l“ was empty
+func sureFind(l []string, s string) string {
+	if len(l) == 0 {
+		return ""
+	}
+
+	r := []rune(s)
+	total := 0
+	for _, i := range r {
+		total = total + int(i)
+	}
+
+	index := 0
+	if total == 0 {
+		index = rand.Intn(len(l) - 1)
+	} else {
+		index = total % len(l)
+	}
+
+	return l[index]
 }
 
 func html(s string) template.HTML {

@@ -19,6 +19,7 @@ type App struct {
 	Telegram      *telegram.Telegram
 	Migration     *db.MigrationModel
 	Users         *db.UserModel
+	AdminUsers    *db.UserModel
 	Products      *db.ProductModel
 	AdminProducts *db.ProductModel
 }
@@ -58,6 +59,16 @@ func New(c *config.Config) (*App, error) {
 			},
 		},
 		AdminProducts: &db.ProductModel{
+			DB: conn,
+			Pagination: &db.Pagination{
+				DB:      conn,
+				Min:     25,
+				Max:     100,
+				Default: 25,
+				Data:    &db.PaginationData{Limit: 25},
+			},
+		},
+		AdminUsers: &db.UserModel{
 			DB: conn,
 			Pagination: &db.Pagination{
 				DB:      conn,

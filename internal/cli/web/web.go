@@ -63,7 +63,7 @@ func (a *router) render(w http.ResponseWriter, r *http.Request, name string, td 
 	id := a.session.GetInt(r, "user")
 	if id > 0 {
 		// Get user by id
-		u, err := a.App.Users.ID(id)
+		u, err := a.App.Users.ID(fmt.Sprint(id))
 		if err != nil {
 			log.Println(err)
 			// user has been deleted? remove session anyway

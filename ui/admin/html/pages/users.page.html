@@ -1,0 +1,45 @@
+{{template "admin" .}}
+
+{{define "body"}}
+{{$label := split "accent:success:attention:severe:danger:open:closed:done:sponsors" ":"  }}
+
+<div class="container-lg">
+  <div class="col-12">
+
+    <div class="d-flex flex-items-center mb-3">
+      <h1 class="overflow-hidden flex-auto">
+        Danh sách thành viên
+      </h1>
+    </div>
+
+    {{if .Users}}
+    <div class="Box">
+      <div>
+        {{range .Users}}
+        <div class="Box-row Box-row--hover-gray d-flex flex-items-center">
+          <span class="mr-3">{{.FirstName}} {{.LastName}} - {{.Phone}}</span>
+          <div class="flex-auto">
+            {{range .Roles}}
+                <span class="Label Label--{{sureFind $label .}}">{{.}}</span>
+            {{end}}
+          </div>
+          <a class="btn btn-xs mr-2" href="/admin/users/{{.ID}}/detail">chi tiết</a>
+        </div>
+        {{end}}
+      </div>
+    </div>
+
+    {{else}}
+    <div class="blankslate">
+        <img referrerpolicy="no-referrer"
+            src="https://media.discordapp.net/attachments/523522129296097290/981393406934806568/cry-min.jpg?width=112&height=112"
+            alt="anime not found" class="blankslate-image" />
+        <h3 class="blankslate-heading">Web chưa có thành viên nào</h3>
+        <p>Hy vọng vài ngày tới sẽ có nhiều người biết đến web hơn.</p>
+    </div>
+    {{end}}
+
+  {{template "pagination" . }}
+</div>
+</div>
+{{end}}

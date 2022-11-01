@@ -92,3 +92,5 @@ func (o *Product) Form() *form.Form {
 
 	return f
 }
+
+type Log struct{}

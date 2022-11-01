@@ -114,7 +114,10 @@ func (m *UserModel) Create(f *form.Form) (*models.User, error) {
 	return o, nil
 }
 
-func (m *UserModel) ID(id int) (*models.User, error) {
+func (m *UserModel) ID(id string) (*models.User, error) {
+	if id == "" {
+		return nil, errors.New("err_id_empty")
+	}
 	q := m.query(`where users.id = $1`)
 	row := m.DB.QueryRow(q, id)
 	o := new(models.User)
