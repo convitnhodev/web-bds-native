@@ -31,6 +31,22 @@
       {{end}}
       <!---->
       {{if .User}}
+        {{if has_role .User "admin" }}
+        <div
+          class="flex items-center h-full text-lg transition-all hover:text-sky-500"
+        >
+          <a href="/admin">Admin</a>
+        </div>
+        {{end}}
+
+
+        {{if not (has_role .User "verfify_phone") }}
+        <div
+          class="flex items-center h-full text-lg transition-all hover:text-sky-500"
+        >
+          <a href="/verify-phone">Xác thực</a>
+        </div>
+        {{end}}
       <div
         class="flex items-center h-full text-lg transition-all hover:text-sky-500"
       >
@@ -71,6 +87,17 @@
       {{end}}
       <!---->
       {{if .User}}
+        {{if has_role .User "admin" }}
+        <a href="/admin">
+          <div class="px-6 py-3 text-gray-500 text-lg">Admin</div>
+        </a>
+        {{end}}
+
+        {{if not (has_role .User "verfify_phone") }}
+        <a href="/verify-phone">
+          <div class="px-6 py-3 text-gray-500 text-lg">Xác thực</div>
+        </a>
+        {{end}}
       <a href="/logout">
         <div class="px-6 py-3 text-gray-500 text-lg">Thoát</div>
       </a>

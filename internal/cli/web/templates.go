@@ -106,6 +106,10 @@ func buildPagination(url string, page int) string {
 }
 
 func hasRole(user *models.User, test string) bool {
+	if user == nil {
+		return false
+	}
+
 	for _, role := range user.Roles {
 		if role == test {
 			return true

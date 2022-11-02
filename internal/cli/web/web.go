@@ -116,7 +116,7 @@ func (a *router) productDetail(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *router) verifyEmail(w http.ResponseWriter, r *http.Request) {
-	f := form.New(r.PostForm)
+	f := form.New(nil)
 
 	defer func() {
 		a.render(w, r, "verify.email.page.html", &templateData{
@@ -127,15 +127,17 @@ func (a *router) verifyEmail(w http.ResponseWriter, r *http.Request) {
 	// nếu req là post thì đó là user muốn nhập lại email
 	// dùng flash session để trả feedback, tránh bị nhầm với form
 	if r.Method == "POST" {
-		f.Required("Email")
 
 		if err := r.ParseForm(); err != nil {
 			f.Errors.Add("err", "err_parse_form")
 			return
 		}
 
+		f.Values = r.PostForm
+		f.Required("EmailToken")
+
 		if !f.Valid() {
-			f.Errors.Add("err", "err_invalid_form")
+			log.Println("form invalid", f.Errors)
 			return
 		}
 
@@ -192,7 +194,30 @@ func (a *router) verifyEmail(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *router) verifyPhone(w http.ResponseWriter, r *http.Request) {
-	a.render(w, r, "verify.phone.page.html", &templateData{})
+	f := form.New(nil)
+
+	defer func() {
+		a.render(w, r, "verify.phone.page.html", &templateData{
+			Form: f,
+		})
+	}()
+
+	if r.Method == "POST" {
+		if err := r.ParseForm(); err != nil {
+			f.Errors.Add("err", "err_parse_form")
+			return
+		}
+
+		f.Values = r.PostForm
+		f.Required("PhoneToken")
+
+		if !f.Valid() {
+			log.Println("form invalid", f.Errors)
+			return
+		}
+
+		//@todo: check PhoneToken
+	}
 }
 
 func (a *router) register(w http.ResponseWriter, r *http.Request) {
@@ -354,7 +379,10 @@ func run(c *root.Cmd) error {
 	mux.Get("/logout", use(a.logout))
 
 	// verify
+	mux.Post("/verify-email", use(a.verifyEmail))
 	mux.Get("/verify-email", use(a.verifyEmail))
+
+	mux.Post("/verify-phone", use(a.verifyPhone))
 	mux.Get("/verify-phone", use(a.verifyPhone))
 
 	mux.Get("/robots.txt", use(a.robots))
@@ -369,6 +397,7 @@ func run(c *root.Cmd) error {
 	mux.Get("/be/", http.StripPrefix("/be", befs))
 
 	registerAdminRoute(mux, a)
+	registerAjaxRoute(mux, a)
 
 	srv := &http.Server{
 		Addr:         port,
