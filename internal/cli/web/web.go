@@ -16,7 +16,6 @@ import (
 
 	"github.com/bmizerany/pat"
 	"github.com/deeincom/deeincom/internal/cli/root"
-	"github.com/deeincom/deeincom/pkg/email"
 	"github.com/deeincom/deeincom/pkg/form"
 	"github.com/golangcollege/sessions"
 )
@@ -141,25 +140,6 @@ func (a *router) verifyEmail(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// thao tác này luôn thành công
-		// hệ thống sẽ ko bao giờ báo cho user biết email có tồn tại hay không
-		a.session.Put(r, "flash", "msg_verify_email_success")
-
-		// lấy user bằng email
-		user, err := a.App.Users.GetByEmail(f.Get("Email"))
-		if err != nil {
-			log.Println(err)
-			return
-		}
-
-		// kiểm tra coi lần trước user yêu cầu verify email là lúc nào
-		// mổi lần yêu cầu phải cách 60s
-		if !user.SendVerifiedEmailAt.Add(60 * time.Second).UTC().Before(time.Now().UTC()) {
-			return
-		}
-
-		// bắn email
-		email.Send()
 	}
 
 	// nếu ko có, hoặc ko parse dc iat, thì xem như expired

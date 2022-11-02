@@ -9,10 +9,11 @@ import (
 
 // Config for this project
 type Config struct {
-	DB             string
-	ProductTypes   []string
-	TelegramChatID string
-	TelegramToken  string
+	DB               string
+	ProductTypes     []string
+	TelegramChatID   string
+	TelegramToken    string
+	PostmarkApiToken string // token để gởi email của postmark.com
 }
 
 // Default config

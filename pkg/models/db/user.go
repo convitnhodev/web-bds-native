@@ -174,3 +174,25 @@ func (m *UserModel) Find() ([]*models.User, error) {
 	}
 	return list, nil
 }
+
+func (m *UserModel) LogSendVerifyEmail(user *models.User) error {
+	q := `
+		update users
+			set email = $2,
+			send_verified_email_at = now()
+		where id = $1
+	`
+	_, err := m.DB.Exec(q, user.ID, user.Email)
+	return err
+}
+
+func (m *UserModel) LogSendVerifyPhone(user *models.User) error {
+	q := `
+		update users
+			set phone = $2,
+			send_verified_phone_at = now()
+		where id = $1
+	`
+	_, err := m.DB.Exec(q, user.ID, user.Phone)
+	return err
+}
