@@ -115,6 +115,7 @@ line-height: inherit; }
 .grid{display:grid;}
 .col-span-2{grid-column:span 2/span 2;}
 .grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr));}
+.float-left{float:left;}
 .mx-auto{margin-left:auto;margin-right:auto;}
 .my-4{margin-top:1rem;margin-bottom:1rem;}
 .-ml-3{margin-left:-0.75rem;}
@@ -127,6 +128,7 @@ line-height: inherit; }
 .ml-3{margin-left:0.75rem;}
 .ml-4{margin-left:1rem;}
 .ml-8{margin-left:2rem;}
+.mr-1{margin-right:0.25rem;}
 .mr-2{margin-right:0.5rem;}
 .mr-3{margin-right:0.75rem;}
 .mt-1{margin-top:0.25rem;}
@@ -159,6 +161,7 @@ line-height: inherit; }
 .min-w-0{min-width:0rem;}
 .w-1\/2{width:50%;}
 .w-10{width:2.5rem;}
+.w-20{width:5rem;}
 .w-6{width:1.5rem;}
 .w-64{width:16rem;}
 .w-8{width:2rem;}
@@ -256,6 +259,7 @@ line-height: inherit; }
 .pb-2{padding-bottom:0.5rem;}
 .pb-20{padding-bottom:5rem;}
 .pl-18{padding-left:4.5rem;}
+.pr-2{padding-right:0.5rem;}
 .pt-10{padding-top:2.5rem;}
 .pt-16{padding-top:4rem;}
 .pt-18{padding-top:4.5rem;}
@@ -278,6 +282,9 @@ line-height: inherit; }
 .leading-6{line-height:1.5rem;}
 .tracking-tight{letter-spacing:-0.025em;}
 .uppercase{text-transform:uppercase;}
+.disabled\:hover\:text-gray-500:hover:disabled,
+.disabled\:text-gray-500:disabled,
+.text-gray-500{--un-text-opacity:1;color:rgba(107,114,128,var(--un-text-opacity));}
 .hover\:text-gray-900:hover,
 .text-gray-900{--un-text-opacity:1;color:rgba(17,24,39,var(--un-text-opacity));}
 .hover\:text-sky-500:hover,
@@ -288,7 +295,6 @@ line-height: inherit; }
 .text-gray-200{--un-text-opacity:1;color:rgba(229,231,235,var(--un-text-opacity));}
 .text-gray-300{--un-text-opacity:1;color:rgba(209,213,219,var(--un-text-opacity));}
 .text-gray-400{--un-text-opacity:1;color:rgba(156,163,175,var(--un-text-opacity));}
-.text-gray-500{--un-text-opacity:1;color:rgba(107,114,128,var(--un-text-opacity));}
 .text-gray-600{--un-text-opacity:1;color:rgba(75,85,99,var(--un-text-opacity));}
 .text-gray-700{--un-text-opacity:1;color:rgba(55,65,81,var(--un-text-opacity));}
 .text-green-500{--un-text-opacity:1;color:rgba(34,197,94,var(--un-text-opacity));}
