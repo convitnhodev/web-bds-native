@@ -9,6 +9,8 @@ import (
 
 	"github.com/bmizerany/pat"
 	"github.com/deeincom/deeincom/pkg/email"
+	"github.com/deeincom/deeincom/pkg/models"
+	"github.com/deeincom/deeincom/pkg/phone"
 )
 
 func (a *router) ajax(next http.HandlerFunc) http.HandlerFunc {
@@ -19,27 +21,36 @@ func (a *router) ajax(next http.HandlerFunc) http.HandlerFunc {
 	})
 }
 
+// gởi verify email cho user
 func (a *router) ajaxSendVerifyEmail(w http.ResponseWriter, r *http.Request) {
-	// always return ok, no matter what
+	// luôn ok
 	defer func() {
 		json.NewEncoder(w).Encode(map[string]string{
 			"status": "ok",
 		})
 	}()
 
-	// user phải logged mới dc yêu cầu verify
-	// tránh spam
+	emailladdress := r.URL.Query().Get("email")
+	// lấy user
+	var user *models.User
+	// nếu user ko đăng nhập, lấy user bằng phone
 	id := a.session.GetInt(r, "user")
 	if id == 0 {
-		log.Println("to request verification email, please logged first")
-		return
+		if u, err := a.App.Users.GetByEmail(emailladdress); err != nil {
+			log.Println(err)
+			return
+		} else {
+			user = u
+		}
+	} else {
+		if u, err := a.App.Users.ID(fmt.Sprint(id)); err != nil {
+			log.Println(err)
+			return
+		} else {
+			user = u
+		}
 	}
 
-	user, err := a.App.Users.ID(fmt.Sprint(id))
-	if err != nil {
-		log.Println(err)
-		return
-	}
 	// nếu user đã verified_email rồi thì ko cần gởi nữa
 	for _, role := range user.Roles {
 		if role == "verified_email" {
@@ -69,27 +80,36 @@ func (a *router) ajaxSendVerifyEmail(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// gởi một tin nhắn sms để verify phone
 func (a *router) ajaxSendVerifyPhone(w http.ResponseWriter, r *http.Request) {
-	// always return ok, no matter what
+	// luôn ok
 	defer func() {
 		json.NewEncoder(w).Encode(map[string]string{
 			"status": "ok",
 		})
 	}()
 
-	// user phải logged mới dc yêu cầu verify
-	// tránh spam
+	phonenumber := r.URL.Query().Get("phone")
+	// lấy user
+	var user *models.User
+	// nếu user ko đăng nhập, lấy user bằng phone
 	id := a.session.GetInt(r, "user")
 	if id == 0 {
-		log.Println("to request verification sms, please logged first")
-		return
+		if u, err := a.App.Users.GetByPhone(phonenumber); err != nil {
+			log.Println(err)
+			return
+		} else {
+			user = u
+		}
+	} else {
+		if u, err := a.App.Users.ID(fmt.Sprint(id)); err != nil {
+			log.Println(err)
+			return
+		} else {
+			user = u
+		}
 	}
 
-	user, err := a.App.Users.ID(fmt.Sprint(id))
-	if err != nil {
-		log.Println(err)
-		return
-	}
 	// nếu user đã verified_phone rồi thì ko cần gởi nữa
 	for _, role := range user.Roles {
 		if role == "verified_phone" {
@@ -97,20 +117,23 @@ func (a *router) ajaxSendVerifyPhone(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// kiểm tra coi lần trước user yêu cầu verify phone là lúc nào
 	// mổi lần yêu cầu phải cách 60s
 	if !user.SendVerifiedPhoneAt.Add(60 * time.Second).UTC().Before(time.Now().UTC()) {
 		return
 	}
 
 	// ghi nhớ lần gởi sms này
-	user.Phone = r.URL.Query().Get("phone")
 	if err := a.App.Users.LogSendVerifyPhone(user); err != nil {
 		log.Println(err)
 		return
 	}
 
 	// gởi phone verify
+	phone.ESMS_APIKEY = a.App.Config.ESMS_APIKEY
+	phone.ESMS_SECRET = a.App.Config.ESMS_SECRET
+	if err := phone.SendSMS(user); err != nil {
+		log.Println(err)
+	}
 }
 
 func registerAjaxRoute(mux *pat.PatternServeMux, a *router) {

@@ -14,6 +14,8 @@ type Config struct {
 	TelegramChatID   string
 	TelegramToken    string
 	PostmarkApiToken string // token để gởi email của postmark.com
+	ESMS_APIKEY      string // apikey cua esms.vn
+	ESMS_SECRET      string // secret cua esms.vn
 }
 
 // Default config

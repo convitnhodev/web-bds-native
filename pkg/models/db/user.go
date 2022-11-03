@@ -28,6 +28,10 @@ var userColumes = []string{
 	"users.phone",
 	"users.password",
 	"users.roles",
+	"users.created_at",
+	"users.updated_at",
+	"users.send_verified_email_at",
+	"users.send_verified_phone_at",
 }
 
 func (m *UserModel) query(s string) string {
@@ -47,6 +51,10 @@ func scanUser(r scanner, o *models.User) error {
 		&o.Phone,
 		&o.Password,
 		pq.Array(&o.Roles),
+		&o.CreatedAt,
+		&o.UpdatedAt,
+		&o.SendVerifiedEmailAt,
+		&o.SendVerifiedPhoneAt,
 	); err != nil {
 		return errors.Wrap(err, "scanUser")
 	}
@@ -147,6 +155,16 @@ func (m *UserModel) GetByEmail(email string) (*models.User, error) {
 	return o, nil
 }
 
+func (m *UserModel) GetByPhone(phone string) (*models.User, error) {
+	q := m.query(`where users.phone = $1`)
+	row := m.DB.QueryRow(q, phone)
+	o := new(models.User)
+	if err := scanUser(row, o); err != nil {
+		return nil, errors.Wrap(err, "user.GetByPhone")
+	}
+	return o, nil
+}
+
 func (m *UserModel) AddRole(id int, role string) error {
 	return nil
 }
@@ -176,23 +194,28 @@ func (m *UserModel) Find() ([]*models.User, error) {
 }
 
 func (m *UserModel) LogSendVerifyEmail(user *models.User) error {
+	user.EmailToken = helper.RandString(6)
 	q := `
-		update users
-			set email = $2,
-			send_verified_email_at = now()
+		update users set
+			email = $2,
+			send_verified_email_at = now(),
+			email_token = $3
 		where id = $1
 	`
-	_, err := m.DB.Exec(q, user.ID, user.Email)
+	_, err := m.DB.Exec(q, user.ID, user.Email, user.EmailToken)
 	return err
 }
 
 func (m *UserModel) LogSendVerifyPhone(user *models.User) error {
+	user.PhoneToken = helper.RandString(6)
+
 	q := `
-		update users
-			set phone = $2,
-			send_verified_phone_at = now()
+		update users set
+			phone = $2,
+			send_verified_phone_at = now(),
+			phone_token = $3
 		where id = $1
 	`
-	_, err := m.DB.Exec(q, user.ID, user.Phone)
+	_, err := m.DB.Exec(q, user.ID, user.Phone, user.PhoneToken)
 	return err
 }
