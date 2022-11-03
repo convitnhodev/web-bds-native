@@ -2,6 +2,7 @@ package web
 
 import (
 	"bytes"
+	"crypto/md5"
 	"fmt"
 	"html/template"
 	"io"
@@ -114,6 +115,67 @@ func (a *router) productDetail(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func (a *router) verifyEmailResult(w http.ResponseWriter, r *http.Request) {
+	f := form.New(nil)
+
+	defer func() {
+		a.render(w, r, "result.email.page.html", &templateData{
+			Form: f,
+		})
+	}()
+
+	// check hash
+	iat := r.URL.Query().Get("iat")
+	token := r.URL.Query().Get("token")
+	sign := r.URL.Query().Get("s")
+
+	qs := fmt.Sprintf("deein:%s:%s:deein", token, iat)
+
+	if fmt.Sprintf("%x", md5.Sum([]byte(qs))) != sign {
+		log.Println("url sign không đúng")
+		f.Errors.Add("err", "err_token_expired")
+		return
+	}
+
+	// nếu ko có, hoặc ko parse dc iat, thì xem như expired
+	issueAt, err := strconv.ParseInt(iat, 10, 64)
+	if err != nil {
+		log.Println(err)
+		f.Errors.Add("err", "err_token_expired")
+		return
+	}
+
+	// token của email sẽ expired sau 1 tuần
+	isExpired := time.Unix(issueAt+3600*24*7, 0).UTC().Before(time.Now().UTC())
+	if isExpired {
+		log.Println(err)
+		f.Errors.Add("err", "err_token_expired")
+		return
+	}
+
+	// tìm user với cái token này
+	user, err := a.App.Users.GetByEmailToken(token)
+	if err != nil {
+		log.Println(err)
+		f.Errors.Add("err", "err_token_invalid")
+	}
+
+	// update user đã verify email
+	if err := a.App.Users.AddRole(user.ID, "verified_email"); err != nil {
+		log.Println(err)
+		f.Errors.Add("err", "err_could_not_verified_email")
+	}
+
+}
+
+func (a *router) verifyPhoneResult(w http.ResponseWriter, r *http.Request) {
+	f := form.New(nil)
+	f.Errors.Add("err", "err_parse_form")
+	a.render(w, r, "result.phone.page.html", &templateData{
+		Form: f,
+	})
+}
+
 func (a *router) verifyEmail(w http.ResponseWriter, r *http.Request) {
 	f := form.New(nil)
 
@@ -142,35 +204,6 @@ func (a *router) verifyEmail(w http.ResponseWriter, r *http.Request) {
 
 	}
 
-	// nếu ko có, hoặc ko parse dc iat, thì xem như expired
-	iat, err := strconv.ParseInt(r.URL.Query().Get("iat"), 10, 64)
-	if err != nil {
-		log.Println(err)
-		f.Errors.Add("err", "err_token_expired")
-		return
-	}
-
-	// token của email sẽ expired sau 1 tuần
-	isExpired := time.Unix(iat+3600*24*7, 0).UTC().Before(time.Now().UTC())
-	if isExpired {
-		log.Println(err)
-		f.Errors.Add("err", "err_token_expired")
-		return
-	}
-
-	// tìm user với cái token này
-	token := r.URL.Query().Get("token")
-	user, err := a.App.Users.GetByEmailToken(token)
-	if err != nil {
-		log.Println(err)
-		f.Errors.Add("err", "err_token_invalid")
-	}
-
-	// update user đã verify email
-	if err := a.App.Users.AddRole(user.ID, "verified_email"); err != nil {
-		log.Println(err)
-		f.Errors.Add("err", "err_could_not_verified_email")
-	}
 }
 
 func (a *router) verifyPhone(w http.ResponseWriter, r *http.Request) {
@@ -361,9 +394,11 @@ func run(c *root.Cmd) error {
 	// verify
 	mux.Post("/verify-email", use(a.verifyEmail))
 	mux.Get("/verify-email", use(a.verifyEmail))
+	mux.Get("/verify/email", use(a.verifyEmailResult))
 
 	mux.Post("/verify-phone", use(a.verifyPhone))
 	mux.Get("/verify-phone", use(a.verifyPhone))
+	mux.Get("/verify/email", use(a.verifyPhoneResult))
 
 	mux.Get("/robots.txt", use(a.robots))
 

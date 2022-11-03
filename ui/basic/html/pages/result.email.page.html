@@ -1,0 +1,7 @@
+{{if .Form.Errors.Get `err`}}
+<div>link không đúng</div>
+Bạn có thể yêu cầu link xác thực mới <a href="/verify-email">ở đây</a>.
+{{else}}
+<div>Email của bạn đã xác thực thành công.</div>
+<a href="/">Quay về trang chủ</a>
+{{end}}

@@ -1,0 +1,7 @@
+{{if .Form.Errors.Get `err`}}
+<div>Link không đúng</div>
+Bạn có thể yêu cầu link xác thực mới <a href="/verify-phone">ở đây</a>.
+{{else}}
+<div>Số điện thoại của bạn đã xác thực thành công.</div>
+<a href="/">Quay về trang chủ</a>
+{{end}}
