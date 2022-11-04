@@ -89,7 +89,7 @@ func (m *UserModel) Create(f *form.Form) (*models.User, error) {
 		phone,
 		password,
 		email_token,
-		phone_token
+		phone_token,
 	) values (
 		$1,
 		$2,

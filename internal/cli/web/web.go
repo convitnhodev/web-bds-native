@@ -17,6 +17,7 @@ import (
 
 	"github.com/bmizerany/pat"
 	"github.com/deeincom/deeincom/internal/cli/root"
+	"github.com/deeincom/deeincom/pkg/email"
 	"github.com/deeincom/deeincom/pkg/form"
 	"github.com/golangcollege/sessions"
 )
@@ -179,11 +180,22 @@ func (a *router) verifyPhoneResult(w http.ResponseWriter, r *http.Request) {
 func (a *router) verifyEmail(w http.ResponseWriter, r *http.Request) {
 	f := form.New(nil)
 
+	ok := false
 	defer func() {
-		a.render(w, r, "verify.email.page.html", &templateData{
-			Form: f,
-		})
+		if !ok {
+			a.render(w, r, "verify.email.page.html", &templateData{
+				Form: f,
+			})
+		}
 	}()
+
+	// nếu user đã verify email rồi thì redirect về home
+	if id := a.session.GetInt(r, "user"); id > 0 {
+		if user, _ := a.App.Users.ID(fmt.Sprint(id)); hasRole(user, "verified_email") {
+			ok = true
+			http.Redirect(w, r, "/", http.StatusSeeOther)
+		}
+	}
 
 	// nếu req là post thì đó là user muốn nhập lại email
 	// dùng flash session để trả feedback, tránh bị nhầm với form
@@ -202,6 +214,22 @@ func (a *router) verifyEmail(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		// tìm user với cái token này
+		user, err := a.App.Users.GetByEmailToken(f.Get("EmailToken"))
+		if err != nil {
+			log.Println(err)
+			f.Errors.Add("err", "err_token_invalid")
+		}
+
+		// update user đã verify email
+		if err := a.App.Users.AddRole(user, "verified_email"); err != nil {
+			log.Println(err)
+			f.Errors.Add("err", "err_could_not_verified_email")
+		}
+
+		ok = true
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+
 	}
 
 }
@@ -217,6 +245,14 @@ func (a *router) verifyPhone(w http.ResponseWriter, r *http.Request) {
 			})
 		}
 	}()
+
+	// nếu user đã verify phone rồi thì redirect về home
+	if id := a.session.GetInt(r, "user"); id > 0 {
+		if user, _ := a.App.Users.ID(fmt.Sprint(id)); hasRole(user, "verified_phone") {
+			ok = true
+			http.Redirect(w, r, "/", http.StatusSeeOther)
+		}
+	}
 
 	if r.Method == "POST" {
 		if err := r.ParseForm(); err != nil {
@@ -293,10 +329,26 @@ func (a *router) register(w http.ResponseWriter, r *http.Request) {
 			return
 		} else {
 			a.session.Put(r, "user", user.ID)
+
+			// nếu user có nhập email thì gởi verify email luôn
+			if f.Get("Email") != "" {
+				// nhớ email
+				user.Email = f.Get("Email")
+
+				if err := a.App.Users.LogSendVerifyEmail(user); err != nil {
+					log.Println(err)
+				}
+
+				// gởi email verify
+				email.PostmarkApiToken = a.App.Config.PostmarkApiToken
+				if err := email.SendVerifyEmail(user); err != nil {
+					log.Println(err)
+				}
+			}
 		}
 
 		ok = true
-		http.Redirect(w, r, r.Header.Get("Referer"), http.StatusSeeOther)
+		http.Redirect(w, r, "/verify-phone", http.StatusSeeOther)
 	}
 }
 

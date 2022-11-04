@@ -118,9 +118,9 @@ func (a *router) ajaxSendVerifyPhone(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// mổi lần yêu cầu phải cách 60s
-	// if !user.SendVerifiedPhoneAt.Add(60 * time.Second).UTC().Before(time.Now().UTC()) {
-	// 	return
-	// }
+	if !user.SendVerifiedPhoneAt.Add(60 * time.Second).UTC().Before(time.Now().UTC()) {
+		return
+	}
 
 	// ghi nhớ lần gởi sms này
 	if err := a.App.Users.LogSendVerifyPhone(user); err != nil {

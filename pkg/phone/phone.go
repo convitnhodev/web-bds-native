@@ -38,7 +38,7 @@ func SendSMS(user *models.User) error {
 		"Content":   fmt.Sprintf("%s la ma xac minh dang ky %s cua ban", user.PhoneToken, Brandname),
 		"Phone":     user.Phone,
 		"SmsType":   "2",
-		"RequestId": fmt.Sprintf("phone:sendSMS:user:%d", user.ID),
+		// "RequestId": fmt.Sprintf("phone:sendSMS:user:%d", user.ID),
 	})
 	if err != nil {
 		return err
