@@ -1,6 +1,7 @@
 const sendCode = document.getElementById('send-code');
 const countdownTimer = document.getElementById('countdown-timer');
 const valueInput = document.getElementById('verify-value');
+const errorMsg = document.getElementById('verify-error');
 
 const EMAIL_RX =
   /^[a-z0-9!#$%&'*+\/=?^_{|}~-]+(?:\.[a-z0-9!#$%&'*+\/=?^_{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/;
@@ -39,6 +40,8 @@ sendCode.addEventListener('click', async () => {
   const value = valueInput.value;
 
   if (!value) {
+    errorMsg.classList.remove('hidden');
+
     return;
   }
 
@@ -55,6 +58,8 @@ sendCode.addEventListener('click', async () => {
   }
 
   if (!valid) {
+    errorMsg.classList.remove('hidden');
+
     return;
   }
 
@@ -63,6 +68,8 @@ sendCode.addEventListener('click', async () => {
   await requestCode(type, value).catch(() => {
     // do nothing
   });
+
+  errorMsg.classList.add('hidden');
 
   const countdown = new Date().getTime() + 60000 + 200; // padding 200ms
 
