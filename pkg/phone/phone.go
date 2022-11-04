@@ -29,24 +29,29 @@ func SendSMS(user *models.User) error {
 		return errors.New("ESMS_SECRET=?")
 	}
 
+	fmt.Println("DEBUG", "phone.SendSMS")
+
 	values, err := json.Marshal(map[string]string{
 		"ApiKey":    ESMS_APIKEY,
 		"SecretKey": ESMS_SECRET,
 		"Brandname": Brandname,
 		"Content":   fmt.Sprintf("%s la ma xac minh dang ky %s cua ban", user.PhoneToken, Brandname),
-		"Phone":     "",
-		"IsUnicode": "0",
+		"Phone":     user.Phone,
 		"SmsType":   "2",
-		"RequestId": fmt.Sprintf("user:verify:%d", user.ID),
+		"RequestId": fmt.Sprintf("phone:sendSMS:user:%d", user.ID),
 	})
 	if err != nil {
 		return err
 	}
 
-	req, err := http.NewRequest("POST", "http://rest.esms.vn/MainService.svc/json/SendMultipleMessage_V4_post_json/", bytes.NewBuffer([]byte(values)))
+	req, err := http.NewRequest("POST", "http://rest.esms.vn/MainService.svc/json/SendMultipleMessage_V4_post_json/",
+		bytes.NewBuffer([]byte(values)))
 	if err != nil {
 		return err
 	}
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
 
 	res, err := client.Do(req)
 	if err != nil {

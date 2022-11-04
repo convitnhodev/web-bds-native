@@ -11,7 +11,7 @@
     <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
       {{if .Form.Errors.Get `err`}}
       <div
-        class="rounded-md bg-red-50 p-4 mb-4 hidden"
+        class="rounded-md bg-red-50 p-4 mb-4"
         id="register-form-error"
       >
         <div class="flex">
@@ -23,6 +23,7 @@
         </div>
       </div>
       {{end}}
+      {{with .Form}}
       <form class="space-y-6" id="register-form" method="post">
         <div>
           <label
@@ -33,11 +34,13 @@
           </label>
           <div class="mt-1">
             <input
+              autofocus
               id="first-name"
               name="FirstName"
               type="text"
               required
               class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm"
+              value="{{ .Get `FirstName` }}"
             />
           </div>
         </div>
@@ -55,6 +58,7 @@
               type="text"
               required
               class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm"
+              value="{{ .Get `LastName`}}"
             />
           </div>
         </div>
@@ -83,6 +87,7 @@
               placeholder="0987654321"
               required
               class="pl-18 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm"
+              value="{{ .Get `Phone`}}"
             />
           </div>
         </div>
@@ -98,6 +103,7 @@
               autocomplete="current-password"
               required
               class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm"
+              value="{{ .Get `Password`}}"
             />
           </div>
         </div>
@@ -135,6 +141,7 @@
               name="Email"
               type="email"
               class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm"
+              value="{{ .Get `Email`}}"
             />
           </div>
         </div>
@@ -153,6 +160,7 @@
           </button>
         </div>
       </form>
+      {{end}}
     </div>
     <div class="absolute inset-0 select-none hidden" id="register-form-overlay">
       <div class="absolute inset-0 w-full h-full bg-white opacity-50"></div>

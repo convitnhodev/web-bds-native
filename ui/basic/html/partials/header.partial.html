@@ -40,7 +40,7 @@
       </div>
       {{end}}
       <!---->
-      {{if not (has_role .User "verfify_phone") }}
+      {{if not (has_role .User "verified_phone") }}
       <div
         class="flex items-center h-full text-lg transition-all hover:text-sky-500"
       >
@@ -94,7 +94,7 @@
       </a>
       {{end}}
       <!---->
-      {{if not (has_role .User "verfify_phone") }}
+      {{if not (has_role .User "verified_phone") }}
       <a href="/verify-phone">
         <div class="px-6 py-3 text-gray-500 text-lg">Xác thực</div>
       </a>

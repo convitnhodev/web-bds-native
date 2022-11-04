@@ -145,6 +145,16 @@ func (m *UserModel) GetByEmailToken(token string) (*models.User, error) {
 	return o, nil
 }
 
+func (m *UserModel) GetByPhoneToken(token string) (*models.User, error) {
+	q := m.query(`where users.phone_token = $1`)
+	row := m.DB.QueryRow(q, token)
+	o := new(models.User)
+	if err := scanUser(row, o); err != nil {
+		return nil, errors.Wrap(err, "user.GetByPhoneToken")
+	}
+	return o, nil
+}
+
 func (m *UserModel) GetByEmail(email string) (*models.User, error) {
 	q := m.query(`where users.email = $1`)
 	row := m.DB.QueryRow(q, email)
@@ -165,8 +175,15 @@ func (m *UserModel) GetByPhone(phone string) (*models.User, error) {
 	return o, nil
 }
 
-func (m *UserModel) AddRole(id int, role string) error {
-	return nil
+func (m *UserModel) AddRole(user *models.User, role string) error {
+	for _, s := range user.Roles {
+		if s == role {
+			return errors.New("err_duplicated_role")
+		}
+	}
+	q := `update users set roles = array_append(roles, $2) where id = $1`
+	_, err := m.DB.Exec(q, user.ID, role)
+	return err
 }
 
 func (m *UserModel) Find() ([]*models.User, error) {

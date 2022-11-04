@@ -105,13 +105,13 @@ func buildPagination(url string, page int) string {
 	return ""
 }
 
-func hasRole(user *models.User, test string) bool {
+func hasRole(user *models.User, role string) bool {
 	if user == nil {
 		return false
 	}
 
-	for _, role := range user.Roles {
-		if role == test {
+	for _, s := range user.Roles {
+		if s == role {
 			return true
 		}
 	}
@@ -119,6 +119,22 @@ func hasRole(user *models.User, test string) bool {
 }
 
 func translate(s string) string {
+	switch s {
+	case "err_parse_form":
+		return "Không thể lấy dữ liệu"
+
+	case "err_invalid_form":
+		return "Thông tin gởi lên không đúng"
+
+	case "err_could_not_create_user":
+		return "Đăng ký thất bại"
+
+	case "err_could_not_verified_phone":
+		return "Không thể xác thực điện thoại"
+
+	case "err_could_not_verified_email":
+		return "Không thể xác thực email"
+	}
 	return s
 }
 

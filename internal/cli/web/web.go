@@ -161,7 +161,7 @@ func (a *router) verifyEmailResult(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// update user đã verify email
-	if err := a.App.Users.AddRole(user.ID, "verified_email"); err != nil {
+	if err := a.App.Users.AddRole(user, "verified_email"); err != nil {
 		log.Println(err)
 		f.Errors.Add("err", "err_could_not_verified_email")
 	}
@@ -170,7 +170,7 @@ func (a *router) verifyEmailResult(w http.ResponseWriter, r *http.Request) {
 
 func (a *router) verifyPhoneResult(w http.ResponseWriter, r *http.Request) {
 	f := form.New(nil)
-	f.Errors.Add("err", "err_parse_form")
+	// f.Errors.Add("err", "err_parse_form")
 	a.render(w, r, "result.phone.page.html", &templateData{
 		Form: f,
 	})
@@ -209,10 +209,13 @@ func (a *router) verifyEmail(w http.ResponseWriter, r *http.Request) {
 func (a *router) verifyPhone(w http.ResponseWriter, r *http.Request) {
 	f := form.New(nil)
 
+	ok := false
 	defer func() {
-		a.render(w, r, "verify.phone.page.html", &templateData{
-			Form: f,
-		})
+		if !ok {
+			a.render(w, r, "verify.phone.page.html", &templateData{
+				Form: f,
+			})
+		}
 	}()
 
 	if r.Method == "POST" {
@@ -229,7 +232,21 @@ func (a *router) verifyPhone(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		//@todo: check PhoneToken
+		// tìm user với cái token này
+		user, err := a.App.Users.GetByPhoneToken(f.Get("PhoneToken"))
+		if err != nil {
+			log.Println(err)
+			f.Errors.Add("err", "err_token_invalid")
+		}
+
+		// update user đã verify phone
+		if err := a.App.Users.AddRole(user, "verified_phone"); err != nil {
+			log.Println(err)
+			f.Errors.Add("err", "err_could_not_verified_phone")
+		}
+
+		ok = true
+		http.Redirect(w, r, "/verify/phone", http.StatusSeeOther)
 	}
 }
 
@@ -398,7 +415,7 @@ func run(c *root.Cmd) error {
 
 	mux.Post("/verify-phone", use(a.verifyPhone))
 	mux.Get("/verify-phone", use(a.verifyPhone))
-	mux.Get("/verify/email", use(a.verifyPhoneResult))
+	mux.Get("/verify/phone", use(a.verifyPhoneResult))
 
 	mux.Get("/robots.txt", use(a.robots))
 
