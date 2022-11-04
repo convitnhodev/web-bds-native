@@ -70,132 +70,36 @@
             <div class="embla" id="main-carousel">
               <div class="embla__viewport">
                 <div class="embla__container">
-                  <div class="embla__slide">
-                    <div class="embla__slide__inner">
-                      <img class="embla__slide__img"
-                        src="https://www.embla-carousel.com/static/slide-1-ae1074a2ded156f4bb23fc2cbf269223.jpg" />
+                  {{range .Attachments}}
+                    {{if eq .ContentType `image`}}
+                    <div class="embla__slide">
+                      <div class="embla__slide__inner">
+                        <img class="embla__slide__img"
+                          src="{{.Link}}" />
+                      </div>
                     </div>
-                  </div>
-                  <div class="embla__slide">
-                    <div class="embla__slide__inner">
-                      <img class="embla__slide__img"
-                        src="https://www.embla-carousel.com/static/slide-1-ae1074a2ded156f4bb23fc2cbf269223.jpg" />
-                    </div>
-                  </div>
-                  <div class="embla__slide">
-                    <div class="embla__slide__inner">
-                      <img class="embla__slide__img"
-                        src="https://www.embla-carousel.com/static/slide-1-ae1074a2ded156f4bb23fc2cbf269223.jpg" />
-                    </div>
-                  </div>
-                  <div class="embla__slide">
-                    <div class="embla__slide__inner">
-                      <img class="embla__slide__img"
-                        src="https://www.embla-carousel.com/static/slide-1-ae1074a2ded156f4bb23fc2cbf269223.jpg" />
-                    </div>
-                  </div>
-                  <div class="embla__slide">
-                    <div class="embla__slide__inner">
-                      <img class="embla__slide__img"
-                        src="https://www.embla-carousel.com/static/slide-1-ae1074a2ded156f4bb23fc2cbf269223.jpg" />
-                    </div>
-                  </div>
-                  <div class="embla__slide">
-                    <div class="embla__slide__inner">
-                      <img class="embla__slide__img"
-                        src="https://www.embla-carousel.com/static/slide-1-ae1074a2ded156f4bb23fc2cbf269223.jpg" />
-                    </div>
-                  </div>
-                  <div class="embla__slide">
-                    <div class="embla__slide__inner">
-                      <img class="embla__slide__img"
-                        src="https://www.embla-carousel.com/static/slide-1-ae1074a2ded156f4bb23fc2cbf269223.jpg" />
-                    </div>
-                  </div>
-                  <div class="embla__slide">
-                    <div class="embla__slide__inner">
-                      <img class="embla__slide__img"
-                        src="https://www.embla-carousel.com/static/slide-1-ae1074a2ded156f4bb23fc2cbf269223.jpg" />
-                    </div>
-                  </div>
-                  <div class="embla__slide">
-                    <div class="embla__slide__inner">
-                      <img class="embla__slide__img"
-                        src="https://www.embla-carousel.com/static/slide-1-ae1074a2ded156f4bb23fc2cbf269223.jpg" />
-                    </div>
-                  </div>
-                  <div class="embla__slide">
-                    <div class="embla__slide__inner">
-                      <img class="embla__slide__img"
-                        src="https://www.embla-carousel.com/static/slide-1-ae1074a2ded156f4bb23fc2cbf269223.jpg" />
-                    </div>
-                  </div>
+                    {{end}}
+                  {{end}}
+
+
                 </div>
               </div>
             </div>
             <div class="embla embla--thumb" id="thumb-carousel">
               <div class="embla__viewport">
                 <div class="embla__container embla__container--thumb">
-                  <div class="embla__slide embla__slide--thumb">
-                    <button class="embla__slide__inner embla__slide__inner--thumb" type="button">
-                      <img class="embla__slide__thumbnail"
-                        src="https://www.embla-carousel.com/static/slide-1-ae1074a2ded156f4bb23fc2cbf269223.jpg" />
-                    </button>
-                  </div>
-                  <div class="embla__slide embla__slide--thumb">
-                    <button class="embla__slide__inner embla__slide__inner--thumb" type="button">
-                      <img class="embla__slide__thumbnail"
-                        src="https://www.embla-carousel.com/static/slide-1-ae1074a2ded156f4bb23fc2cbf269223.jpg" />
-                    </button>
-                  </div>
-                  <div class="embla__slide embla__slide--thumb">
-                    <button class="embla__slide__inner embla__slide__inner--thumb" type="button">
-                      <img class="embla__slide__thumbnail"
-                        src="https://www.embla-carousel.com/static/slide-1-ae1074a2ded156f4bb23fc2cbf269223.jpg" />
-                    </button>
-                  </div>
-                  <div class="embla__slide embla__slide--thumb">
-                    <button class="embla__slide__inner embla__slide__inner--thumb" type="button">
-                      <img class="embla__slide__thumbnail"
-                        src="https://www.embla-carousel.com/static/slide-1-ae1074a2ded156f4bb23fc2cbf269223.jpg" />
-                    </button>
-                  </div>
-                  <div class="embla__slide embla__slide--thumb">
-                    <button class="embla__slide__inner embla__slide__inner--thumb" type="button">
-                      <img class="embla__slide__thumbnail"
-                        src="https://www.embla-carousel.com/static/slide-1-ae1074a2ded156f4bb23fc2cbf269223.jpg" />
-                    </button>
-                  </div>
-                  <div class="embla__slide embla__slide--thumb">
-                    <button class="embla__slide__inner embla__slide__inner--thumb" type="button">
-                      <img class="embla__slide__thumbnail"
-                        src="https://www.embla-carousel.com/static/slide-1-ae1074a2ded156f4bb23fc2cbf269223.jpg" />
-                    </button>
-                  </div>
-                  <div class="embla__slide embla__slide--thumb">
-                    <button class="embla__slide__inner embla__slide__inner--thumb" type="button">
-                      <img class="embla__slide__thumbnail"
-                        src="https://www.embla-carousel.com/static/slide-1-ae1074a2ded156f4bb23fc2cbf269223.jpg" />
-                    </button>
-                  </div>
-                  <div class="embla__slide embla__slide--thumb">
-                    <button class="embla__slide__inner embla__slide__inner--thumb" type="button">
-                      <img class="embla__slide__thumbnail"
-                        src="https://www.embla-carousel.com/static/slide-1-ae1074a2ded156f4bb23fc2cbf269223.jpg" />
-                    </button>
-                  </div>
-                  <div class="embla__slide embla__slide--thumb">
-                    <button class="embla__slide__inner embla__slide__inner--thumb" type="button">
-                      <img class="embla__slide__thumbnail"
-                        src="https://www.embla-carousel.com/static/slide-1-ae1074a2ded156f4bb23fc2cbf269223.jpg" />
-                    </button>
-                  </div>
-                  <div class="embla__slide embla__slide--thumb">
-                    <button class="embla__slide__inner embla__slide__inner--thumb" type="button">
-                      <img class="embla__slide__thumbnail"
-                        src="https://www.embla-carousel.com/static/slide-1-ae1074a2ded156f4bb23fc2cbf269223.jpg" />
-                    </button>
-                  </div>
+                  {{range .Attachments}}
+                    {{if eq .ContentType `image`}}
+                    <div class="embla__slide embla__slide--thumb">
+                      <button class="embla__slide__inner embla__slide__inner--thumb" type="button">
+                        <img class="embla__slide__thumbnail"
+                          src="{{.Link}}" />
+                      </button>
+                    </div>
+                    {{end}}
+                  {{end}}
+
+
                 </div>
               </div>
             </div>

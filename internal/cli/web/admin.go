@@ -3,8 +3,11 @@ package web
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/bmizerany/pat"
@@ -215,7 +218,7 @@ func (a *router) adminUpdateAttachment(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	if r.Method == "POST" {
-		if err := r.ParseForm(); err != nil {
+		if err := r.ParseMultipartForm(10 << 20); err != nil {
 			f.Errors.Add("err", "err_parse_form")
 			return
 		}
@@ -227,6 +230,31 @@ func (a *router) adminUpdateAttachment(w http.ResponseWriter, r *http.Request) {
 			log.Println("form invalid", f.Errors)
 			return
 		}
+
+		file, handler, err := r.FormFile("UploadFile")
+		if err != nil {
+			f.Errors.Add("err", "err_could_not_upload")
+			return
+		}
+		defer file.Close()
+
+		f.Set("Size", fmt.Sprint(handler.Size))
+
+		// Create file
+		dst, err := os.Create(filepath.Join("upload", handler.Filename))
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		defer dst.Close()
+
+		// Copy the uploaded file to the created file on the filesystem
+		if _, err := io.Copy(dst, file); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		f.Set("Link", "https://cdn.deein.com/"+handler.Filename)
 
 		if err := a.App.Attachments.Update(attachment, f); err != nil {
 			log.Println(err)

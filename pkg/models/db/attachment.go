@@ -108,13 +108,17 @@ func (m *AttachmentModel) Update(o *models.Attachment, f *form.Form) error {
 			attachments
 		set
 			updated_at = now(),
-			title = $2
+			title = $2,
+			link = $3,
+			size = $4
 		where
 			id = $1
 	`
 	_, err := m.DB.Exec(q,
 		o.ID,
 		f.Get("Title"),
+		f.Get("Link"),
+		f.Get("Size"),
 	)
 
 	return err

@@ -5,39 +5,79 @@
 <div class="container-lg">
     <div class="col-12">
         <h1 class="overflow-hidden flex-auto">
-            <h1>Thêm file đính kèm</h1>
+            <h1>Thêm file đính kèm <span class="Label">Loại: {{.Form.Get `ContentType`}}</span></h1>
             <div class="text-small">{{.Product.Title}}</div>
         </h1>
 
-        {{with .Form.Errors.Get `form` }}
-        <div class="alert alert-error">
-            {{.}}
-        </div>
-        {{end}}
-        {{with .Form.Errors.Get `form` }}
+        {{with .Form.Errors.Get `err` }}
         <div class="alert alert-error">
             {{.}}
         </div>
         {{end}}
 
-
-        <form method="POST">
+        <form method="POST" enctype="multipart/form-data">
             {{with .Form}}
 
-            <div class="form-group {{with .Errors.Get `Title`}}errored{{end}}">
-                <div class="form-group-header">
-                    <label>Title</label>
+            <div class="clearfix">
+                <div class="col-6 pr-2 float-left">
+                    <div class="form-group {{with .Errors.Get `Title`}}errored{{end}}">
+                        <div class="form-group-header">
+                            <label>Title</label>
+                        </div>
+                        <div class="form-group-body">
+                            <input type="text" class="form-control" autocomplete="off" spellcheck="false" name="Title"
+                                value="{{.Get `Title`}}">
+                        </div>
+                        {{with .Errors.Get `Title`}}
+                        <p class="note error">{{.}}</p>
+                        {{end}}
+                    </div>
+
+                    {{if not (.Get `Link`) }}
+                    <div class="form-group {{with .Errors.Get `Link`}}errored{{end}}">
+                        <div class="form-group-header">
+                            <label>Link</label>
+                        </div>
+                        <div class="form-group-body">
+                            <input type="file"
+                                id="uploadfile" name="UploadFile"
+                                {{if eq (.Get `ContentType`) `image` }}
+                                    accept="image/png, image/jpeg, image/jpg"
+                                {{end}}
+                                {{if eq (.Get `ContentType`) `document` }}
+                                    accept="application/pdf"
+                                {{end}}
+                                {{if eq (.Get `ContentType`) `video` }}
+                                    accept="video/mp4"
+                                {{end}}
+                            >
+                        </div>
+                        {{with .Errors.Get `Link`}}
+                        <p class="note error">{{.}}</p>
+                        {{end}}
+                    </div>
+                    {{end}}
+                    <button class="btn btn-primary" type="submit">Cập nhật</button>
                 </div>
-                <div class="form-group-body">
-                    <input type="text" class="form-control" autocomplete="off" spellcheck="false" name="Title"
-                        value="{{.Get `Title`}}">
+                <div class="col-6 pr-2 float-left">
+                    {{if .Get `Link`}}
+                    <div class="form-group-header">
+                        <label>Preview</label>
+                    </div>
+
+                        {{if eq (.Get `ContentType`) `image` }}
+                            <img src="{{.Get `Link`}}" alt="preview">
+                        {{end}}
+                        {{if eq (.Get `ContentType`) `document` }}
+
+                        {{end}}
+                        {{if eq (.Get `ContentType`) `video` }}
+                            <video src="{{.Get `Link`}}"></video>
+                        {{end}}
+                    {{end}}
                 </div>
-                {{with .Errors.Get `Title`}}
-                <p class="note error">{{.}}</p>
-                {{end}}
             </div>
 
-            <button class="btn btn-primary" type="submit">Cập nhật</button>
             {{end}}
         </form>
 

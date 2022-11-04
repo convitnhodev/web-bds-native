@@ -111,8 +111,16 @@ func (a *router) productDetail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	attachments, err := a.App.Attachments.Find(product)
+	if err != nil {
+		log.Println(err)
+		a.render(w, r, "404.page.html", &templateData{})
+		return
+	}
+
 	a.render(w, r, "detail.page.html", &templateData{
-		Product: product,
+		Product:     product,
+		Attachments: attachments,
 	})
 }
 
