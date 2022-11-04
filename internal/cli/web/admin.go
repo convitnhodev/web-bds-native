@@ -80,8 +80,37 @@ func (a *router) isadmin(next http.HandlerFunc) http.HandlerFunc {
 	})
 }
 
+func (a *router) adminRemoveProduct(w http.ResponseWriter, r *http.Request) {
+	a.App.AdminProducts.Remove(r.URL.Query().Get(":id"))
+
+	http.Redirect(w, r, "/admin/products", http.StatusSeeOther)
+}
+
 func (a *router) adminHome(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/admin/products", http.StatusSeeOther)
+}
+
+func (a *router) adminAttachments(w http.ResponseWriter, r *http.Request) {
+	p := a.App.AdminAttachments.Pagination.Query(r.URL)
+
+	product, err := a.App.Products.ID(r.URL.Query().Get(":id"))
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "bad request", 400)
+		return
+	}
+	attachments, err := a.App.AdminAttachments.Find(product)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "bad request", 400)
+		return
+	}
+
+	a.adminrender(w, r, "attachments.page.html", &templateData{
+		Product:     product,
+		Pagination:  p,
+		Attachments: attachments,
+	})
 }
 
 func (a *router) adminProducts(w http.ResponseWriter, r *http.Request) {
@@ -139,6 +168,78 @@ func (a *router) adminCreateProduct(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, fmt.Sprintf("/admin/products/%d/update", product.ID), http.StatusSeeOther)
 }
 
+func (a *router) adminCreateAttachment(w http.ResponseWriter, r *http.Request) {
+	atype := r.URL.Query().Get("type")
+	pid := r.URL.Query().Get("pid")
+	product, err := a.App.Products.ID(pid)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "500 - internal server error", 500)
+		return
+	}
+	attachment, err := a.App.Attachments.Create(product, atype)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "500 - internal server error", 500)
+		return
+	}
+
+	http.Redirect(w, r, fmt.Sprintf("/admin/attachments/%d/update", attachment.ID), http.StatusSeeOther)
+}
+
+func (a *router) adminUpdateAttachment(w http.ResponseWriter, r *http.Request) {
+	attachment, err := a.App.Attachments.ID(r.URL.Query().Get(":id"))
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "500 - internal server error", 500)
+		return
+	}
+
+	product, err := a.App.Products.ID(fmt.Sprint(attachment.Product.ID))
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "500 - internal server error", 500)
+		return
+	}
+
+	f := attachment.Form()
+
+	ok := false
+	defer func() {
+		if !ok {
+			a.adminrender(w, r, "attachments.update.page.html", &templateData{
+				Form:    f,
+				Product: product,
+			})
+		}
+	}()
+
+	if r.Method == "POST" {
+		if err := r.ParseForm(); err != nil {
+			f.Errors.Add("err", "err_parse_form")
+			return
+		}
+
+		f.Values = r.PostForm
+		f.Required("Title")
+
+		if !f.Valid() {
+			log.Println("form invalid", f.Errors)
+			return
+		}
+
+		if err := a.App.Attachments.Update(attachment, f); err != nil {
+			log.Println(err)
+			f.Errors.Add("err", "could_not_update_attachment")
+			return
+		}
+
+		ok = true
+		http.Redirect(w, r, fmt.Sprintf("/admin/products/%d/attachments", attachment.Product.ID), http.StatusSeeOther)
+	}
+
+}
+
 func (a *router) adminUpdateProduct(w http.ResponseWriter, r *http.Request) {
 	product, err := a.App.Products.ID(r.URL.Query().Get(":id"))
 	if err != nil {
@@ -188,9 +289,16 @@ func (a *router) adminUpdateProduct(w http.ResponseWriter, r *http.Request) {
 func registerAdminRoute(mux *pat.PatternServeMux, a *router) {
 	mux.Get("/admin", use(a.adminHome, a.isadmin))
 	mux.Get("/admin/products", use(a.adminProducts, a.isadmin))
+
+	mux.Get("/admin/products/:id/remove", use(a.adminRemoveProduct, a.isadmin))
 	mux.Post("/admin/products/:id/update", use(a.adminUpdateProduct, a.isadmin))
 	mux.Get("/admin/products/:id/update", use(a.adminUpdateProduct, a.isadmin))
 	mux.Get("/admin/products/create", use(a.adminCreateProduct, a.isadmin))
+
+	mux.Get("/admin/products/:id/attachments", use(a.adminAttachments, a.isadmin))
+	mux.Post("/admin/attachments/:id/update", use(a.adminUpdateAttachment, a.isadmin))
+	mux.Get("/admin/attachments/:id/update", use(a.adminUpdateAttachment, a.isadmin))
+	mux.Get("/admin/attachments/create", use(a.adminCreateAttachment, a.isadmin))
 
 	mux.Get("/admin/users", use(a.adminUsers, a.isadmin))
 	mux.Get("/admin/users/:id/detail", use(a.adminUsersDetail, a.isadmin))

@@ -31,6 +31,9 @@ type templateData struct {
 	Products []*models.Product
 	Product  *models.Product
 
+	Attachments []*models.Attachment
+	Attachment  *models.Attachment
+
 	Log  *models.Log
 	Logs []*models.Log
 

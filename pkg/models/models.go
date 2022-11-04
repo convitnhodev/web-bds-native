@@ -24,13 +24,17 @@ type User struct {
 }
 
 type Attachment struct {
-	Title  string
-	Type   string
-	URL    string
-	Width  int
-	Height int
-	Size   int
-	Length int
+	ID             int
+	Title          string
+	ContentType    string
+	MineType       string
+	Link           string
+	Width          int
+	Height         int
+	Size           int
+	VideoLength    int
+	VideoThumbnail string
+	Product        Product
 }
 
 type Product struct {
@@ -89,6 +93,23 @@ func (o *Product) Form() *form.Form {
 	f.Set("FrontWidth", fmt.Sprint(o.FrontWidth))
 	f.Set("StreetWidth", fmt.Sprint(o.StreetWidth))
 	f.Set("PavementWidth", fmt.Sprint(o.PavementWidth))
+
+	return f
+}
+
+func (o *Attachment) Form() *form.Form {
+	f := form.New(nil)
+	f.Set("Title", o.Title)
+	f.Set("ContentType", o.ContentType)
+	f.Set("MineType", o.MineType)
+	f.Set("Link", o.Link)
+	f.Set("VideoThumbnail", o.VideoThumbnail)
+
+	f.Set("ProductID", fmt.Sprint(o.Product.ID))
+	f.Set("Width", fmt.Sprint(o.Width))
+	f.Set("Height", fmt.Sprint(o.Height))
+	f.Set("Size", fmt.Sprint(o.Size))
+	f.Set("VideoLength", fmt.Sprint(o.VideoLength))
 
 	return f
 }

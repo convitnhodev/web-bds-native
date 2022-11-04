@@ -8,7 +8,8 @@
 
     <div class="d-flex flex-items-center mb-3">
       <h1 class="overflow-hidden flex-auto">
-        Tài sản
+        File đính kèm
+        <div class="text-small">{{.Product.Title}}</div>
       </h1>
 
       <details class="dropdown details-reset details-overlay d-inline-block">
@@ -18,22 +19,23 @@
         </summary>
 
         <ul class="dropdown-menu dropdown-menu-se">
-            <li><a href="/admin/products/create" class="dropdown-item" role="menuitem">Tài sản</a></li>
+            <li><a href="/admin/attachments/create?type=document&pid={{.Product.ID}}" class="dropdown-item" role="menuitem">Document</a></li>
+            <li><a href="/admin/attachments/create?type=image&pid={{.Product.ID}}" class="dropdown-item" role="menuitem">Image</a></li>
+            <li><a href="/admin/attachments/create?type=video&pid={{.Product.ID}}" class="dropdown-item" role="menuitem">Video</a></li>
         </ul>
       </details>
     </div>
 
-    {{if .Products}}
+    {{if .Attachments}}
     <div class="Box">
       <div>
-        {{range .Products}}
+        {{range .Attachments}}
         <div class="Box-row Box-row--hover-gray d-flex flex-items-center">
           <span class="mr-3">{{.Title}}</span>
           <div class="flex-auto">
           </div>
-          <a class="btn btn-xs mr-2" href="/admin/products/{{.ID}}/attachments">files</a>
-          <a class="btn btn-xs mr-2" href="/admin/products/{{.ID}}/update">sửa</a>
-          <a class="btn btn-danger btn-xs" href="/admin/products/{{.ID}}/remove" onclick="return confirm('chắc nghen?');">xóa</a>
+          <a class="btn btn-xs mr-1" href="/admin/attachments/{{.ID}}/update">sửa</a>
+          <a class="btn btn-danger btn-xs" href="/admin/attachments/{{.ID}}" onclick="return confirm('chắc nghen?');">xóa</a>
         </div>
         {{end}}
       </div>
@@ -44,8 +46,8 @@
         <img referrerpolicy="no-referrer"
             src="https://media.discordapp.net/attachments/523522129296097290/981393406934806568/cry-min.jpg?width=112&height=112"
             alt="anime not found" class="blankslate-image" />
-        <h3 class="blankslate-heading">Chưa có tài sản nào</h3>
-        <p>Nhấn vào nút tạo mới bên trên để thêm tài sản mới.</p>
+            <h3 class="blankslate-heading">Chưa có file đính kèm nào</h3>
+            <p>Nhấn vào nút tạo mới bên trên để thêm file mới vào tài sản này.</p>
     </div>
     {{end}}
 

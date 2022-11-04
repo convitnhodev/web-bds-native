@@ -92,8 +92,8 @@ func scanProduct(r scanner, o *models.Product) error {
 }
 
 func (m *ProductModel) Find() ([]*models.Product, error) {
-	q := m.query("where updated_at > '0001-01-01 00:00:00+00'::date order by id desc")
-	count := m.count("where updated_at > '0001-01-01 00:00:00+00'::date")
+	q := m.query("where is_deleted = false and updated_at > '0001-01-01 00:00:00+00'::date order by id desc")
+	count := m.count("where is_deleted = false and updated_at > '0001-01-01 00:00:00+00'::date")
 
 	if err := m.Pagination.Count(count); err != nil {
 		return nil, err
@@ -206,5 +206,11 @@ func (m *ProductModel) Update(o *models.Product, f *form.Form) error {
 		f.Get("Area"),
 	)
 
+	return err
+}
+
+func (m *ProductModel) Remove(id string) error {
+	q := `update products set is_deleted = true where id = $1`
+	_, err := m.DB.Exec(q, id)
 	return err
 }
