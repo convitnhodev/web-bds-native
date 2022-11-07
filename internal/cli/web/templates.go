@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"path/filepath"
 	"strings"
-
+	
 	"github.com/deeincom/deeincom/config"
 	"github.com/deeincom/deeincom/pkg/form"
 	"github.com/deeincom/deeincom/pkg/models"
@@ -37,6 +37,11 @@ type templateData struct {
 	Log  *models.Log
 	Logs []*models.Log
 
+	Posts []*models.Post
+	Post *models.Post
+
+	Comments []*models.Comment
+
 	//Config
 	Config *config.Config
 }
@@ -52,6 +57,7 @@ var functions = template.FuncMap{
 	"html":            html,
 	"buildPagination": buildPagination,
 	"sureFind":        sureFind,
+	"find_post_tags":  findPostByTags,
 }
 
 // sureFind always find an element in list l
@@ -177,4 +183,16 @@ func parseHTML(dir string) (map[string]*template.Template, error) {
 		cache[name] = ts
 	}
 	return cache, nil
+}
+
+func findPostByTags(s string) []*models.Post {
+	tags := []string {}
+
+	for _, t := range strings.Split(s, ",") {
+		tags = append(tags, strings.TrimSpace(t))
+	}
+
+	posts := app.Posts.Tags(tags)
+
+	return posts
 }

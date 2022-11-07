@@ -1,0 +1,129 @@
+{{template "admin" .}}
+
+{{define "body"}}
+
+<div class="container-lg">
+    <div class="col-12">
+
+        <h1>Cập nhật bài viết</h1>
+
+        {{with .Form.Errors.Get `form` }}
+        <div class="alert alert-error">
+            {{.}}
+        </div>
+        {{end}}
+        {{with .Form.Errors.Get `form` }}
+        <div class="alert alert-error">
+            {{.}}
+        </div>
+        {{end}}
+
+
+        <form method="POST">
+            {{with .Form}}
+
+            <div class="form-group {{with .Errors.Get `Title`}}errored{{end}}">
+                <div class="form-group-header">
+                    <label>Tiêu đề *</label>
+                </div>
+                <div class="form-group-body">
+                    <input class="form-control" autocomplete="off" spellcheck="false" name="Title"
+                        value="{{.Get `Title`}}">
+                </div>
+                {{with .Errors.Get `Title`}}
+                <p class="note error">{{.}}</p>
+                {{else}}
+                <p class="note">Vd: Đầu tư bất động sản trong năm 2022</p>
+                {{end}}
+            </div>
+
+            <div class="form-group {{with .Errors.Get `Short`}}errored{{end}}">
+                <div class="form-group-header">
+                    <label>Mô tả ngắn</label>
+                </div>
+                <div class="form-group-body">
+                    <input class="form-control" autocomplete="off" spellcheck="false" name="Short"
+                        value="{{.Get `Short`}}">
+                </div>
+                {{with .Errors.Get `Short`}}
+                <p class="note error">{{.}}</p>
+                {{else}}
+                <p class="note">Vd: Cần chuẩn bị gì để đầu tư bất động sản trong năm 2022...</p>
+                {{end}}
+            </div>
+
+            <div class="form-group {{with .Errors.Get `Tags`}}errored{{end}}">
+                <div class="form-group-header">
+                    <label>Nhãn</label>
+                </div>
+                <div class="form-group-body">
+                    <input class="form-control" autocomplete="off" spellcheck="false" name="Tags"
+                        value="{{.Get `Tags`}}">
+                </div>
+                {{with .Errors.Get `Tags`}}
+                <p class="note error">{{.}}</p>
+                {{else}}
+                <p class="note">Vd: bds, dautu</p>
+                {{end}}
+            </div>
+
+            <div class="form-group {{with .Errors.Get `PublishedAt`}}errored{{end}}">
+                <div class="form-group-header">
+                    <label>Ngày giờ đăng</label>
+                </div>
+                <div class="form-group-body">
+                    <input class="form-control" type="datetime-local" autocomplete="off" spellcheck="false" name="PublishedAt"
+                        value="{{.Get `PublishedAt`}}" step="1"
+                    >
+                </div>
+                {{with .Errors.Get `PublishedAt`}}
+                <p class="note error">{{.}}</p>
+                {{end}}
+            </div>
+
+            <div class="form-group {{with .Errors.Get `Thumbnail`}}errored{{end}}">
+                <div class="form-group-header">
+                    <label>Ảnh nhỏ</label>
+                </div>
+                <div class="form-group-body">
+                    <img id="preview" class="avatar" alt="jonrohan" src="{{ if .Get `Thumbnail` }} {{ .Get `Thumbnail` }} {{else}}/static/images/image.svg{{end}}" width="58" height="58"/>
+                    <script>
+                        let loadFile = function(event) {
+                            let preview = document.getElementById('preview');
+                            let reader = new FileReader();
+                            reader.onload = function(){
+                                let preview = document.getElementById('preview');
+                                preview.src = reader.result;
+                            };
+
+                            reader.readAsDataURL(event.target.files[0]);
+                        };
+                    </script>
+                    <input class="ml-2" type="file" name="Thumbnail" accept="image/png, image/jpeg, image/jpg" onchange="loadFile(event);">
+                </div>
+                {{with .Errors.Get `Thumbnail`}}
+                <p class="note error">{{.}}</p>
+                {{end}}
+            </div>
+
+
+            <div class="form-group">
+                <div class="form-group-header">
+                    <label>Nội dung bài viết</label>
+                </div>
+                <div class="form-group-body">
+                    <textarea class="form-control wysiwyg" name="Content">{{.Get `Content`}}</textarea>
+                </div>
+                {{with .Errors.Get `Content`}}
+                <p class="note error">{{.}}</p>
+                {{end}}
+            </div>
+
+            <button class="btn btn-primary" type="submit">Cập nhật</button>
+            {{end}}
+        </form>
+
+    </div>
+</div>
+</div>
+{{end}}
