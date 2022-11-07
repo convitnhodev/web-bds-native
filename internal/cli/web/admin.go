@@ -314,6 +314,109 @@ func (a *router) adminUpdateProduct(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func (a *router) adminPosts(w http.ResponseWriter, r *http.Request) {
+	p := a.App.Posts.Pagination.Query(r.URL)
+
+	posts, err := a.App.Posts.Find()
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "bad request", 400)
+		return
+	}
+
+	a.adminrender(w, r, "posts.page.html", &templateData{
+		Posts: posts,
+		Pagination: p,
+	})
+}
+
+func (a *router) adminCreatePost(w http.ResponseWriter, r *http.Request) {
+	id := a.session.GetInt(r, "user")
+	post, err := a.App.Posts.Create(id, "blog")
+
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "500 - internal server error", 500)
+		return
+	}
+
+	http.Redirect(w, r, fmt.Sprintf("/admin/posts/%d/update", post.ID), http.StatusSeeOther)
+}
+
+func (a *router) adminUpdatePost(w http.ResponseWriter, r *http.Request) {
+	post, err := a.App.Posts.ID(r.URL.Query().Get(":id"))
+	if err != nil {
+		log.Println(err)
+		http.Redirect(w, r, "/admin/posts", http.StatusSeeOther)
+		return
+	}
+
+	f := post.Form()
+
+	ok := false
+	defer func() {
+		if !ok {
+			a.adminrender(w, r, "posts.update.page.html", &templateData{
+				Form: f,
+			})
+		}
+	}()
+
+	if r.Method == "POST" {
+		if err := r.ParseForm(); err != nil {
+			f.Errors.Add("err", "err_parse_form")
+			return
+		}
+
+		f.Values = r.PostForm
+		f.Required("Title")
+		
+		// TODO: upload Image
+		// file, handler, err := r.FormFile("Thumbnail")
+		// if err != nil {
+		// 	f.Errors.Add("err", "err_could_not_upload")
+		// 	return
+		// }
+		// defer file.Close()
+
+		// // Create file
+		// dst, err := os.Create(filepath.Join("upload", handler.Filename))
+		// if err != nil {
+		// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+		// 	return
+		// }
+		// defer dst.Close()
+
+		// // Copy the uploaded file to the created file on the filesystem
+		// if _, err := io.Copy(dst, file); err != nil {
+		// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+		// 	return
+		// }
+
+		f.Set("Thumbnail", "")
+
+		if !f.Valid() {
+			log.Println("form invalid", f.Errors)
+			return
+		}
+
+		if err := a.App.Posts.Update(post, f); err != nil {
+			log.Println(err)
+			f.Errors.Add("err", "could_not_update_post")
+			return
+		}
+
+		ok = true
+		http.Redirect(w, r, "/admin/posts", http.StatusSeeOther)
+	}
+
+}
+
+func (a *router) adminRemovePost(w http.ResponseWriter, r *http.Request) {
+	a.App.Posts.Remove(r.URL.Query().Get(":id"))
+	http.Redirect(w, r, "/admin/posts", http.StatusSeeOther)
+}
+
 func registerAdminRoute(mux *pat.PatternServeMux, a *router) {
 	mux.Get("/admin", use(a.adminHome, a.isadmin))
 	mux.Get("/admin/products", use(a.adminProducts, a.isadmin))
@@ -327,6 +430,12 @@ func registerAdminRoute(mux *pat.PatternServeMux, a *router) {
 	mux.Post("/admin/attachments/:id/update", use(a.adminUpdateAttachment, a.isadmin))
 	mux.Get("/admin/attachments/:id/update", use(a.adminUpdateAttachment, a.isadmin))
 	mux.Get("/admin/attachments/create", use(a.adminCreateAttachment, a.isadmin))
+	
+	mux.Get("/admin/posts", use(a.adminPosts, a.isadmin))
+	mux.Get("/admin/posts/create", use(a.adminCreatePost, a.isadmin))
+	mux.Get("/admin/posts/:id/update", use(a.adminUpdatePost, a.isadmin))
+	mux.Post("/admin/posts/:id/update", use(a.adminUpdatePost, a.isadmin))
+	mux.Get("/admin/posts/:id/remove", use(a.adminRemovePost, a.isadmin))
 
 	mux.Get("/admin/users", use(a.adminUsers, a.isadmin))
 	mux.Get("/admin/users/:id/detail", use(a.adminUsersDetail, a.isadmin))

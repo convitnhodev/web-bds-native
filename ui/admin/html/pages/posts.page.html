@@ -1,0 +1,61 @@
+{{template "admin" .}}
+
+{{define "body"}}
+{{$label := split "accent:success:attention:severe:danger:open:closed:done:sponsors" ":"  }}
+
+<div class="container-lg">
+  <div class="col-12">
+
+    <div class="d-flex flex-items-center mb-3">
+      <h1 class="overflow-hidden flex-auto">
+        Posts
+        <div class="Counter mr-1">{{.Pagination.Data.Total}}</div>
+      </h1>
+
+        <a class="btn btn-primary" aria-haspopup="true" href="/admin/posts/create">
+            Tạo mới
+        </a>
+    </div>
+
+    {{if .Posts}}
+    <div class="Box">
+      <div>
+        {{range .Posts}}
+        <div class="Box-row Box-row--hover-gray d-flex flex-items-center">
+          <div class="flex-auto d-flex">
+            <img class="avatar" alt="jonrohan" src="{{ .Thumbnail }}" width="38" height="38"/>
+            <div class="ml-2">
+              <div class="d-flex">
+                <strong class="color-fg-accent">{{.Title}}</strong>
+                <div class="ml-2">
+                  {{ range .Tags }}
+                  <span class="Label ml-1 Label--sponsors">{{.}}</span>
+                  {{ end }}
+                </div>
+              </div>
+              <div class="text-small color-fg-subtle">
+                Tạo lúc {{ .CreatedAt }}
+              </div>
+            </div>
+          </div>
+          <a class="btn btn-xs mr-1" href="/admin/posts/{{.ID}}/update">sửa</a>
+          <a class="btn btn-danger btn-xs" href="/admin/posts/{{.ID}}/remove" onclick="return confirm('chắc nghen?');">xóa</a>
+        </div>
+        {{end}}
+      </div>
+    </div>
+
+    {{else}}
+    <div class="blankslate">
+        <img referrerpolicy="no-referrer"
+            src="https://media.discordapp.net/attachments/523522129296097290/981393406934806568/cry-min.jpg?width=112&height=112"
+            alt="anime not found" class="blankslate-image" />
+            <h3 class="blankslate-heading">Chưa có bài viết nào</h3>
+            <p>Nhấn vào nút tạo mới để tạo bài viết</p>
+    </div>
+    {{end}}
+
+  {{template "pagination" . }}
+</div>
+</div>
+{{end}}

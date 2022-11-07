@@ -24,6 +24,8 @@ type App struct {
 	AdminProducts    *db.ProductModel
 	Attachments      *db.AttachmentModel
 	AdminAttachments *db.AttachmentModel
+	Posts 			 *db.PostModel
+	Comments		 *db.CommentModel
 }
 
 // New return an app instance
@@ -51,6 +53,26 @@ func New(c *config.Config) (*App, error) {
 			},
 		},
 		Products: &db.ProductModel{
+			DB: conn,
+			Pagination: &db.Pagination{
+				DB:      conn,
+				Min:     25,
+				Max:     100,
+				Default: 25,
+				Data:    &db.PaginationData{Limit: 25},
+			},
+		},
+		Posts: &db.PostModel {
+			DB: conn,
+			Pagination: &db.Pagination{
+				DB:      conn,
+				Min:     25,
+				Max:     100,
+				Default: 25,
+				Data:    &db.PaginationData{Limit: 25},
+			},
+		},
+		Comments: &db.CommentModel {
 			DB: conn,
 			Pagination: &db.Pagination{
 				DB:      conn,

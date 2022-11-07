@@ -20,11 +20,13 @@ import (
 	"github.com/deeincom/deeincom/pkg/email"
 	"github.com/deeincom/deeincom/pkg/form"
 	"github.com/golangcollege/sessions"
+	deein "github.com/deeincom/deeincom"
 )
 
 var fe string   // đường dẫn đến thư mục theme cho fe
 var be string   // đường dẫn đến thư mục theme cho be
 var port string // port web sẽ chạy
+var app deein.App
 
 type router struct {
 	*root.Cmd
@@ -450,6 +452,8 @@ func run(c *root.Cmd) error {
 		be:      beHTML,
 		session: session,
 	}
+
+	app = *a.App
 
 	// homepage
 	mux.Get("/", use(a.home))
