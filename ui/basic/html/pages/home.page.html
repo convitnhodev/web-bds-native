@@ -1,11 +1,11 @@
 {{template "ui" .}}
 <!---->
 {{define "title" -}}
-<title>Đầu tư vì một tương lai thịnh vượng | deein.com</title>
+<title>Mua chung Nhà phố triệu đô, tài sản hiện hữu | deein.com</title>
 {{- end}}
 <!---->
 {{define "description" -}}
-<meta name="description" content="Đầu tư vì một tương lai thịnh vượng" />
+<meta name="description" content="Mua chung thật, tài sản hiện hữu, lợi nhuận an toàn - bền vững" />
 {{- end}}
 <!---->
 {{define "body" -}}
@@ -85,27 +85,27 @@
         <div class="text-4xl font-bold">> 1 tỷ đô</div>
         <div class="text-lg">được đầu tư</div>
         <div class="my-4 border-t"></div>
-        <div class="text-gray-600">mục tiêu 2025 tổng tài sản</div>
+        <div class="text-gray-600">Mục tiêu 2025 tổng tài sản</div>
       </div>
       <div class="border rounded-lg px-8 py-4 grow shrink-0 w-64">
         <div class="text-4xl font-bold">> 2.5 triệu</div>
         <div class="text-lg">thành viên</div>
         <div class="my-4 border-t"></div>
-        <div class="text-gray-600">cộng đồng tổ chức và cá nhân mua chung</div>
+        <div class="text-gray-600">Cộng đồng tổ chức và cá nhân mua chung</div>
       </div>
       <div class="border rounded-lg px-8 py-4 grow shrink-0 w-64">
         <div class="text-4xl font-bold">> 1000</div>
         <div class="text-lg">giao dịch</div>
         <div class="my-4 border-t"></div>
         <div class="text-gray-600">
-          mục tiêu đạt 1000 giao dịch cho tới 2025
+          Mục tiêu đạt 1000 giao dịch cho tới 2025
         </div>
       </div>
       <div class="border rounded-lg px-8 py-4 grow shrink-0 w-64">
         <div class="text-4xl font-bold">+10%/năm</div>
         <div class="text-lg">cam kết an toàn</div>
         <div class="my-4 border-t"></div>
-        <div class="text-gray-600">theo chu kỳ 3 năm</div>
+        <div class="text-gray-600">Theo chu kỳ 3 năm</div>
       </div>
     </div>
   </div>
@@ -238,7 +238,7 @@
           <span class="block">trên Deein</span>
         </h2>
         <p class="mt-12 text-lg text-gray-300">
-          Được tư vấn bởi hang luật nổi tiếng BGI và quy trình thẩm địn tài sản
+          Được tư vấn bởi hãng luật nổi tiếng BGI và quy trình thẩm định tài sản
           tin cậy.
         </p>
       </div>
@@ -262,15 +262,15 @@
             <p class="mt-4 text-lg leading-6 text-sky-200">
               Các khoản mua chung có rủi ro, kém thanh khoản và có thể mất vốn
               toàn bộ.
-              <a class="text-sky-300 hover:underline" href="/">Tìm hiểu thêm</a
-              >.
             </p>
+            {{ if not .User }}
             <a
               href="/register"
               class="mt-8 inline-flex items-center rounded-md border border-transparent bg-white px-5 py-3 text-base font-medium text-sky-600 shadow transition-all hover:bg-sky-50"
             >
               Bắt đầu ngay
             </a>
+            {{end}}
             <!-- <p class="mt-3 text-sm text-sky-300 sm:mt-4">
               Các khoản đầu tư có rủi ro, kém thanh khoản và có thể dẫn đến thua
               lỗ toàn bộ của vốn.
