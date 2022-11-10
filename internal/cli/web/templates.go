@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"path/filepath"
 	"strings"
-	
+
 	"github.com/deeincom/deeincom/config"
 	"github.com/deeincom/deeincom/pkg/form"
 	"github.com/deeincom/deeincom/pkg/models"
@@ -38,7 +38,7 @@ type templateData struct {
 	Logs []*models.Log
 
 	Posts []*models.Post
-	Post *models.Post
+	Post  *models.Post
 
 	Comments []*models.Comment
 
@@ -186,7 +186,7 @@ func parseHTML(dir string) (map[string]*template.Template, error) {
 }
 
 func findPostByTags(s string) []*models.Post {
-	tags := []string {}
+	tags := []string{}
 
 	for _, t := range strings.Split(s, ",") {
 		tags = append(tags, strings.TrimSpace(t))

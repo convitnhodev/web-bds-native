@@ -16,11 +16,12 @@ import (
 	"time"
 
 	"github.com/bmizerany/pat"
+	deein "github.com/deeincom/deeincom"
 	"github.com/deeincom/deeincom/internal/cli/root"
 	"github.com/deeincom/deeincom/pkg/email"
 	"github.com/deeincom/deeincom/pkg/form"
+	"github.com/deeincom/deeincom/pkg/models"
 	"github.com/golangcollege/sessions"
-	deein "github.com/deeincom/deeincom"
 )
 
 var fe string   // đường dẫn đến thư mục theme cho fe
@@ -120,9 +121,15 @@ func (a *router) productDetail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	comments, err := a.App.Comments.Slug(slug)
+	if err != nil {
+		comments = []*models.Comment{}
+	}
+
 	a.render(w, r, "detail.page.html", &templateData{
 		Product:     product,
 		Attachments: attachments,
+		Comments:    comments,
 	})
 }
 
@@ -414,6 +421,56 @@ func (a *router) login(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (a *router) islogined(next http.HandlerFunc) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		id := a.session.GetInt(r, "user")
+		if id == 0 {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (a *router) createComment(w http.ResponseWriter, r *http.Request) {
+	f := form.New(nil)
+	slug := r.URL.Query().Get(":slug")
+	id := a.session.GetString(r, "user")
+
+	ok := false
+	defer func() {
+		if !ok {
+			http.Error(w, "bad request", 400)
+		}
+	}()
+
+	if err := r.ParseForm(); err != nil {
+		f.Errors.Add("err", "err_parse_form")
+		return
+	}
+
+	f.Values = r.PostForm
+	f.Set("Slug", slug)
+	f.Set("UserId", id)
+	f.Required("Message")
+
+	if !f.Valid() {
+		log.Println("form invalid", f.Errors)
+		return
+	}
+
+	if _, err := a.App.Comments.Create(f); err != nil {
+		log.Println(err)
+		f.Errors.Add("err", "could_not_update_comment")
+		return
+	}
+
+	ok = true
+
+	w.Write([]byte("Ok"))
+}
+
 func (a *router) robots(w http.ResponseWriter, r *http.Request) {
 	f, err := os.Open("./robots.txt")
 	if err == nil {
@@ -480,6 +537,9 @@ func run(c *root.Cmd) error {
 	mux.Post("/verify-phone", use(a.verifyPhone))
 	mux.Get("/verify-phone", use(a.verifyPhone))
 	mux.Get("/verify/phone", use(a.verifyPhoneResult))
+
+	// comment
+	mux.Post("/comments/:slug/create", use(a.createComment, a.islogined))
 
 	mux.Get("/robots.txt", use(a.robots))
 

@@ -417,6 +417,11 @@ func (a *router) adminRemovePost(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/admin/posts", http.StatusSeeOther)
 }
 
+func (a *router) adminChangeCensorshipComment(w http.ResponseWriter, r *http.Request) {
+	a.App.Comments.ChangeCensorship(r.URL.Query().Get(":id"))
+	w.Write([]byte("Ok"))
+}
+
 func registerAdminRoute(mux *pat.PatternServeMux, a *router) {
 	mux.Get("/admin", use(a.adminHome, a.isadmin))
 	mux.Get("/admin/products", use(a.adminProducts, a.isadmin))
@@ -436,6 +441,7 @@ func registerAdminRoute(mux *pat.PatternServeMux, a *router) {
 	mux.Get("/admin/posts/:id/update", use(a.adminUpdatePost, a.isadmin))
 	mux.Post("/admin/posts/:id/update", use(a.adminUpdatePost, a.isadmin))
 	mux.Get("/admin/posts/:id/remove", use(a.adminRemovePost, a.isadmin))
+	mux.Get("/admin/comments/:id/changeCensorship", use(a.adminChangeCensorshipComment, a.isadmin))
 
 	mux.Get("/admin/users", use(a.adminUsers, a.isadmin))
 	mux.Get("/admin/users/:id/detail", use(a.adminUsersDetail, a.isadmin))

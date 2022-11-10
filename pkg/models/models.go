@@ -2,8 +2,8 @@ package models
 
 import (
 	"fmt"
-	"time"
 	"strings"
+	"time"
 
 	"github.com/deeincom/deeincom/pkg/form"
 )
@@ -69,33 +69,36 @@ type Product struct {
 }
 
 type UserInfo struct {
-	ID					int
-	FirstName           string
-	LastName            string
+	ID        int
+	FirstName string
+	LastName  string
 }
 
 type Post struct {
-	ID                  int
-	Title               string
-	PostType            string
-	Slug                string
-	Thumbnail			string
-	Poster              UserInfo
-	Tags                []string
-	Short               string
-	Content             string
-	PublishedAt         *time.Time
-	CreatedAt           time.Time
-	UpdatedAt           time.Time
+	ID          int
+	Title       string
+	PostType    string
+	Slug        string
+	Thumbnail   string
+	Poster      UserInfo
+	Tags        []string
+	Short       string
+	Content     string
+	PublishedAt *time.Time
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
 }
 
 type Comment struct {
-	ID                  int
-	Poster				UserInfo
-	Slug				string
-	Message				string
-	CreatedAt           time.Time
-	UpdatedAt           time.Time
+	ID           int
+	UserId       int
+	ParrentId    int
+	Poster       UserInfo
+	Slug         string
+	Message      string
+	IsCensorship bool
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
 }
 
 func (o *Product) Form() *form.Form {
@@ -154,13 +157,22 @@ func (o *Post) Form() *form.Form {
 	f.Set("Thumbnail", o.Thumbnail)
 
 	if o.PublishedAt != nil {
-		loc, err:= time.LoadLocation("Asia/Ho_Chi_Minh")
+		loc, err := time.LoadLocation("Asia/Ho_Chi_Minh")
 		if err == nil {
 			f.Set("PublishedAt", o.PublishedAt.In(loc).Format("2006-01-02T15:04:05"))
 		}
 	} else {
 		f.Set("PublishedAt", "")
 	}
+
+	return f
+}
+
+func (o *Comment) Form() *form.Form {
+	f := form.New(nil)
+
+	f.Set("Comment", o.Message)
+	f.Set("Slug", o.Slug)
 
 	return f
 }

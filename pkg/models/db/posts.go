@@ -118,7 +118,7 @@ func (m *PostModel) Find() ([]*models.Post, error) {
 	return list, nil
 }
 
-func (m *PostModel) Tags(tags []string) ([]*models.Post) {
+func (m *PostModel) Tags(tags []string) []*models.Post {
 	q := m.query(
 		fmt.Sprintf(
 			"where posts.tags @> '{%s}' order by posts.id desc",
@@ -154,7 +154,7 @@ func (m *PostModel) Create(userId int, postType string) (*models.Post, error) {
 		return nil, errors.New("err_post_type_empty")
 	}
 
-	q := fmt.Sprintf(`insert into posts (poster_id, post_type) values (%d, '%s') returning id`, userId, postType)
+	q := fmt.Sprintf(`INSERT INTO posts (poster_id, post_type) VALUES (%d, '%s') RETURNING id`, userId, postType)
 	row := m.DB.QueryRow(q)
 
 	o := new(models.Post)
@@ -165,11 +165,11 @@ func (m *PostModel) Create(userId int, postType string) (*models.Post, error) {
 	return o, nil
 }
 
-func (m *PostModel) Update(o *models.Post, f *form.Form) (error) {
+func (m *PostModel) Update(o *models.Post, f *form.Form) error {
 	q := `
-		update
+		UPDATE
 			posts
-		set
+		SET
 			updated_at = now(),
 			title = $2,
 			short = $3,
@@ -178,7 +178,7 @@ func (m *PostModel) Update(o *models.Post, f *form.Form) (error) {
 			published_at = $6,
 			tags = $7,
 			thumbnail = $8
-		where
+		WHERE
 			id = $1
 	`
 
@@ -209,10 +209,10 @@ func (m *PostModel) ID(id string) (*models.Post, error) {
 		return nil, errors.New("err_id_empty")
 	}
 
-	q := m.query(`where posts.id = $1`, false)
+	q := m.query(`WHERE posts.id = $1`, false)
 	row := m.DB.QueryRow(q, id)
 	o := new(models.Post)
-	
+
 	if err := scanPost(row, o, false); err != nil {
 		return nil, errors.Wrap(err, "user.ID")
 	}
@@ -231,7 +231,11 @@ func (m *PostModel) Remove(id string) error {
 	_, err = m.DB.Exec(q,
 		id,
 	)
-	
+
+	if err != nil {
+		return err
+	}
+
 	q = "DELETE FROM comments WHERE comments.slug = $1;"
 	_, err = m.DB.Exec(q,
 		o.Slug,
