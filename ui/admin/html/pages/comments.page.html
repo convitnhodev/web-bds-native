@@ -1,0 +1,51 @@
+{{template "admin" .}}
+
+{{define "body"}}
+{{$label := split "accent:success:attention:severe:danger:open:closed:done:sponsors" ":"  }}
+
+<div class="container-lg">
+  <div class="col-12">
+
+    <div class="d-flex flex-items-center mb-3">
+      <h1 class="overflow-hidden flex-auto">
+        File đính kèm
+      </h1>
+    </div>
+    {{if .Comments}}
+    <div class="Box">
+      <div>
+        {{range .Comments}}
+        <div class="Box-row Box-row--hover-gray d-flex flex-items-center">
+          <div class="flex-auto d-flex">
+            <div class="h2 avatar CircleBadge CircleBadge--small color-bg-emphasis color-fg-on-emphasis" width="38" height="38">
+              <stromg>{{ if .Poster.FirstName }}{{ upper (slice .Poster.FirstName 0 1) }}{{ end}}{{ if .Poster.LastName }}{{ upper (slice .Poster.LastName 0 1) }}{{ end}}</stromg>
+            </div>
+            <div class="ml-2">
+              <div class="d-flex">
+                <strong class="color-fg-accent">{{ .Poster.FirstName}} {{ .Poster.LastName }}</strong>
+              </div>
+              <div class="text-small color-fg-subtle" style="word-wrap: break-word;max-width: 750px;margin-left: auto;margin-right: auto;">{{ .Message }}</div>
+            </div>
+          </div>
+
+          <a class="btn btn-xs mr-1" href="/admin/comments/{{.ID}}/changeCensorship">Duyệt</a>
+          <a class="btn btn-danger btn-xs" href="/admin/comments/{{.ID}}/remove" onclick="return confirm('chắc nghen?');">xóa</a>
+        </div>
+        {{end}}
+      </div>
+    </div>
+
+    {{else}}
+    <div class="blankslate">
+        <img referrerpolicy="no-referrer"
+            src="https://media.discordapp.net/attachments/523522129296097290/981393406934806568/cry-min.jpg?width=112&height=112"
+            alt="anime not found" class="blankslate-image" />
+            <h3 class="blankslate-heading">Chưa có bình luận nào</h3>
+            <p>Hãy quay lại sau khi có bình luận từ người dùng.</p>
+    </div>
+    {{end}}
+
+  {{template "pagination" . }}
+</div>
+</div>
+{{end}}

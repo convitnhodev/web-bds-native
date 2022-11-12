@@ -95,7 +95,7 @@ type Post struct {
 type Comment struct {
 	ID           int
 	UserId       int
-	ParrentId    int
+	ParrentId    *int
 	Poster       UserInfo
 	Slug         string
 	Message      string

@@ -505,7 +505,29 @@ func (a *router) adminRemovePost(w http.ResponseWriter, r *http.Request) {
 
 func (a *router) adminChangeCensorshipComment(w http.ResponseWriter, r *http.Request) {
 	a.App.Comments.ChangeCensorship(r.URL.Query().Get(":id"))
-	w.Write([]byte("Ok"))
+
+	http.Redirect(w, r, "/admin/comments", http.StatusSeeOther)
+}
+
+func (a *router) adminComments(w http.ResponseWriter, r *http.Request) {
+	p := a.App.Comments.Pagination.Query(r.URL)
+
+	comments, err := a.App.Comments.Find()
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "bad request", 400)
+		return
+	}
+
+	a.adminrender(w, r, "comments.page.html", &templateData{
+		Comments:   comments,
+		Pagination: p,
+	})
+}
+
+func (a *router) adminRemoveComent(w http.ResponseWriter, r *http.Request) {
+	a.App.Comments.Remove(r.URL.Query().Get(":id"))
+	http.Redirect(w, r, "/admin/comments", http.StatusSeeOther)
 }
 
 func registerAdminRoute(mux *pat.PatternServeMux, a *router) {
@@ -529,7 +551,10 @@ func registerAdminRoute(mux *pat.PatternServeMux, a *router) {
 	mux.Get("/admin/posts/:id/update", use(a.adminUpdatePost, a.isadmin))
 	mux.Post("/admin/posts/:id/update", use(a.adminUpdatePost, a.isadmin))
 	mux.Get("/admin/posts/:id/remove", use(a.adminRemovePost, a.isadmin))
+
+	mux.Get("/admin/comments", use(a.adminComments, a.isadmin))
 	mux.Get("/admin/comments/:id/changeCensorship", use(a.adminChangeCensorshipComment, a.isadmin))
+	mux.Get("/admin/comments/:id/remove", use(a.adminRemoveComent, a.isadmin))
 
 	mux.Get("/admin/users", use(a.adminUsers, a.isadmin))
 	mux.Get("/admin/users/:id/detail", use(a.adminUsersDetail, a.isadmin))

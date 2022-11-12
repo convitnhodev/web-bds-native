@@ -50,11 +50,36 @@ func scanComment(r scanner, o *models.Comment) error {
 }
 
 func (m *CommentModel) query(s string) string {
-	return fmt.Sprintf(`SELECT %s FROM comments %s LEFT JOIN users ON comments.user_id = users.id`, strings.Join(commentUserColumes, ","), s)
+	return fmt.Sprintf(`SELECT %s FROM comments LEFT JOIN users ON comments.user_id = users.id %s`, strings.Join(commentUserColumes, ","), s)
 }
 
 func (m *CommentModel) count(s string) string {
 	return fmt.Sprintf(`SELECT count(*) FROM comments %s`, s)
+}
+
+func (m *CommentModel) Find() ([]*models.Comment, error) {
+	q := m.query("WHERE is_censorship = False ORDER BY comments.id desc")
+	count := m.count("")
+
+	if err := m.Pagination.Count(count); err != nil {
+		return nil, err
+	}
+
+	rows, err := m.DB.Query(m.Pagination.Generate(q))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	list := []*models.Comment{}
+	for rows.Next() {
+		o := &models.Comment{}
+		if err := scanComment(rows, o); err != nil {
+			log.Println(err)
+		}
+		list = append(list, o)
+	}
+	return list, nil
 }
 
 func (m *CommentModel) Slug(slug string) ([]*models.Comment, error) {
@@ -99,12 +124,21 @@ func (m *CommentModel) Create(f *form.Form) (*models.Comment, error) {
 	return o, nil
 }
 
+func (m *CommentModel) Remove(id string) error {
+	q := "DELETE FROM comments WHERE comments.id = $1;"
+	_, err := m.DB.Exec(q,
+		id,
+	)
+
+	return err
+}
+
 func (m *CommentModel) ChangeCensorship(id string) error {
 	q := `
 		UPDATE comments SET
-			comments.updated_at = now(),
-			comments.is_censorship = not(comments.is_censorship)
-		WHERE id = $2`
+			updated_at = now(),
+			is_censorship = not(is_censorship)
+		WHERE id = $1`
 
 	_, err := m.DB.Exec(q,
 		id,
