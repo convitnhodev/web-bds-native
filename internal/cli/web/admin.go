@@ -3,14 +3,12 @@ package web
 import (
 	"bytes"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
-	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/bmizerany/pat"
+	"github.com/deeincom/deeincom/pkg/form"
 )
 
 func (a *router) adminrender(w http.ResponseWriter, r *http.Request, name string, td *templateData) {
@@ -233,28 +231,23 @@ func (a *router) adminUpdateAttachment(w http.ResponseWriter, r *http.Request) {
 
 		file, handler, err := r.FormFile("UploadFile")
 		if err != nil {
+			log.Println(err)
 			f.Errors.Add("err", "err_could_not_upload")
 			return
 		}
 		defer file.Close()
 
-		f.Set("Size", fmt.Sprint(handler.Size))
-
-		// Create file
-		dst, err := os.Create(filepath.Join("upload", handler.Filename))
+		fileName, err := a.App.LocalFile.UploadFile(fmt.Sprintf("products/%d/", attachment.Product.ID), file, handler)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		defer dst.Close()
-
-		// Copy the uploaded file to the created file on the filesystem
-		if _, err := io.Copy(dst, file); err != nil {
+			log.Println(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		f.Set("Link", "https://cdn.deein.com/"+handler.Filename)
+		link := a.App.Config.CDNRoot + *fileName
+
+		f.Set("Size", fmt.Sprint(handler.Size))
+		f.Set("Link", link)
 
 		if err := a.App.Attachments.Update(attachment, f); err != nil {
 			log.Println(err)
@@ -314,6 +307,42 @@ func (a *router) adminUpdateProduct(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func (a *router) adminUpdateProductMedia(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
+	productId := query.Get(":id")
+	attachmentId := query.Get(":attachmentId")
+	typeMedia := query.Get("typeMedia")
+
+	attachment, err := a.App.Attachments.ID(attachmentId)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "500 - internal server error", 500)
+		return
+	}
+
+	key := ""
+
+	switch typeMedia {
+	case "poster":
+		key = "poster_link"
+	case "houseCertificate":
+		key = "house_certificate_link"
+	case "financePlan":
+		key = "finance_plan_link"
+	default:
+		http.Error(w, "500 - internal server error", 500)
+		return
+	}
+
+	if err := a.App.Products.Set(productId, key, attachment.Link); err != nil {
+		log.Println(err)
+		http.Error(w, "500 - internal server error", 500)
+		return
+	}
+
+	http.Redirect(w, r, fmt.Sprintf("/admin/products/%s/attachments", productId), http.StatusSeeOther)
+}
+
 func (a *router) adminPosts(w http.ResponseWriter, r *http.Request) {
 	p := a.App.Posts.Pagination.Query(r.URL)
 
@@ -325,22 +354,79 @@ func (a *router) adminPosts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	a.adminrender(w, r, "posts.page.html", &templateData{
-		Posts: posts,
+		Posts:      posts,
 		Pagination: p,
 	})
 }
 
 func (a *router) adminCreatePost(w http.ResponseWriter, r *http.Request) {
-	id := a.session.GetInt(r, "user")
-	post, err := a.App.Posts.Create(id, "blog")
+	f := form.Form{}
 
-	if err != nil {
-		log.Println(err)
-		http.Error(w, "500 - internal server error", 500)
-		return
+	ok := false
+	defer func() {
+		if !ok {
+			a.adminrender(w, r, "posts.update.page.html", &templateData{
+				Form: &f,
+			})
+		}
+	}()
+
+	if r.Method == "POST" {
+		if err := r.ParseMultipartForm(10 << 20); err != nil {
+			log.Println(err)
+			f.Errors.Add("err", "err_parse_form")
+			return
+		}
+
+		f.Values = r.PostForm
+		f.Required("Title")
+
+		if !f.Valid() {
+			log.Println("form invalid", f.Errors)
+			return
+		}
+
+		id := a.session.GetInt(r, "user")
+		post, err := a.App.Posts.Create(id, "blog")
+
+		if err != nil {
+			log.Println(err)
+			f.Errors.Add("err", "could_not_create_post")
+			return
+		}
+
+		file, handler, err := r.FormFile("Thumbnail")
+		if err != nil && http.ErrMissingFile != err {
+			log.Println(err)
+			f.Errors.Add("err", "err_could_not_upload")
+			return
+		}
+
+		if file != nil {
+			defer file.Close()
+
+			fileName, err := a.App.LocalFile.UploadFile(fmt.Sprintf("posts/%d/", post.ID), file, handler)
+			if err != nil {
+				log.Println(err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			thumbnail := a.App.Config.CDNRoot + *fileName
+			f.Set("Thumbnail", thumbnail)
+		} else {
+			f.Set("Thumbnail", post.Thumbnail)
+		}
+
+		if err := a.App.Posts.Update(post, &f); err != nil {
+			log.Println(err)
+			f.Errors.Add("err", "could_not_create_post")
+			return
+		}
+
+		ok = true
+		http.Redirect(w, r, "/admin/posts", http.StatusSeeOther)
 	}
-
-	http.Redirect(w, r, fmt.Sprintf("/admin/posts/%d/update", post.ID), http.StatusSeeOther)
 }
 
 func (a *router) adminUpdatePost(w http.ResponseWriter, r *http.Request) {
@@ -363,41 +449,41 @@ func (a *router) adminUpdatePost(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	if r.Method == "POST" {
-		if err := r.ParseForm(); err != nil {
+		if err := r.ParseMultipartForm(10 << 20); err != nil {
+			log.Println(err)
 			f.Errors.Add("err", "err_parse_form")
 			return
 		}
 
 		f.Values = r.PostForm
 		f.Required("Title")
-		
-		// TODO: upload Image
-		// file, handler, err := r.FormFile("Thumbnail")
-		// if err != nil {
-		// 	f.Errors.Add("err", "err_could_not_upload")
-		// 	return
-		// }
-		// defer file.Close()
-
-		// // Create file
-		// dst, err := os.Create(filepath.Join("upload", handler.Filename))
-		// if err != nil {
-		// 	http.Error(w, err.Error(), http.StatusInternalServerError)
-		// 	return
-		// }
-		// defer dst.Close()
-
-		// // Copy the uploaded file to the created file on the filesystem
-		// if _, err := io.Copy(dst, file); err != nil {
-		// 	http.Error(w, err.Error(), http.StatusInternalServerError)
-		// 	return
-		// }
-
-		f.Set("Thumbnail", "")
 
 		if !f.Valid() {
 			log.Println("form invalid", f.Errors)
 			return
+		}
+
+		file, handler, err := r.FormFile("Thumbnail")
+		if err != nil && http.ErrMissingFile != err {
+			log.Println(err)
+			f.Errors.Add("err", "err_could_not_upload")
+			return
+		}
+
+		if file != nil {
+			defer file.Close()
+
+			fileName, err := a.App.LocalFile.UploadFile(fmt.Sprintf("posts/%d/", post.ID), file, handler)
+			if err != nil {
+				log.Println(err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			thumbnail := a.App.Config.CDNRoot + *fileName
+			f.Set("Thumbnail", thumbnail)
+		} else {
+			f.Set("Thumbnail", post.Thumbnail)
 		}
 
 		if err := a.App.Posts.Update(post, f); err != nil {
@@ -432,12 +518,14 @@ func registerAdminRoute(mux *pat.PatternServeMux, a *router) {
 	mux.Get("/admin/products/create", use(a.adminCreateProduct, a.isadmin))
 
 	mux.Get("/admin/products/:id/attachments", use(a.adminAttachments, a.isadmin))
+	mux.Get("/admin/products/:id/attachments/:attachmentId/updateMedia", use(a.adminUpdateProductMedia, a.isadmin))
 	mux.Post("/admin/attachments/:id/update", use(a.adminUpdateAttachment, a.isadmin))
 	mux.Get("/admin/attachments/:id/update", use(a.adminUpdateAttachment, a.isadmin))
 	mux.Get("/admin/attachments/create", use(a.adminCreateAttachment, a.isadmin))
-	
+
 	mux.Get("/admin/posts", use(a.adminPosts, a.isadmin))
 	mux.Get("/admin/posts/create", use(a.adminCreatePost, a.isadmin))
+	mux.Post("/admin/posts/create", use(a.adminCreatePost, a.isadmin))
 	mux.Get("/admin/posts/:id/update", use(a.adminUpdatePost, a.isadmin))
 	mux.Post("/admin/posts/:id/update", use(a.adminUpdatePost, a.isadmin))
 	mux.Get("/admin/posts/:id/remove", use(a.adminRemovePost, a.isadmin))

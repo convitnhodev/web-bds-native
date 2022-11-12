@@ -123,7 +123,7 @@ func EqualStringSlice(s1, s2 []string) bool {
 	return true
 }
 
-// Contains return true if `s`` in `list`
+// Contains return true if `s“ in `list`
 func Contains(s string, list []string) bool {
 	for _, v := range list {
 		if v == s {

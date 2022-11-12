@@ -1,6 +1,8 @@
-package file
+package files
 
 import (
+	"crypto/sha1"
+	"encoding/hex"
 	"io"
 	"mime/multipart"
 	"os"
@@ -14,9 +16,7 @@ type LocalFile struct {
 	Root string
 }
 
-func (l *LocalFile) UploadFile(file *os.File, fileHeader *multipart.FileHeader) (*string, error) {
-	defer file.Close()
-
+func (l *LocalFile) UploadFile(prefix_path string, file io.Reader, fileHeader *multipart.FileHeader) (*string, error) {
 	header := fileHeader.Header
 	size := fileHeader.Size
 	Mb := int64(1024 * 1024)
@@ -48,7 +48,21 @@ func (l *LocalFile) UploadFile(file *os.File, fileHeader *multipart.FileHeader) 
 		return nil, errors.New("File type no support")
 	}
 
-	dstFilename := filepath.Join(l.Root, fileHeader.Filename)
+	root := filepath.Join(l.Root, prefix_path)
+	if _, err := os.Stat(root); os.IsNotExist(err) {
+		err := os.MkdirAll(root, os.ModeDir)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	h := sha1.New()
+	ext := filepath.Ext(fileHeader.Filename)
+	fileName := strings.TrimSuffix(fileHeader.Filename, ext)
+	h.Write([]byte(fileName))
+	sha1_hash := hex.EncodeToString(h.Sum(nil)) + ext
+
+	dstFilename := filepath.Join(root, sha1_hash)
 	dst, err := os.Create(dstFilename)
 	if err != nil {
 		return nil, err

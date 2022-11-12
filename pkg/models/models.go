@@ -39,33 +39,36 @@ type Attachment struct {
 }
 
 type Product struct {
-	ID                int
-	Title             string
-	Short             string
-	Full              string
-	FullContent       string
-	City              string
-	District          string
-	Ward              string
-	AddressNumber     string
-	Street            string
-	HouseDirection    string
-	BalconyDirection  string
-	BusinessAdvantage string
-	FinancialPlan     string
-	Legal             string
-	Furniture         string
-	Slug              string
-	Type              string
-	Area              int
-	Bedroom           int
-	Toilet            int
-	Floor             int
-	FrontWidth        int
-	StreetWidth       int
-	PavementWidth     int
-	CreatedAt         time.Time
-	UpdatedAt         time.Time
+	ID                   int
+	Title                string
+	Short                string
+	Full                 string
+	FullContent          string
+	City                 string
+	District             string
+	Ward                 string
+	AddressNumber        string
+	Street               string
+	HouseDirection       string
+	BalconyDirection     string
+	BusinessAdvantage    string
+	FinancialPlan        string
+	Legal                string
+	Furniture            string
+	Slug                 string
+	Type                 string
+	PosterLink           string
+	HouseCertificateLink string
+	FinancePlanLink      string
+	Area                 int
+	Bedroom              int
+	Toilet               int
+	Floor                int
+	FrontWidth           int
+	StreetWidth          int
+	PavementWidth        int
+	CreatedAt            time.Time
+	UpdatedAt            time.Time
 }
 
 type UserInfo struct {
@@ -150,6 +153,8 @@ func (o *Attachment) Form() *form.Form {
 
 func (o *Post) Form() *form.Form {
 	f := form.New(nil)
+
+	f.Set("ID", fmt.Sprint(o.ID))
 	f.Set("Title", o.Title)
 	f.Set("Content", o.Content)
 	f.Set("Tags", strings.Join(o.Tags, ", "))

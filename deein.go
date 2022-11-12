@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/deeincom/deeincom/config"
+	"github.com/deeincom/deeincom/pkg/files"
 	"github.com/deeincom/deeincom/pkg/models/db"
 	"github.com/deeincom/deeincom/pkg/telegram"
 	"github.com/pkg/errors"
@@ -24,8 +25,9 @@ type App struct {
 	AdminProducts    *db.ProductModel
 	Attachments      *db.AttachmentModel
 	AdminAttachments *db.AttachmentModel
-	Posts 			 *db.PostModel
-	Comments		 *db.CommentModel
+	Posts            *db.PostModel
+	Comments         *db.CommentModel
+	LocalFile        *files.LocalFile
 }
 
 // New return an app instance
@@ -37,8 +39,11 @@ func New(c *config.Config) (*App, error) {
 		log.Println("DATABASE: OK")
 	}
 
+	lf := files.LocalFile{c.UploadingRoot}
+
 	app := &App{
-		Config: c,
+		LocalFile: &lf,
+		Config:    c,
 		Migration: &db.MigrationModel{
 			DB: conn,
 		},
@@ -62,7 +67,7 @@ func New(c *config.Config) (*App, error) {
 				Data:    &db.PaginationData{Limit: 25},
 			},
 		},
-		Posts: &db.PostModel {
+		Posts: &db.PostModel{
 			DB: conn,
 			Pagination: &db.Pagination{
 				DB:      conn,
@@ -72,7 +77,7 @@ func New(c *config.Config) (*App, error) {
 				Data:    &db.PaginationData{Limit: 25},
 			},
 		},
-		Comments: &db.CommentModel {
+		Comments: &db.CommentModel{
 			DB: conn,
 			Pagination: &db.Pagination{
 				DB:      conn,

@@ -25,15 +25,78 @@
         </ul>
       </details>
     </div>
-
     {{if .Attachments}}
     <div class="Box">
       <div>
         {{range .Attachments}}
         <div class="Box-row Box-row--hover-gray d-flex flex-items-center">
           <span class="mr-3">{{.Title}}</span>
+          {{ if eq .Link $.Product.PosterLink }}
+          <span class="Label ml-1 Label--severe">
+            Poster
+          </span>
+          {{ end }}
+          {{ if eq .Link $.Product.HouseCertificateLink }}
+          <span class="Label ml-1 Label--severe">
+            Sổ đỏ
+          </span>
+          {{ end }}
+          {{ if eq .Link $.Product.FinancePlanLink }}
+          <span class="Label ml-1 Label--severe">
+            Kế hoạch tài chính chi tiết
+          </span>
+          {{ end }}
           <div class="flex-auto">
           </div>
+          
+          {{ if or (and (eq .ContentType `image`) (or (not (eq .Link $.Product.PosterLink)) (not (eq .Link $.Product.HouseCertificateLink))))
+              (and (eq .ContentType `document`) (or (not (eq .Link $.Product.HouseCertificateLink)) (not (eq .Link $.Product.FinancePlanLink))))
+            }}
+          <details class="dropdown details-reset details-overlay d-inline-block mr-1">
+            <summary class="btn btn-primary" aria-haspopup="true">
+              Chọn làm
+              <div class="dropdown-caret"></div>
+            </summary>
+            <ul class="dropdown-menu dropdown-menu-se">
+              {{if (eq .ContentType `image`) }}
+                {{ if not (eq .Link $.Product.PosterLink) }}
+                <li>
+                  <a class="dropdown-item" role="menuitem" 
+                    href="/admin/products/{{ .Product.ID }}/attachments/{{ .ID }}/updateMedia?typeMedia=poster"
+                  >Chọn làm poster</a>
+                </li>
+                {{ end }}
+                
+                {{ if not (eq .Link $.Product.HouseCertificateLink) }}
+                <li>
+                  <a class="dropdown-item" role="menuitem" 
+                    href="/admin/products/{{ .Product.ID }}/attachments/{{ .ID }}/updateMedia?typeMedia=houseCertificate"
+                    >Chọn làm sổ đỏ</a>
+                </li>
+                {{ end }}
+
+              {{end}}
+
+              {{if eq .ContentType `document` }}
+                {{ if not (eq .Link $.Product.HouseCertificateLink) }}
+                <li>
+                  <a class="dropdown-item" role="menuitem" 
+                    href="/admin/products/{{ .Product.ID }}/attachments/{{ .ID }}/updateMedia?typeMedia=houseCertificate"
+                    >Chọn làm sổ đỏ</a>
+                </li>
+                {{ end }}
+                {{ if not (eq .Link $.Product.FinancePlanLink) }}
+                <li>
+                  <a class="dropdown-item" role="menuitem" 
+                    href="/admin/products/{{ .Product.ID }}/attachments/{{ .ID }}/updateMedia?typeMedia=financePlan"
+                    >Kế hoạch tài chính chi tiết</a>
+                </li>
+                {{ end }}
+              {{end}}
+            </ul>
+          </details>
+          {{ end }}
+
           <a class="btn btn-xs mr-1" href="/admin/attachments/{{.ID}}/update">sửa</a>
           <a class="btn btn-danger btn-xs" href="/admin/attachments/{{.ID}}" onclick="return confirm('chắc nghen?');">xóa</a>
         </div>

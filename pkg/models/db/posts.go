@@ -190,13 +190,19 @@ func (m *PostModel) Update(o *models.Post, f *form.Form) error {
 		}
 	}
 
+	var publishedAt *string = nil
+	if len(f.Get("PublishedAt")) > 0 {
+		time := fmt.Sprintf("{%s} +0700", f.Get("PublishedAt"))
+		publishedAt = &time
+	}
+
 	_, err := m.DB.Exec(q,
 		o.ID,
 		f.Get("Title"),
 		f.Get("Short"),
 		slugify.Slugify(f.Get("Title")),
 		f.Get("Content"),
-		fmt.Sprintf("{%s} +0700", f.Get("PublishedAt")),
+		&publishedAt,
 		fmt.Sprintf("{%s}", strings.Join(tags, ",")),
 		f.Get("Thumbnail"),
 	)

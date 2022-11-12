@@ -18,8 +18,7 @@
         </div>
         {{end}}
 
-
-        <form method="POST">
+        <form method="POST" enctype="multipart/form-data">
             {{with .Form}}
 
             <div class="form-group {{with .Errors.Get `Title`}}errored{{end}}">
@@ -86,7 +85,10 @@
                     <label>Ảnh nhỏ</label>
                 </div>
                 <div class="form-group-body">
-                    <img id="preview" class="avatar" alt="jonrohan" src="{{ if .Get `Thumbnail` }} {{ .Get `Thumbnail` }} {{else}}/static/images/image.svg{{end}}" width="58" height="58"/>
+                    <img id="preview" class="avatar" alt="jonrohan"
+                        src="{{ if .Get `Thumbnail` }} {{ .Get `Thumbnail` }} {{else}}/static/images/image.svg{{end}}"
+                        width="58" height="58"
+                    />
                     <script>
                         let loadFile = function(event) {
                             let preview = document.getElementById('preview');
@@ -119,7 +121,7 @@
                 {{end}}
             </div>
 
-            <button class="btn btn-primary" type="submit">Cập nhật</button>
+            <button class="btn btn-primary" type="submit">{{ if eq (.Get `ID`) "" }}Tạo{{(.Get `ID`) }} {{else}}Cập nhật{{end}}</button>
             {{end}}
         </form>
 

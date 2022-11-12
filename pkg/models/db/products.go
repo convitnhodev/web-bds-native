@@ -45,6 +45,9 @@ var productColumes = []string{
 	"products.business_advantage",
 	"products.legal",
 	"products.area",
+	"products.poster_link",
+	"products.house_certificate_link",
+	"products.finance_plan_link",
 }
 
 func (m *ProductModel) query(s string) string {
@@ -84,6 +87,9 @@ func scanProduct(r scanner, o *models.Product) error {
 		&o.BusinessAdvantage,
 		&o.Legal,
 		&o.Area,
+		&o.PosterLink,
+		&o.HouseCertificateLink,
+		&o.FinancePlanLink,
 	); err != nil {
 		return errors.Wrap(err, "scanProduct")
 	}
@@ -205,6 +211,20 @@ func (m *ProductModel) Update(o *models.Product, f *form.Form) error {
 		f.Get("Legal"),
 		f.Get("Area"),
 	)
+
+	return err
+}
+
+func (m *ProductModel) Set(id string, key string, value string) error {
+	q := fmt.Sprintf(`
+		UPDATE
+			products
+		SET
+			%s = $2
+		WHERE id = $1
+	`, key)
+
+	_, err := m.DB.Exec(q, id, value)
 
 	return err
 }
