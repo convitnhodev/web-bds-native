@@ -471,6 +471,114 @@ func (a *router) createComment(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Ok"))
 }
 
+func (a *router) uploadKYC(w http.ResponseWriter, r *http.Request) {
+	f := form.Form{}
+	userId := a.session.GetString(r, "user")
+	user, err := a.App.Users.ID(userId)
+	ok := false
+
+	if err != nil {
+		a.render(w, r, "500.page.html", &templateData{})
+		return
+	}
+
+	defer func() {
+		if !ok {
+			a.render(w, r, "kyc.page.html", &templateData{
+				Form: &f,
+				User: user,
+			})
+		}
+	}()
+
+	if r.Method == "POST" {
+		if err := r.ParseMultipartForm(30 << 20); err != nil {
+			log.Println(err)
+			f.Errors.Add("err", "err_parse_form")
+			return
+		}
+
+		f.Values = r.PostForm
+		f.Required("FrontIdentityCard")
+		f.Required("BackIdentityCard")
+		f.Required("SelfieImage")
+
+		if !f.Valid() {
+			log.Println("form invalid", f.Errors)
+			return
+		}
+
+		// Front file
+		frontFile, handler, err := r.FormFile("FrontIdentityCard")
+		if err != nil && http.ErrMissingFile != err {
+			log.Println(err)
+			f.Errors.Add("err", "err_could_not_upload")
+			return
+		}
+		defer frontFile.Close()
+
+		frontFileName, err := a.App.LocalFile.UploadFile(fmt.Sprintf("users.%s/", userId), frontFile, handler)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		f.Set("FrontIdentityCard", *frontFileName)
+
+		// Back file
+		backFile, handler, err := r.FormFile("FrontIdentityCard")
+		if err != nil && http.ErrMissingFile != err {
+			log.Println(err)
+			f.Errors.Add("err", "err_could_not_upload")
+			return
+		}
+		defer frontFile.Close()
+
+		backFileName, err := a.App.LocalFile.UploadFile(fmt.Sprintf("users.%s/", userId), backFile, handler)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		f.Set("BackIdentityCard", *backFileName)
+
+		// Selfie file
+		selfieFile, handler, err := r.FormFile("FrontIdentityCard")
+		if err != nil && http.ErrMissingFile != err {
+			log.Println(err)
+			f.Errors.Add("err", "err_could_not_upload")
+			return
+		}
+		defer frontFile.Close()
+
+		selfieFileName, err := a.App.LocalFile.UploadFile(fmt.Sprintf("users.%s/", userId), selfieFile, handler)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		f.Set("SelfieImage", *selfieFileName)
+
+		if err := a.App.Users.UpdateKYCStatus(userId, "submited_kyc"); err != nil {
+			log.Println(err)
+			f.Errors.Add("err", "could_not_kyc")
+			return
+		}
+
+		if err := a.App.KYC.SubmitKYC(userId, &f); err != nil {
+			log.Println(err)
+			f.Errors.Add("err", "could_not_kyc")
+			return
+		}
+
+		ok = true
+		http.Redirect(w, r, "kyc.page.html", http.StatusSeeOther)
+	}
+}
+
 func (a *router) robots(w http.ResponseWriter, r *http.Request) {
 	f, err := os.Open("./robots.txt")
 	if err == nil {
@@ -540,6 +648,10 @@ func run(c *root.Cmd) error {
 
 	// comment
 	mux.Post("/comments/:slug/create", use(a.createComment, a.islogined))
+
+	// kyc
+	mux.Get("/kyc", use(a.uploadKYC, a.islogined))
+	mux.Post("/kyc", use(a.uploadKYC, a.islogined))
 
 	mux.Get("/robots.txt", use(a.robots))
 

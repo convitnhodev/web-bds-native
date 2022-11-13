@@ -9,21 +9,29 @@ import (
 
 // Config for this project
 type Config struct {
-	DB               string
-	ProductTypes     []string
-	TelegramChatID   string
-	TelegramToken    string
-	PostmarkApiToken string // token để gởi email của postmark.com
-	ESMS_APIKEY      string // apikey cua esms.vn
-	ESMS_SECRET      string // secret cua esms.vn
-	UploadingRoot    string
-	CDNRoot          string
+	DB                      string
+	ProductTypes            []string
+	TelegramChatID          string
+	TelegramToken           string
+	PostmarkApiToken        string // token để gởi email của postmark.com
+	ESMS_APIKEY             string // apikey cua esms.vn
+	ESMS_SECRET             string // secret cua esms.vn
+	UploadingRoot           string
+	PrefixUploadingRootLink string
 }
 
 // Default config
 func (c *Config) Default() error {
 	if c.DB == "" {
 		return errors.New("please config postgres db (config.json)")
+	}
+
+	if c.PrefixUploadingRootLink == "" {
+		c.PrefixUploadingRootLink = "/"
+	}
+
+	if c.UploadingRoot == "" {
+		c.UploadingRoot = "upload"
 	}
 
 	if len(c.ProductTypes) == 0 {

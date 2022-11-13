@@ -131,8 +131,9 @@ func (a *router) adminProducts(w http.ResponseWriter, r *http.Request) {
 
 func (a *router) adminUsers(w http.ResponseWriter, r *http.Request) {
 	p := a.App.AdminUsers.Pagination.Query(r.URL)
+	kycStatus := r.URL.Query().Get("kyc_status")
 
-	users, err := a.App.AdminUsers.Find()
+	users, err := a.App.AdminUsers.Find(kycStatus)
 	if err != nil {
 		log.Println(err)
 		http.Error(w, "bad request", 400)
@@ -140,6 +141,7 @@ func (a *router) adminUsers(w http.ResponseWriter, r *http.Request) {
 	}
 	a.adminrender(w, r, "users.page.html", &templateData{
 		Users:      users,
+		IsKYCQuery: kycStatus != "",
 		Pagination: p,
 	})
 }
@@ -152,10 +154,22 @@ func (a *router) adminUsersDetail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	kycList, err := a.App.KYC.User(r.URL.Query().Get(":id"))
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "bad request", 400)
+		return
+	}
+
 	a.adminrender(w, r, "users.detail.page.html", &templateData{
-		User: user,
-		Logs: nil,
+		User:    user,
+		KYCList: kycList,
+		Logs:    nil,
 	})
+}
+
+func (a *router) adminUserKYC(w http.ResponseWriter, r *http.Request) {
+
 }
 
 func (a *router) adminCreateProduct(w http.ResponseWriter, r *http.Request) {
@@ -237,17 +251,15 @@ func (a *router) adminUpdateAttachment(w http.ResponseWriter, r *http.Request) {
 		}
 		defer file.Close()
 
-		fileName, err := a.App.LocalFile.UploadFile(fmt.Sprintf("products/%d/", attachment.Product.ID), file, handler)
+		fileName, err := a.App.LocalFile.UploadFile(fmt.Sprintf("products.%d/", attachment.Product.ID), file, handler)
 		if err != nil {
 			log.Println(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		link := a.App.Config.CDNRoot + *fileName
-
 		f.Set("Size", fmt.Sprint(handler.Size))
-		f.Set("Link", link)
+		f.Set("Link", *fileName)
 
 		if err := a.App.Attachments.Update(attachment, f); err != nil {
 			log.Println(err)
@@ -405,15 +417,14 @@ func (a *router) adminCreatePost(w http.ResponseWriter, r *http.Request) {
 		if file != nil {
 			defer file.Close()
 
-			fileName, err := a.App.LocalFile.UploadFile(fmt.Sprintf("posts/%d/", post.ID), file, handler)
+			fileName, err := a.App.LocalFile.UploadFile(fmt.Sprintf("posts.%d/", post.ID), file, handler)
 			if err != nil {
 				log.Println(err)
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
 
-			thumbnail := a.App.Config.CDNRoot + *fileName
-			f.Set("Thumbnail", thumbnail)
+			f.Set("Thumbnail", *fileName)
 		} else {
 			f.Set("Thumbnail", post.Thumbnail)
 		}
@@ -473,15 +484,14 @@ func (a *router) adminUpdatePost(w http.ResponseWriter, r *http.Request) {
 		if file != nil {
 			defer file.Close()
 
-			fileName, err := a.App.LocalFile.UploadFile(fmt.Sprintf("posts/%d/", post.ID), file, handler)
+			fileName, err := a.App.LocalFile.UploadFile(fmt.Sprintf("posts.%d/", post.ID), file, handler)
 			if err != nil {
 				log.Println(err)
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
 
-			thumbnail := a.App.Config.CDNRoot + *fileName
-			f.Set("Thumbnail", thumbnail)
+			f.Set("Thumbnail", *fileName)
 		} else {
 			f.Set("Thumbnail", post.Thumbnail)
 		}
@@ -558,4 +568,7 @@ func registerAdminRoute(mux *pat.PatternServeMux, a *router) {
 
 	mux.Get("/admin/users", use(a.adminUsers, a.isadmin))
 	mux.Get("/admin/users/:id/detail", use(a.adminUsersDetail, a.isadmin))
+
+	mux.Get("/admin/users/:id/kyc/:kycId/approve", use(a.adminUserKYC, a.isadmin))
+	mux.Post("/admin/users/:id/kyc/:kycId/approve", use(a.adminUserKYC, a.isadmin))
 }

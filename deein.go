@@ -27,6 +27,8 @@ type App struct {
 	AdminAttachments *db.AttachmentModel
 	Posts            *db.PostModel
 	Comments         *db.CommentModel
+	Files            *db.FileModel
+	KYC              *db.KYCModel
 	LocalFile        *files.LocalFile
 }
 
@@ -39,7 +41,21 @@ func New(c *config.Config) (*App, error) {
 		log.Println("DATABASE: OK")
 	}
 
-	lf := files.LocalFile{c.UploadingRoot}
+	Files := db.FileModel{
+		DB: conn,
+		Pagination: &db.Pagination{
+			DB:      conn,
+			Min:     25,
+			Max:     100,
+			Default: 25,
+			Data:    &db.PaginationData{Limit: 25},
+		},
+	}
+	lf := files.LocalFile{
+		c.UploadingRoot,
+		c.PrefixUploadingRootLink,
+		&Files,
+	}
 
 	app := &App{
 		LocalFile: &lf,
@@ -118,6 +134,17 @@ func New(c *config.Config) (*App, error) {
 			},
 		},
 		AdminAttachments: &db.AttachmentModel{
+			DB: conn,
+			Pagination: &db.Pagination{
+				DB:      conn,
+				Min:     25,
+				Max:     100,
+				Default: 25,
+				Data:    &db.PaginationData{Limit: 25},
+			},
+		},
+		Files: &Files,
+		KYC: &db.KYCModel{
 			DB: conn,
 			Pagination: &db.Pagination{
 				DB:      conn,

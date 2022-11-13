@@ -71,19 +71,13 @@ type Product struct {
 	UpdatedAt            time.Time
 }
 
-type UserInfo struct {
-	ID        int
-	FirstName string
-	LastName  string
-}
-
 type Post struct {
 	ID          int
 	Title       string
 	PostType    string
 	Slug        string
 	Thumbnail   string
-	Poster      UserInfo
+	Poster      User
 	Tags        []string
 	Short       string
 	Content     string
@@ -96,12 +90,36 @@ type Comment struct {
 	ID           int
 	UserId       int
 	ParrentId    *int
-	Poster       UserInfo
+	Poster       User
 	Slug         string
 	Message      string
 	IsCensorship bool
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
+}
+
+type File struct {
+	ID        int
+	LocalPath string
+	CloudLink string
+	Status    string
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+type KYC struct {
+	ID                int
+	UserId            int
+	FrontIdentityCard string
+	BackIdentityCard  string
+	SelfieImage       string
+	Feedback          string
+	Status            string
+	LastKYCFeedback   string
+	RejectedBy        int
+	ApprovedBy        int
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
 }
 
 func (o *Product) Form() *form.Form {
@@ -178,6 +196,14 @@ func (o *Comment) Form() *form.Form {
 
 	f.Set("Comment", o.Message)
 	f.Set("Slug", o.Slug)
+
+	return f
+}
+
+func (o *KYC) Form() *form.Form {
+	f := form.New(nil)
+
+	f.Set("LastKYCFeedback", o.LastKYCFeedback)
 
 	return f
 }

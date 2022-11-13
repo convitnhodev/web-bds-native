@@ -8,12 +8,27 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
+	"github.com/deeincom/deeincom/pkg/models/db"
 	"github.com/pkg/errors"
 )
 
 type LocalFile struct {
-	Root string
+	Root                    string
+	PrefixUploadingRootLink string
+	Files                   *db.FileModel
+}
+
+func (l *LocalFile) GenNamefile(filename string) string {
+	h := sha1.New()
+	ext := filepath.Ext(filename)
+	filenameWithoutExt := strings.TrimSuffix(filename, ext)
+
+	h.Write([]byte(filenameWithoutExt + "-" + time.Now().Format("20060102150405")))
+	sha1_hash := hex.EncodeToString(h.Sum(nil)) + ext
+
+	return sha1_hash
 }
 
 func (l *LocalFile) UploadFile(prefix_path string, file io.Reader, fileHeader *multipart.FileHeader) (*string, error) {
@@ -56,13 +71,7 @@ func (l *LocalFile) UploadFile(prefix_path string, file io.Reader, fileHeader *m
 		}
 	}
 
-	h := sha1.New()
-	ext := filepath.Ext(fileHeader.Filename)
-	fileName := strings.TrimSuffix(fileHeader.Filename, ext)
-	h.Write([]byte(fileName))
-	sha1_hash := hex.EncodeToString(h.Sum(nil)) + ext
-
-	dstFilename := filepath.Join(root, sha1_hash)
+	dstFilename := filepath.Join(root, l.GenNamefile(fileHeader.Filename))
 	dst, err := os.Create(dstFilename)
 	if err != nil {
 		return nil, err
@@ -71,6 +80,11 @@ func (l *LocalFile) UploadFile(prefix_path string, file io.Reader, fileHeader *m
 
 	// Copy the uploaded file to the created file on the filesystem
 	if _, err := io.Copy(dst, file); err != nil {
+		return nil, err
+	}
+
+	// Create new row for local file
+	if _, err := l.Files.Create(filepath.Join(l.PrefixUploadingRootLink, dstFilename)); err != nil {
 		return nil, err
 	}
 

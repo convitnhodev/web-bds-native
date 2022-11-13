@@ -30,7 +30,7 @@ var commentUserColumes = []string{
 }
 
 func scanComment(r scanner, o *models.Comment) error {
-	o.Poster = models.UserInfo{}
+	o.Poster = models.User{}
 	if err := r.Scan(
 		&o.ID,
 		&o.ParrentId,

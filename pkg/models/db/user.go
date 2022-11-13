@@ -186,10 +186,14 @@ func (m *UserModel) AddRole(user *models.User, role string) error {
 	return err
 }
 
-func (m *UserModel) Find() ([]*models.User, error) {
+func (m *UserModel) Find(kyc_status string) ([]*models.User, error) {
 	q := m.query("order by id desc")
-	count := m.count("")
 
+	if kyc_status != "" {
+		q = m.query(fmt.Sprintf("WHERE last_kyc_status = '%s' order by id desc", kyc_status))
+	}
+
+	count := m.count("")
 	if err := m.Pagination.Count(count); err != nil {
 		return nil, err
 	}
@@ -234,5 +238,20 @@ func (m *UserModel) LogSendVerifyPhone(user *models.User) error {
 		where id = $1
 	`
 	_, err := m.DB.Exec(q, user.ID, user.Phone, user.PhoneToken)
+	return err
+}
+
+func (m *UserModel) UpdateKYCStatus(userId string, status string) error {
+	q := `
+		UPDATE users SET
+			updated_at = now(),
+			last_kyc_status = $2
+		WHERE id = $1
+	`
+	_, err := m.DB.Exec(q,
+		userId,
+		status,
+	)
+
 	return err
 }

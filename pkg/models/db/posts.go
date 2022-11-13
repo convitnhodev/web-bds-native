@@ -38,7 +38,7 @@ var postUserColumes = []string{
 
 func scanPost(r scanner, o *models.Post, includePoster bool) error {
 	if includePoster {
-		o.Poster = models.UserInfo{}
+		o.Poster = models.User{}
 		if err := r.Scan(
 			&o.ID,
 			&o.Title,

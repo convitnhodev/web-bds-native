@@ -8,9 +8,15 @@
 
     <div class="d-flex flex-items-center mb-3">
       <h1 class="overflow-hidden flex-auto">
-        Danh sách thành viên
+        {{ if .IsKYCQuery }}Danh sách thành viên đang chờ KYC{{else}}Danh sách thành viên{{end}}
       </h1>
     </div>
+
+    {{ if not .IsKYCQuery }}
+    <div class="BtnGroup d-block mb-2">
+      <a href="/admin/users?kyc_status=submited_kyc" class="BtnGroup-item btn" type="button">User chờ KYC</a>
+    </div>
+    {{end}}
 
     {{if .Users}}
     <div class="Box">
