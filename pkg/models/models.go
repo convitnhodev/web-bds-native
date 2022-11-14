@@ -116,8 +116,8 @@ type KYC struct {
 	Feedback          string
 	Status            string
 	LastKYCFeedback   string
-	RejectedBy        int
-	ApprovedBy        int
+	RejectedBy        *int
+	ApprovedBy        *int
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
 }

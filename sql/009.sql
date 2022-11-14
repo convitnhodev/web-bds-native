@@ -21,8 +21,8 @@ create table kyc (
     back_identity_card text not null default '',
     selfie_image text not null default '',
     feedback text not null default '',
-    approved_by int not null,
-    rejected_by int not null,
+    approved_by int,
+    rejected_by int,
     status user_kyc_status not null default 'submited_kyc',
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now()
