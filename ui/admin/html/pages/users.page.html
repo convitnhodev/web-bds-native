@@ -12,7 +12,11 @@
       </h1>
     </div>
 
-    {{ if not .IsKYCQuery }}
+    {{ if .IsKYCQuery }}
+    <div class="BtnGroup d-block mb-2">
+      <a href="/admin/users" class="BtnGroup-item btn" type="button">Tất cả User</a>
+    </div>
+    {{ else }}
     <div class="BtnGroup d-block mb-2">
       <a href="/admin/users?kyc_status=submited_kyc" class="BtnGroup-item btn" type="button">User chờ KYC</a>
     </div>
