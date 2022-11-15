@@ -15,9 +15,9 @@ import (
 )
 
 type LocalFile struct {
-	Root                    string
-	PrefixUploadingRootLink string
-	Files                   *db.FileModel
+	Root                   string
+	MappingUploadLocalLink string
+	Files                  *db.FileModel
 }
 
 func (l *LocalFile) GenNamefile(filename string) string {
@@ -84,9 +84,10 @@ func (l *LocalFile) UploadFile(prefix_path string, file io.Reader, fileHeader *m
 	}
 
 	// Create new row for local file
-	if _, err := l.Files.Create(filepath.Join(l.PrefixUploadingRootLink, dstFilename)); err != nil {
+	localLink := filepath.Join(l.MappingUploadLocalLink, strings.TrimPrefix(dstFilename, l.Root))
+	if _, err := l.Files.Create(localLink); err != nil {
 		return nil, err
 	}
 
-	return &dstFilename, nil
+	return &localLink, nil
 }

@@ -12,4 +12,6 @@ require (
 	github.com/microcosm-cc/bluemonday v1.0.21
 	github.com/pkg/errors v0.9.1
 	golang.org/x/crypto v0.1.0
+	github.com/go-co-op/gocron v1.18.0
+	github.com/kurin/blazer v0.5.3
 )

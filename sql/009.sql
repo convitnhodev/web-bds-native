@@ -11,7 +11,7 @@ create table files (
 );
 
 CREATE INDEX idx_files_local_path ON files USING btree(local_path);
-CREATE INDEX idx_files_created_at ON files USING btree(created_at);
+CREATE INDEX idx_files_cloud_link ON files USING btree(cloud_link);
 
 create type user_kyc_status as enum ('no_kyc', 'submited_kyc', 'approved_kyc', 'rejected_kyc');
 create table kyc (

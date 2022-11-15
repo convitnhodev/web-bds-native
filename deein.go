@@ -30,6 +30,7 @@ type App struct {
 	Files            *db.FileModel
 	KYC              *db.KYCModel
 	LocalFile        *files.LocalFile
+	B2Scheduler      *files.LocalToB2
 }
 
 // New return an app instance
@@ -51,15 +52,34 @@ func New(c *config.Config) (*App, error) {
 			Data:    &db.PaginationData{Limit: 25},
 		},
 	}
+
 	lf := files.LocalFile{
 		c.UploadingRoot,
-		c.PrefixUploadingRootLink,
+		c.MappingUploadLocalLink,
 		&Files,
 	}
 
+	B2Scheduler, err := files.NewB2Scheduler(
+		c.B2AccountId,
+		c.B2AccountKey,
+		c.B2BucketName,
+		c.UploadToB2At,
+		c.B2Prefix,
+		c.UploadingRoot,
+		c.MappingUploadLocalLink,
+		&Files,
+	)
+
+	if err != nil {
+		return nil, errors.Wrap(err, "Backblaze scheduler")
+	}
+
+	B2Scheduler.StartScheduler()
+
 	app := &App{
-		LocalFile: &lf,
-		Config:    c,
+		B2Scheduler: B2Scheduler,
+		LocalFile:   &lf,
+		Config:      c,
 		Migration: &db.MigrationModel{
 			DB: conn,
 		},

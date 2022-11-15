@@ -9,15 +9,20 @@ import (
 
 // Config for this project
 type Config struct {
-	DB                      string
-	ProductTypes            []string
-	TelegramChatID          string
-	TelegramToken           string
-	PostmarkApiToken        string // token để gởi email của postmark.com
-	ESMS_APIKEY             string // apikey cua esms.vn
-	ESMS_SECRET             string // secret cua esms.vn
-	UploadingRoot           string
-	PrefixUploadingRootLink string
+	DB                     string
+	ProductTypes           []string
+	TelegramChatID         string
+	TelegramToken          string
+	PostmarkApiToken       string // token để gởi email của postmark.com
+	ESMS_APIKEY            string // apikey cua esms.vn
+	ESMS_SECRET            string // secret cua esms.vn
+	B2Prefix               string
+	UploadingRoot          string
+	MappingUploadLocalLink string
+	B2BucketName           string
+	B2AccountId            string
+	B2AccountKey           string
+	UploadToB2At           string
 }
 
 // Default config
@@ -26,8 +31,28 @@ func (c *Config) Default() error {
 		return errors.New("please config postgres db (config.json)")
 	}
 
-	if c.PrefixUploadingRootLink == "" {
-		c.PrefixUploadingRootLink = "/"
+	if c.B2BucketName == "" {
+		return errors.New("please config B2BucketName backblaze(config.json)")
+	}
+
+	if c.B2AccountId == "" {
+		return errors.New("please config B2AccountId backblaze(config.json)")
+	}
+
+	if c.B2AccountKey == "" {
+		return errors.New("please config B2AccountKey backblaze(config.json)")
+	}
+
+	if c.UploadToB2At == "" {
+		c.UploadToB2At = "19:00"
+	}
+
+	if c.B2Prefix == "" {
+		c.B2Prefix = "upload"
+	}
+
+	if c.MappingUploadLocalLink == "" {
+		c.MappingUploadLocalLink = "/upload"
 	}
 
 	if c.UploadingRoot == "" {

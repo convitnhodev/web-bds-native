@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/deeincom/deeincom/pkg/models"
@@ -67,7 +68,29 @@ func (m *FileModel) Create(localPath string) (*models.File, error) {
 }
 
 func (m *FileModel) UploadCloudLink(localPath string, cloudLink string) error {
-	q := "UPDATE files (local_path) SET cloud_link = $2 WHERE files.local_path = $1"
+	q := "UPDATE files SET cloud_link = $2, status = 'sync' WHERE files.local_path = $1"
 	_, err := m.DB.Exec(q, localPath, cloudLink)
 	return err
+}
+
+func (m *FileModel) NotUpload() ([]*models.File, error) {
+	q := m.query(`WHERE files.cloud_link = ''`)
+
+	rows, err := m.DB.Query(q)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	list := []*models.File{}
+	for rows.Next() {
+		o := &models.File{}
+		if err := scanFile(rows, o); err != nil {
+			log.Println(err)
+		}
+		list = append(list, o)
+	}
+
+	return list, nil
 }
