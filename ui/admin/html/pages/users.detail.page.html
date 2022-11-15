@@ -2,6 +2,20 @@
 
 {{define "body"}}
 {{$label := split "accent:success:attention:severe:danger:open:closed:done:sponsors" ":"  }}
+<style> 
+  details-dialog {
+    position: fixed;
+    margin: 10vh auto;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 999;
+    max-height: 80vh;
+    max-width: 100vw;
+    width: 448px;
+    overflow: auto;
+  }
+</style>
 
 <div class="container-lg">
   <div class="col-12">
@@ -15,17 +29,176 @@
 
       </h1>
     </div>
-
+    
+    <!-- KYC details -->
     {{ if .KYCList }}
     <div class="Subhead">
       <h2 class="Subhead-heading">Thông tin KYC</h2>
     </div>
       {{ range .KYCList }}
-        <div class="Subhead-description">
-          Ngày tháng, {{ $.User.FirstName}} {{ $.User.LastName }} chờ duyệt KYC
+        {{ if eq .Status "submited_kyc" }}
+        <div class="Subhead-description mb-3">
+          Tại {{ .CreatedAt.Format "Ngày 02 Tháng 01 Năm 2006" }}, Người dùng <strong>{{ $.User.FirstName }} {{ $.User.LastName }}</strong> đang chờ chờ duyệt KYC
         </div>
-      {{ end}}
-    {{end}}
+        <div class="d-flex">
+          <div>
+            <details class="details-reset details-overlay details-overlay-dark" id="kyc-model-{{ .ID }}">
+              <summary class="btn mr-1" aria-haspopup="dialog">Xem hình KYC</summary>
+              <details-dialog class="Box Box--overlay d-flex flex-column anim-fade-in fast">
+                <div class="Box-header">
+                  <button class="Box-btn-octicon btn-octicon float-right" type="button" aria-label="Close dialog" data-close-dialog onclick="closeDialog('kyc-model-{{ .ID }}');">
+                    <svg class="octicon octicon-x" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true">
+                      <path fill-rule="evenodd" 
+                        d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z">
+                      </path>
+                    </svg>
+                  </button>
+                  <h3 class="Box-title">Hình KYC</h3>
+                </div>
+                <div class="overflow-auto">
+                  <ul>
+                    <li class="Box-row">
+                      <strong>Hình mặt trước</strong>
+                      <img class="avatar v-align-middle mr-2 mt-1" src="{{ .FrontIdentityCard }}"  width="414" height="348">
+                    </li>
+                    <li class="Box-row border-bottom">
+                      <strong>Hình mặt sau</strong>
+                      <img class="avatar v-align-middle mr-2" src="{{ .BackIdentityCard }}" width="414" height="348">
+                    </li>
+                    <li class="Box-row border-bottom">
+                      <strong>Hình selfie</strong>
+                      <img class="avatar v-align-middle mr-2" src="{{ .SelfieImage }}" width="414" height="348">
+                    </li>
+                  </ul>
+                </div>
+                <div class="Box-footer"></div>
+              </details-dialog>
+            </details>  
+          </div>
+          <a class="btn btn-primary mr-1" href="/admin/users/{{$.User.ID}}/kyc/{{.ID}}/approve" onclick="return confirm('chắc nghen?');">Duyệt KYC</a>
+          <div>
+            <details class="details-reset details-overlay details-overlay-dark" id="kyc-model-{{ .ID }}">
+              <summary class="btn color-fg-danger mr-1" aria-haspopup="dialog">Từ chối KYC</summary>
+              <details-dialog class="Box Box--overlay d-flex flex-column anim-fade-in fast">
+                <div class="Box-header">
+                  <button class="Box-btn-octicon btn-octicon float-right" type="button" aria-label="Close dialog" data-close-dialog onclick="closeDialog('kyc-model-{{ .ID }}');">
+                    <svg class="octicon octicon-x" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true">
+                      <path fill-rule="evenodd" 
+                        d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z">
+                      </path>
+                    </svg>
+                  </button>
+                  <h3 class="Box-title">Hình KYC</h3>
+                </div>
+                <div class="overflow-auto p-2">
+                  <form action="/admin/users/{{$.User.ID}}/kyc/{{.ID}}/reject" method="post">
+                    <div class="form-group">
+                      <div class="form-group-header">
+                        <label for="example-textarea">Phản hồi cho user</label>
+                      </div>
+                      <div class="form-group-body">
+                        <textarea class="form-control" name="Feedback"></textarea>
+                      </div>
+                    </div>
+                    <button class="btn btn-primary mr-1" type="submit" onclick="return confirm('chắc nghen?');">Xác nhận</button>
+                  </form>
+                </div>
+                <div class="Box-footer"></div>
+              </details-dialog>
+            </details>  
+          </div>
+        </div>
+        {{ end }}
+        {{ if eq .Status "approved_kyc" }}
+        <div class="Subhead-description mb-3">
+          <div class="Subhead-description mb-3">
+            Người dùng <strong>{{ $.User.FirstName }} {{ $.User.LastName }}</strong> đã được duyệt KYC
+          </div>
+          <div class="d-flex">
+            <div>
+              <details class="details-reset details-overlay details-overlay-dark" id="kyc-model-{{ .ID }}">
+                <summary class="btn mr-1" aria-haspopup="dialog">Xem hình KYC</summary>
+                <details-dialog class="Box Box--overlay d-flex flex-column anim-fade-in fast">
+                  <div class="Box-header">
+                    <button class="Box-btn-octicon btn-octicon float-right" type="button" aria-label="Close dialog" data-close-dialog onclick="closeDialog('kyc-model-{{ .ID }}');">
+                      <svg class="octicon octicon-x" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true">
+                        <path fill-rule="evenodd" 
+                          d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z">
+                        </path>
+                      </svg>
+                    </button>
+                    <h3 class="Box-title">Hình KYC</h3>
+                  </div>
+                  <div class="overflow-auto">
+                    <ul>
+                      <li class="Box-row">
+                        <strong>Hình mặt trước</strong>
+                        <img class="avatar v-align-middle mr-2 mt-1" src="{{ .FrontIdentityCard }}"  width="414" height="348">
+                      </li>
+                      <li class="Box-row border-bottom">
+                        <strong>Hình mặt sau</strong>
+                        <img class="avatar v-align-middle mr-2" src="{{ .BackIdentityCard }}" width="414" height="348">
+                      </li>
+                      <li class="Box-row border-bottom">
+                        <strong>Hình selfie</strong>
+                        <img class="avatar v-align-middle mr-2" src="{{ .SelfieImage }}" width="414" height="348">
+                      </li>
+                    </ul>
+                  </div>
+                  <div class="Box-footer"></div>
+                </details-dialog>
+              </details>  
+            </div>
+          </div>
+        </div>
+        {{ end }}
+
+        {{ if eq .Status "rejected_kyc" }}
+        <div class="Subhead-description mb-3">
+          <div class="Subhead-description mb-3">
+            Người dùng <strong>{{ $.User.FirstName }} {{ $.User.LastName }}</strong> đã bị từ chối KYC với lý do: <strong>{{ .Feedback }}</strong>
+          </div>
+          <div class="d-flex">
+            <div>
+              <details class="details-reset details-overlay details-overlay-dark" id="kyc-model-{{ .ID }}">
+                <summary class="btn mr-1" aria-haspopup="dialog">Xem hình KYC</summary>
+                <details-dialog class="Box Box--overlay d-flex flex-column anim-fade-in fast">
+                  <div class="Box-header">
+                    <button class="Box-btn-octicon btn-octicon float-right" type="button" aria-label="Close dialog" data-close-dialog onclick="closeDialog('kyc-model-{{ .ID }}');">
+                      <svg class="octicon octicon-x" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true">
+                        <path fill-rule="evenodd" 
+                          d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z">
+                        </path>
+                      </svg>
+                    </button>
+                    <h3 class="Box-title">Hình KYC</h3>
+                  </div>
+                  <div class="overflow-auto">
+                    <ul>
+                      <li class="Box-row">
+                        <strong>Hình mặt trước</strong>
+                        <img class="avatar v-align-middle mr-2 mt-1" src="{{ .FrontIdentityCard }}" width="414" height="348">
+                      </li>
+                      <li class="Box-row border-bottom">
+                        <strong>Hình mặt sau</strong>
+                        <img class="avatar v-align-middle mr-2" src="{{ .BackIdentityCard }}" width="414" height="348">
+                      </li>
+                      <li class="Box-row border-bottom">
+                        <strong>Hình selfie</strong>
+                        <img class="avatar v-align-middle mr-2" src="{{ .SelfieImage }}" width="414" height="348">
+                      </li>
+                    </ul>
+                  </div>
+                  <div class="Box-footer"></div>
+                </details-dialog>
+              </details>  
+            </div>
+          </div>
+        </div>
+        {{ end }}
+      {{ end }}
+    {{ end }}
+    <!-- End KYC details -->
 
   {{template "pagination" . }}
 </div>

@@ -93,3 +93,34 @@ func (m *KYCModel) SubmitKYC(userId string, f *form.Form) error {
 
 	return err
 }
+
+func (m *KYCModel) FeedbackKYC(kycId string, userId string, status string, reason string) error {
+	q := `
+		UPDATE kyc SET
+			updated_at = now(),
+			approved_by = $2,
+			status = $3,
+			feedback = $4
+		WHERE id = $1
+	`
+
+	if status == "rejected_kyc" {
+		q = `
+			UPDATE kyc SET
+				updated_at = now(),
+				rejected_by = $2,
+				status = $3,
+				feedback = $4
+			WHERE id = $1
+		`
+	}
+
+	_, err := m.DB.Exec(q,
+		kycId,
+		userId,
+		status,
+		reason,
+	)
+
+	return err
+}

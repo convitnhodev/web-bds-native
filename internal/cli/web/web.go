@@ -482,6 +482,8 @@ func (a *router) uploadKYC(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// TODO: check user có verified phone chưa
+
 	defer func() {
 		if !ok {
 			a.render(w, r, "kyc.page.html", &templateData{

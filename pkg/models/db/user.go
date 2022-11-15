@@ -245,12 +245,20 @@ func (m *UserModel) UpdateKYCStatus(userId string, status string) error {
 	q := `
 		UPDATE users SET
 			updated_at = now(),
-			last_kyc_status = $2
+			last_kyc_status = $2,
+			roles = ARRAY(SELECT DISTINCT e FROM UNNEST(ARRAY_APPEND(roles, $3)) AS t(e) WHERE e != '')
 		WHERE id = $1
 	`
+
+	newRole := ""
+	if status == "approved_kyc" {
+		newRole = "verified_id"
+	}
+
 	_, err := m.DB.Exec(q,
 		userId,
 		status,
+		newRole,
 	)
 
 	return err

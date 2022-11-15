@@ -168,8 +168,105 @@ func (a *router) adminUsersDetail(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (a *router) adminUserKYC(w http.ResponseWriter, r *http.Request) {
+func (a *router) adminApproveKYC(w http.ResponseWriter, r *http.Request) {
+	userId := r.URL.Query().Get(":id")
+	kycId := r.URL.Query().Get(":kycId")
 
+	// Update KYC status
+	status := "approved_kyc"
+	err := a.App.KYC.FeedbackKYC(
+		kycId,
+		userId,
+		status,
+		"",
+	)
+
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "500 - internal server error", 500)
+		return
+	}
+
+	// Update Role, KCS status user
+	err = a.App.Users.UpdateKYCStatus(
+		userId,
+		status,
+	)
+
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "500 - internal server error", 500)
+		return
+	}
+
+	http.Redirect(w, r, fmt.Sprintf("/admin/users/%s/detail", userId), http.StatusSeeOther)
+}
+
+func (a *router) adminRejectKYC(w http.ResponseWriter, r *http.Request) {
+	userId := r.URL.Query().Get(":id")
+	kycId := r.URL.Query().Get(":kycId")
+	ok := false
+	f := form.Form{}
+
+	defer func() {
+		if !ok {
+			user, err := a.App.AdminUsers.ID(r.URL.Query().Get(":id"))
+			if err != nil {
+				log.Println(err)
+				return
+			}
+
+			kycList, err := a.App.KYC.User(r.URL.Query().Get(":id"))
+			if err != nil {
+				log.Println(err)
+				return
+			}
+
+			a.adminrender(w, r, "users.detail.page.html", &templateData{
+				Form:    &f,
+				User:    user,
+				KYCList: kycList,
+			})
+		}
+	}()
+
+	if err := r.ParseForm(); err != nil {
+		f.Errors.Add("err", "err_parse_form")
+		return
+	}
+
+	f.Values = r.PostForm
+
+	// Update KYC status
+	status := "rejected_kyc"
+	err := a.App.KYC.FeedbackKYC(
+		kycId,
+		userId,
+		status,
+		f.Get("Feedback"),
+	)
+
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "500 - internal server error", 500)
+		return
+	}
+
+	// Update Role, KCS status user
+	err = a.App.Users.UpdateKYCStatus(
+		userId,
+		status,
+	)
+
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "500 - internal server error", 500)
+		return
+	}
+
+	ok = true
+
+	http.Redirect(w, r, fmt.Sprintf("/admin/users/%s/detail", userId), http.StatusSeeOther)
 }
 
 func (a *router) adminCreateProduct(w http.ResponseWriter, r *http.Request) {
@@ -569,6 +666,6 @@ func registerAdminRoute(mux *pat.PatternServeMux, a *router) {
 	mux.Get("/admin/users", use(a.adminUsers, a.isadmin))
 	mux.Get("/admin/users/:id/detail", use(a.adminUsersDetail, a.isadmin))
 
-	mux.Get("/admin/users/:id/kyc/:kycId/approve", use(a.adminUserKYC, a.isadmin))
-	mux.Post("/admin/users/:id/kyc/:kycId/approve", use(a.adminUserKYC, a.isadmin))
+	mux.Get("/admin/users/:id/kyc/:kycId/approve", use(a.adminApproveKYC, a.isadmin))
+	mux.Post("/admin/users/:id/kyc/:kycId/reject", use(a.adminRejectKYC, a.isadmin))
 }

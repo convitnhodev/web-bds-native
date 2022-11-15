@@ -203,7 +203,7 @@ func (o *Comment) Form() *form.Form {
 func (o *KYC) Form() *form.Form {
 	f := form.New(nil)
 
-	f.Set("LastKYCFeedback", o.LastKYCFeedback)
+	f.Set("Feedback", o.Feedback)
 
 	return f
 }

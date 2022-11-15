@@ -31,3 +31,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
           ]
     });
 });
+
+function closeDialog(id) {
+    document.getElementById(id).removeAttribute("open")
+}
