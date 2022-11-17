@@ -87,6 +87,16 @@ func RandString(n int) string {
 	return string(b)
 }
 
+var digits = []rune("0123456789")
+
+func RandDigitString(n int) string {
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = digits[rand.Intn(len(digits))]
+	}
+	return string(b)
+}
+
 func UnsafeHTML(s string) string {
 	return policy.Sanitize(strings.ReplaceAll(html.UnescapeString(s), "\n", "<br>"))
 }

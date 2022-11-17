@@ -20,7 +20,20 @@ var ESMS_APIKEY string
 var ESMS_SECRET string
 var Brandname = "Baotrixemay"
 
-func SendSMS(user *models.User) error {
+func SendVerifyPhone(user *models.User) error {
+	content := fmt.Sprintf("%s la ma xac minh dang ky %s cua ban", user.PhoneToken, Brandname)
+	phone := user.Phone
+
+	return SendSMS(phone, content)
+}
+
+func SendResetPwdPhone(phone string, token string) error {
+	content := fmt.Sprintf("%s la ma xac minh dùng để cài đặt lại mật khẩu tại %s cua ban", token, Brandname)
+
+	return SendSMS(phone, content)
+}
+
+func SendSMS(phone string, content string) error {
 	if ESMS_APIKEY == "" {
 		return errors.New("ESMS_APIKEY=?")
 	}
@@ -35,8 +48,8 @@ func SendSMS(user *models.User) error {
 		"ApiKey":    ESMS_APIKEY,
 		"SecretKey": ESMS_SECRET,
 		"Brandname": Brandname,
-		"Content":   fmt.Sprintf("%s la ma xac minh dang ky %s cua ban", user.PhoneToken, Brandname),
-		"Phone":     user.Phone,
+		"Content":   content,
+		"Phone":     phone,
 		"SmsType":   "2",
 		// "RequestId": fmt.Sprintf("phone:sendSMS:user:%d", user.ID),
 	})

@@ -131,7 +131,7 @@ func (a *router) ajaxSendVerifyPhone(w http.ResponseWriter, r *http.Request) {
 	// gởi phone verify
 	phone.ESMS_APIKEY = a.App.Config.ESMS_APIKEY
 	phone.ESMS_SECRET = a.App.Config.ESMS_SECRET
-	if err := phone.SendSMS(user); err != nil {
+	if err := phone.SendVerifyPhone(user); err != nil {
 		log.Println(err)
 	}
 }

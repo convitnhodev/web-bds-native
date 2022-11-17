@@ -42,8 +42,9 @@ type templateData struct {
 
 	Comments []*models.Comment
 
-	KYCList    []*models.KYC
-	IsKYCQuery bool
+	KYCList           []*models.KYC
+	IsKYCQuery        bool
+	IsResetPwdByToken bool
 
 	//Config
 	Config *config.Config

@@ -20,7 +20,9 @@ import (
 	"github.com/deeincom/deeincom/internal/cli/root"
 	"github.com/deeincom/deeincom/pkg/email"
 	"github.com/deeincom/deeincom/pkg/form"
+	"github.com/deeincom/deeincom/pkg/helper"
 	"github.com/deeincom/deeincom/pkg/models"
+	"github.com/deeincom/deeincom/pkg/phone"
 	"github.com/golangcollege/sessions"
 )
 
@@ -421,6 +423,150 @@ func (a *router) login(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (a *router) forgotPassword(w http.ResponseWriter, r *http.Request) {
+	f := form.New(nil)
+
+	ok := false
+	defer func() {
+		if !ok {
+			a.render(w, r, "forgot.password.page.html", &templateData{
+				Form: f,
+			})
+		}
+	}()
+
+	// nếu đã login thì ko show nữa
+	if a.session.GetInt(r, "user") > 0 {
+		ok = true
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
+	if r.Method == "POST" {
+		if err := r.ParseForm(); err != nil {
+			f.Errors.Add("err", "err_parse_form")
+			return
+		}
+
+		f.Values = r.PostForm
+		f.Required("Phone")
+
+		if !f.Valid() {
+			log.Println("form invalid", f.Errors)
+			f.Errors.Add("err", "err_invalid_form")
+			return
+		}
+
+		phoneNum := f.Get("Phone")
+		user, err := a.App.Users.GetByPhone(phoneNum)
+
+		if err != nil {
+			f.Errors.Add("err", "err_invalid_form")
+			return
+		}
+
+		if user != nil &&
+			(user.RPTExpiredAt == nil || user.RPTExpiredAt.Before(time.Now())) {
+			token := helper.RandDigitString(5)
+			err := a.App.Users.ResetPasswordByPhone(phoneNum, token)
+
+			if err != nil {
+				log.Println("Reset fail", err)
+				f.Errors.Add("err", "err_invalid_form")
+				return
+			}
+
+			if err := phone.SendResetPwdPhone(phoneNum, token); err != nil {
+				log.Println(err)
+			}
+
+		}
+
+		ok = true
+		a.session.Put(r, "reset_pwd_phone", phoneNum)
+		http.Redirect(w, r, "/reset-password", http.StatusSeeOther)
+	}
+}
+
+func (a *router) resetPassword(w http.ResponseWriter, r *http.Request) {
+	f := form.New(nil)
+	ok := false
+
+	// Nếu không chứa reseting phone thì không show form
+	phoneNum := a.session.GetString(r, "reset_pwd_phone")
+	userId := a.session.GetInt(r, "user")
+
+	if phoneNum == "" && userId <= 0 {
+		ok = true
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
+	defer func() {
+		if !ok {
+			a.render(w, r, "reset.password.page.html", &templateData{
+				Form:              f,
+				IsResetPwdByToken: phoneNum != "",
+			})
+		}
+	}()
+
+	if r.Method == "POST" {
+		if err := r.ParseForm(); err != nil {
+			f.Errors.Add("err", "err_parse_form")
+			return
+		}
+
+		f.Values = r.PostForm
+		f.Required("Token", "Password", "RepeatPassword")
+
+		if f.Get("Password") != f.Get("RepeatPassword") {
+			f.Errors.Add("err", "err_invalid_repeatpassword")
+			return
+		}
+
+		if !f.Valid() {
+			log.Println("form invalid", f.Errors)
+			f.Errors.Add("err", "err_invalid_form")
+			return
+		}
+
+		if phoneNum != "" {
+			// Trường hợp reset by phone
+			user, _ := a.App.Users.GetByPhone(phoneNum)
+
+			if user != nil {
+				err := a.App.Users.CompareHashAndPassword(user.ResetPasswordToken, f.Get("Token"))
+
+				if err != nil || user.RPTExpiredAt.Before(time.Now()) {
+					log.Println("Token invalid", user.ResetPasswordToken, user.RPTExpiredAt)
+					f.Errors.Add("err", "err_invalid_token")
+					return
+				}
+
+				a.App.Users.UpdateNewPassword(fmt.Sprint(user.ID), f.Get("Password"))
+			}
+		} else if userId > 0 {
+			// Trường hợp reset by old password
+			user, _ := a.App.Users.ID(fmt.Sprint(userId))
+
+			if user != nil {
+				err := a.App.Users.CompareHashAndPassword(user.Password, f.Get("Token"))
+				if err != nil {
+					log.Println("Token invalid", f.Get("Token"))
+					f.Errors.Add("err", "err_invalid_token")
+					return
+				}
+
+				a.App.Users.UpdateNewPassword(fmt.Sprint(user.ID), f.Get("Password"))
+			}
+		}
+
+		a.session.Pop(r, "reset_pwd_phone")
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+	}
+}
+
 func (a *router) islogined(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		id := a.session.GetInt(r, "user")
@@ -635,6 +781,13 @@ func run(c *root.Cmd) error {
 	// đăng nhập
 	mux.Post("/login", use(a.login))
 	mux.Get("/login", use(a.login))
+
+	// Quên pass
+	mux.Get("/forgot-password", use(a.forgotPassword))
+	mux.Post("/forgot-password", use(a.forgotPassword))
+
+	mux.Get("/reset-password", use(a.resetPassword))
+	mux.Post("/reset-password", use(a.resetPassword))
 
 	// out
 	mux.Get("/logout", use(a.logout))

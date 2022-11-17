@@ -22,6 +22,8 @@ type User struct {
 	UpdatedAt           time.Time
 	SendVerifiedEmailAt time.Time
 	SendVerifiedPhoneAt time.Time
+	ResetPasswordToken  string
+	RPTExpiredAt        *time.Time
 }
 
 type Attachment struct {

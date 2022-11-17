@@ -32,6 +32,18 @@ var userColumes = []string{
 	"users.updated_at",
 	"users.send_verified_email_at",
 	"users.send_verified_phone_at",
+	"users.reset_pwd_token",
+	"users.rpt_expired_at",
+}
+
+func (m *UserModel) HashPassword(s string) (string, error) {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(s), 12)
+	return string(hashedPassword), err
+}
+
+func (m *UserModel) CompareHashAndPassword(hashed string, password string) error {
+	err := bcrypt.CompareHashAndPassword([]byte(hashed), []byte(password))
+	return err
 }
 
 func (m *UserModel) query(s string) string {
@@ -55,6 +67,8 @@ func scanUser(r scanner, o *models.User) error {
 		&o.UpdatedAt,
 		&o.SendVerifiedEmailAt,
 		&o.SendVerifiedPhoneAt,
+		&o.ResetPasswordToken,
+		&o.RPTExpiredAt,
 	); err != nil {
 		return errors.Wrap(err, "scanUser")
 	}
@@ -67,13 +81,13 @@ func (m *UserModel) Auth(f *form.Form) (*models.User, error) {
 		select id, password from users where phone = $1
 	`
 	var id int
-	var hashed []byte
+	var hashed string
 	row := m.DB.QueryRow(q, f.Get("Phone"))
 	if err := row.Scan(&id, &hashed); err != nil {
 		return nil, err
 	}
 
-	if err := bcrypt.CompareHashAndPassword(hashed, []byte(f.Get("Password"))); err != nil {
+	if err := m.CompareHashAndPassword(hashed, f.Get("Password")); err != nil {
 		return nil, err
 	}
 
@@ -100,7 +114,8 @@ func (m *UserModel) Create(f *form.Form) (*models.User, error) {
 		$7
 	) returning id
 	`
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(f.Get("Password")), 12)
+	hashedPassword, err := m.HashPassword(f.Get("Password"))
+
 	if err != nil {
 		return nil, errors.Wrap(err, "UserModel.Create")
 	}
@@ -110,7 +125,7 @@ func (m *UserModel) Create(f *form.Form) (*models.User, error) {
 		f.Get("LastName"),
 		f.Get("Email"),
 		f.Get("Phone"),
-		string(hashedPassword),
+		hashedPassword,
 		helper.RandString(6),
 		helper.RandString(6),
 	)
@@ -262,4 +277,49 @@ func (m *UserModel) UpdateKYCStatus(userId string, status string) error {
 	)
 
 	return err
+}
+
+func (m *UserModel) ResetPasswordByPhone(phone string, token string) error {
+	hashedToken, err := m.HashPassword(token)
+	if err != nil {
+		return err
+	}
+
+	q := `
+		UPDATE users SET
+			updated_at = now(),
+			reset_pwd_token = $2,
+			rpt_expired_at = now() + (15 * interval '1 minute')
+		WHERE phone = $1
+	`
+	_, qerr := m.DB.Exec(q,
+		phone,
+		hashedToken,
+	)
+
+	return qerr
+}
+
+func (m *UserModel) UpdateNewPassword(userId string, password string) error {
+	hashedPassword, err := m.HashPassword(password)
+
+	if err != nil {
+		return err
+	}
+
+	q := `
+		UPDATE users SET
+			updated_at = now(),
+			password = $2,
+			rpt_expired_at = null,
+			reset_pwd_token = ''
+		WHERE id = $1
+	`
+
+	_, qerr := m.DB.Exec(q,
+		userId,
+		hashedPassword,
+	)
+
+	return qerr
 }
