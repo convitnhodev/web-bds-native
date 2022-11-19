@@ -1,0 +1,87 @@
+{{template "admin" .}}
+
+{{define "body"}}
+{{$label := split "accent:success:attention:severe:danger:open:closed:done:sponsors" ":"  }}
+
+<div class="container-lg">
+  <div class="col-12">
+
+    <div class="d-flex flex-items-center mb-3">
+      <h1 class="overflow-hidden flex-auto">
+        Nhật ký hệ thống
+      </h1>
+    </div>
+
+    <div class="d-flex flex-items-center">
+      {{ with .Form }}
+      <form method="GET" action="/admin/logs">
+        <label for="name">Ngày ghi nhật ký</label>
+        <input
+          class="form-control mr-4"
+          type="date"
+          autocomplete="off"
+          spellcheck="false"
+          name="date"
+          value="{{ .Get `Date` }}"
+          step="1"
+        >
+        <label for="name">Người dùng</label>
+        <input
+          class="form-control mr-4"
+          type="text"
+          style="min-width: 268px;"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="Dùng email hoặc số điện thoại để tìm."
+          name="user_info"
+          value="{{ .Get `UserInfo` }}"
+          step="1"
+       >
+       <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+      </form>
+      {{ end }}
+      
+    </div>
+
+    {{with .Form.Errors.Get `err` }}
+    <div class="flash mt-3 flash-error">
+      <svg class="octicon" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M4.47.22A.75.75 0 015 0h6a.75.75 0 01.53.22l4.25 4.25c.141.14.22.331.22.53v6a.75.75 0 01-.22.53l-4.25 4.25A.75.75 0 0111 16H5a.75.75 0 01-.53-.22L.22 11.53A.75.75 0 010 11V5a.75.75 0 01.22-.53L4.47.22zm.84 1.28L1.5 5.31v5.38l3.81 3.81h5.38l3.81-3.81V5.31L10.69 1.5H5.31zM8 4a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 018 4zm0 8a1 1 0 100-2 1 1 0 000 2z"></path></svg>
+      {{ __ . }}
+    </div>
+    {{end}}
+
+    {{if .Logs}}
+    <div class="Box">
+      <div>
+        {{range .Logs}}
+        <div class="Box-row Box-row--hover-gray d-flex flex-items-center">
+          <div class="flex-auto d-flex">
+            <div class="h2 avatar CircleBadge CircleBadge--small color-bg-emphasis color-fg-on-emphasis" width="38" height="38">
+              <stromg>{{ if .Poster.FirstName }}{{ upper (slice .Poster.FirstName 0 1) }}{{ end}}{{ if .Poster.LastName }}{{ upper (slice .Poster.LastName 0 1) }}{{ end}}</stromg>
+            </div>
+            <div class="ml-2">
+              <div class="d-flex">
+                <strong class="color-fg-accent">{{ .Poster.FirstName}} {{ .Poster.LastName }}</strong>
+              </div>
+              <div class="text-small color-fg-subtle" style="word-wrap: break-word;max-width: 750px;margin-left: auto;margin-right: auto;">{{ .Content }}</div>
+            </div>
+          </div>
+        </div>
+        {{end}}
+      </div>
+    </div>
+
+    {{else}}
+    <div class="blankslate">
+        <img referrerpolicy="no-referrer"
+            src="https://media.discordapp.net/attachments/523522129296097290/981393406934806568/cry-min.jpg?width=112&height=112"
+            alt="anime not found" class="blankslate-image" />
+            <h3 class="blankslate-heading">Chưa có nhật ký nào</h3>
+            <p>Hãy quay lại sau khi có nhật ký mới nhất.</p>
+    </div>
+    {{end}}
+
+  {{template "pagination" . }}
+</div>
+</div>
+{{end}}

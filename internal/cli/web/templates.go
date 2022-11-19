@@ -150,6 +150,9 @@ func translate(s string) string {
 
 	case "err_could_not_verified_email":
 		return "Không thể xác thực email"
+
+	case "user_query_err":
+		return "Lỗi không truy vấn được người dùng."
 	}
 	return s
 }

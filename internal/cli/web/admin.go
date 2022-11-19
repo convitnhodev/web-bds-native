@@ -9,6 +9,7 @@ import (
 
 	"github.com/bmizerany/pat"
 	"github.com/deeincom/deeincom/pkg/form"
+	"github.com/deeincom/deeincom/pkg/models"
 )
 
 func (a *router) adminrender(w http.ResponseWriter, r *http.Request, name string, td *templateData) {
@@ -765,6 +766,51 @@ func (a *router) adminRemoveComent(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/admin/comments", http.StatusSeeOther)
 }
 
+func (a *router) adminLogs(w http.ResponseWriter, r *http.Request) {
+	userInfo := r.URL.Query().Get("user_info")
+	date := r.URL.Query().Get("date")
+	f := form.New(nil)
+
+	f.Set("Date", date)
+	f.Set("UserInfo", userInfo)
+
+	var user *models.User
+	var err error
+	var logs []*models.Log
+	var lerr error
+
+	defer func() {
+		a.adminrender(w, r, "logs.page.html", &templateData{
+			Logs: logs,
+			Form: f,
+		})
+	}()
+
+	if userInfo == "" {
+		logs, lerr = a.App.Log.Find("", date)
+	} else {
+		if strings.Contains(userInfo, "@") {
+			user, err = a.App.Users.GetByEmail(userInfo)
+		} else {
+			user, err = a.App.Users.GetByPhone(userInfo)
+		}
+
+		if err != nil {
+			log.Println(err)
+			f.Errors.Add("err", "user_query_err")
+			return
+		}
+
+		logs, lerr = a.App.Log.Find(fmt.Sprint(user.ID), date)
+	}
+
+	if lerr != nil {
+		log.Println(lerr)
+		http.Error(w, "bad request", 400)
+		return
+	}
+}
+
 func registerAdminRoute(mux *pat.PatternServeMux, a *router) {
 	mux.Get("/admin", use(a.adminHome, a.isadmin))
 	mux.Get("/admin/products", use(a.adminProducts, a.isadmin))
@@ -799,4 +845,6 @@ func registerAdminRoute(mux *pat.PatternServeMux, a *router) {
 
 	mux.Get("/admin/users/:id/partner/:partnerId/approve", use(a.adminApprovePartner, a.isadmin))
 	mux.Post("/admin/users/:id/partner/:partnerId/reject", use(a.adminRejectPartner, a.isadmin))
+
+	mux.Get("/admin/logs", use(a.adminLogs, a.isadmin))
 }

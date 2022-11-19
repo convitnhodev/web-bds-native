@@ -138,6 +138,14 @@ type Partner struct {
 	UpdatedAt  time.Time
 }
 
+type Log struct {
+	ID        int64
+	UserId    int
+	Actor     User
+	Content   string
+	CreatedAt time.Time
+}
+
 func (o *Product) Form() *form.Form {
 	f := form.New(nil)
 	f.Set("Title", o.Title)
@@ -232,5 +240,3 @@ func (o *Partner) Form() *form.Form {
 
 	return f
 }
-
-type Log struct{}

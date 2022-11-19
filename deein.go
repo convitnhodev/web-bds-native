@@ -30,6 +30,7 @@ type App struct {
 	Files            *db.FileModel
 	KYC              *db.KYCModel
 	Partner          *db.PartnerModel
+	Log              *db.LogModel
 	LocalFile        *files.LocalFile
 	B2Scheduler      *files.LocalToB2
 }
@@ -55,9 +56,9 @@ func New(c *config.Config) (*App, error) {
 	}
 
 	lf := files.LocalFile{
-		c.UploadingRoot,
-		c.MappingUploadLocalLink,
-		&Files,
+		Root:                   c.UploadingRoot,
+		MappingUploadLocalLink: c.MappingUploadLocalLink,
+		Files:                  &Files,
 	}
 
 	B2Scheduler, err := files.NewB2Scheduler(
@@ -176,6 +177,16 @@ func New(c *config.Config) (*App, error) {
 			},
 		},
 		Partner: &db.PartnerModel{
+			DB: conn,
+			Pagination: &db.Pagination{
+				DB:      conn,
+				Min:     25,
+				Max:     100,
+				Default: 25,
+				Data:    &db.PaginationData{Limit: 25},
+			},
+		},
+		Log: &db.LogModel{
 			DB: conn,
 			Pagination: &db.Pagination{
 				DB:      conn,

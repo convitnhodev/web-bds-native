@@ -53,7 +53,7 @@ func (m *PartnerModel) query(s string) string {
 }
 
 func (m *PartnerModel) count(s string) string {
-	return fmt.Sprintf(`SELECT count(*) FROM files %s`, s)
+	return fmt.Sprintf(`SELECT count(*) FROM partner %s`, s)
 }
 
 func (m *PartnerModel) User(userId string) ([]*models.Partner, error) {

@@ -55,7 +55,7 @@ func (m *KYCModel) query(s string) string {
 }
 
 func (m *KYCModel) count(s string) string {
-	return fmt.Sprintf(`SELECT count(*) FROM files %s`, s)
+	return fmt.Sprintf(`SELECT count(*) FROM kyc %s`, s)
 }
 
 func (m *KYCModel) User(userId string) ([]*models.KYC, error) {
