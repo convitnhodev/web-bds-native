@@ -177,7 +177,8 @@ func (m *PostModel) Update(o *models.Post, f *form.Form) error {
 			"content" = $5,
 			published_at = $6,
 			tags = $7,
-			thumbnail = $8
+			thumbnail = $8,
+			post_type = $9
 		WHERE
 			id = $1
 	`
@@ -205,6 +206,7 @@ func (m *PostModel) Update(o *models.Post, f *form.Form) error {
 		&publishedAt,
 		fmt.Sprintf("{%s}", strings.Join(tags, ",")),
 		f.Get("Thumbnail"),
+		f.Get("PostType"),
 	)
 
 	return err

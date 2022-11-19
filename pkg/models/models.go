@@ -194,6 +194,7 @@ func (o *Post) Form() *form.Form {
 	f.Set("Tags", strings.Join(o.Tags, ", "))
 	f.Set("Short", o.Short)
 	f.Set("Thumbnail", o.Thumbnail)
+	f.Set("PostType", o.PostType)
 
 	if o.PublishedAt != nil {
 		loc, err := time.LoadLocation("Asia/Ho_Chi_Minh")

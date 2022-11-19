@@ -66,6 +66,16 @@
                 {{end}}
             </div>
 
+            <div class="form-group-body">
+                <div class="form-group-header">
+                    <label>Loại bài viết</label>
+                </div>
+                <select class="form-select" name="PostType">
+                  <option value="blog" {{if eq (.Get `PostType`) "blog" }}selected{{end}} >Blog</option>
+                  <option value="event" {{if eq (.Get `PostType`) "event" }}selected{{end}} >Event</option>
+                </select>
+            </div>
+
             <div class="form-group {{with .Errors.Get `PublishedAt`}}errored{{end}}">
                 <div class="form-group-header">
                     <label>Ngày giờ đăng</label>

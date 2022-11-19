@@ -8,7 +8,7 @@
 
     <div class="d-flex flex-items-center mb-3">
       <h1 class="overflow-hidden flex-auto">
-        {{ if .IsKYCQuery }}Danh sách thành viên đang chờ KYC{{else}}Danh sách thành viên{{end}}
+        {{ if .IsKYCQuery }}Danh sách thành viên đang chờ KYC{{else if .IsPartnerQuery }}Danh sách chờ duyệt làm đối tác{{else}}Danh sách thành viên{{end}}
       </h1>
     </div>
 
