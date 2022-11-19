@@ -29,6 +29,7 @@ type App struct {
 	Comments         *db.CommentModel
 	Files            *db.FileModel
 	KYC              *db.KYCModel
+	Partner          *db.PartnerModel
 	LocalFile        *files.LocalFile
 	B2Scheduler      *files.LocalToB2
 }
@@ -165,6 +166,16 @@ func New(c *config.Config) (*App, error) {
 		},
 		Files: &Files,
 		KYC: &db.KYCModel{
+			DB: conn,
+			Pagination: &db.Pagination{
+				DB:      conn,
+				Min:     25,
+				Max:     100,
+				Default: 25,
+				Data:    &db.PaginationData{Limit: 25},
+			},
+		},
+		Partner: &db.PartnerModel{
 			DB: conn,
 			Pagination: &db.Pagination{
 				DB:      conn,

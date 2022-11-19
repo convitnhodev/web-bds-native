@@ -81,7 +81,7 @@ func (m *KYCModel) User(userId string) ([]*models.KYC, error) {
 
 func (m *KYCModel) SubmitKYC(userId string, f *form.Form) error {
 	q := `
-		INSERT INTO kyc (userId, front_identity_card, back_identity_card, selfie_image)
+		INSERT INTO kyc (user_id, front_identity_card, back_identity_card, selfie_image)
 		VALUES ($1, $2, $3, $4)
 	`
 	_, err := m.DB.Exec(q,

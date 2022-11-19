@@ -43,7 +43,9 @@ type templateData struct {
 	Comments []*models.Comment
 
 	KYCList           []*models.KYC
+	PartnerList       []*models.Partner
 	IsKYCQuery        bool
+	IsPartnerQuery    bool
 	IsResetPwdByToken bool
 
 	//Config

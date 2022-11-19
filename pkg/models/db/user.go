@@ -34,6 +34,7 @@ var userColumes = []string{
 	"users.send_verified_phone_at",
 	"users.reset_pwd_token",
 	"users.rpt_expired_at",
+	"users.partner_status",
 }
 
 func (m *UserModel) HashPassword(s string) (string, error) {
@@ -69,6 +70,7 @@ func scanUser(r scanner, o *models.User) error {
 		&o.SendVerifiedPhoneAt,
 		&o.ResetPasswordToken,
 		&o.RPTExpiredAt,
+		&o.PartnerStatus,
 	); err != nil {
 		return errors.Wrap(err, "scanUser")
 	}
@@ -201,11 +203,15 @@ func (m *UserModel) AddRole(user *models.User, role string) error {
 	return err
 }
 
-func (m *UserModel) Find(kyc_status string) ([]*models.User, error) {
+func (m *UserModel) Find(kycStatus string, partnerStatus string) ([]*models.User, error) {
 	q := m.query("order by id desc")
 
-	if kyc_status != "" {
-		q = m.query(fmt.Sprintf("WHERE last_kyc_status = '%s' order by id desc", kyc_status))
+	if kycStatus != "" {
+		q = m.query(fmt.Sprintf("WHERE last_kyc_status = '%s' order by id desc", kycStatus))
+	}
+
+	if partnerStatus != "" {
+		q = m.query(fmt.Sprintf("WHERE partner_status = '%s' order by id desc", partnerStatus))
 	}
 
 	count := m.count("")
@@ -268,6 +274,29 @@ func (m *UserModel) UpdateKYCStatus(userId string, status string) error {
 	newRole := ""
 	if status == "approved_kyc" {
 		newRole = "verified_id"
+	}
+
+	_, err := m.DB.Exec(q,
+		userId,
+		status,
+		newRole,
+	)
+
+	return err
+}
+
+func (m *UserModel) UpdatePartnerStatus(userId string, status string) error {
+	q := `
+		UPDATE users SET
+			updated_at = now(),
+			partner_status = $2,
+			roles = ARRAY(SELECT DISTINCT e FROM UNNEST(ARRAY_APPEND(roles, $3)) AS t(e) WHERE e != '')
+		WHERE id = $1
+	`
+
+	newRole := ""
+	if status == "approved" {
+		newRole = "deein_partner"
 	}
 
 	_, err := m.DB.Exec(q,

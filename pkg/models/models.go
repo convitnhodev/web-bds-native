@@ -18,6 +18,7 @@ type User struct {
 	Roles               []string
 	EmailToken          string
 	PhoneToken          string
+	PartnerStatus       string
 	CreatedAt           time.Time
 	UpdatedAt           time.Time
 	SendVerifiedEmailAt time.Time
@@ -124,6 +125,19 @@ type KYC struct {
 	UpdatedAt         time.Time
 }
 
+type Partner struct {
+	ID         int
+	UserId     int
+	Message    string
+	CVLink     string
+	Status     string
+	Feedback   string
+	RejectedBy *int
+	ApprovedBy *int
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
+}
+
 func (o *Product) Form() *form.Form {
 	f := form.New(nil)
 	f.Set("Title", o.Title)
@@ -203,6 +217,14 @@ func (o *Comment) Form() *form.Form {
 }
 
 func (o *KYC) Form() *form.Form {
+	f := form.New(nil)
+
+	f.Set("Feedback", o.Feedback)
+
+	return f
+}
+
+func (o *Partner) Form() *form.Form {
 	f := form.New(nil)
 
 	f.Set("Feedback", o.Feedback)

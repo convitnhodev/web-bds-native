@@ -88,7 +88,7 @@
                       </path>
                     </svg>
                   </button>
-                  <h3 class="Box-title">Hình KYC</h3>
+                  <h3 class="Box-title">Phản hồi</h3>
                 </div>
                 <div class="overflow-auto p-2">
                   <form action="/admin/users/{{$.User.ID}}/kyc/{{.ID}}/reject" method="post">
@@ -199,6 +199,152 @@
       {{ end }}
     {{ end }}
     <!-- End KYC details -->
+
+    <!-- Partner details -->
+    {{ if .PartnerList }}
+    <div class="Subhead">
+      <h2 class="Subhead-heading">Thông tin ứng tuyển đối tác</h2>
+    </div>
+    {{ range .PartnerList }}
+        {{ if eq .Status "apply" }}
+        <div class="Subhead-description mb-3">
+          Tại {{ .CreatedAt.Format "Ngày 02 Tháng 01 Năm 2006" }}, Người dùng <strong>{{ $.User.FirstName }} {{ $.User.LastName }}</strong> đã ứng tuyển làm đối tác
+        </div>
+        <div class="d-flex">
+          <div>
+            <details class="details-reset details-overlay details-overlay-dark" id="kyc-model-{{ .ID }}">
+              <summary class="btn mr-1" aria-haspopup="dialog">Xem CV</summary>
+              <details-dialog class="Box Box--overlay d-flex flex-column anim-fade-in fast">
+                <div class="Box-header">
+                  <button class="Box-btn-octicon btn-octicon float-right" type="button" aria-label="Close dialog" data-close-dialog onclick="closeDialog('kyc-model-{{ .ID }}');">
+                    <svg class="octicon octicon-x" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true">
+                      <path fill-rule="evenodd" 
+                        d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z">
+                      </path>
+                    </svg>
+                  </button>
+                  <h3 class="Box-title">CV của ứng viên</h3>
+                </div>
+                <div class="overflow-auto">
+                  <ul>
+                    <li class="Box-row">
+                      <strong>CV của ứng viên</strong>
+                      <img class="avatar v-align-middle mr-2 mt-1" src="{{ .CVLink }}"  width="414" height="348">
+                    </li>
+                  </ul>
+                </div>
+                <div class="Box-footer"></div>
+              </details-dialog>
+            </details>  
+          </div>
+          <a class="btn btn-primary mr-1" href="/admin/users/{{$.User.ID}}/partner/{{.ID}}/approve" onclick="return confirm('chắc nghen?');">Duyệt ứng viên</a>
+          <div>
+            <details class="details-reset details-overlay details-overlay-dark" id="kyc-model-{{ .ID }}">
+              <summary class="btn color-fg-danger mr-1" aria-haspopup="dialog">Từ chối ứng viên</summary>
+              <details-dialog class="Box Box--overlay d-flex flex-column anim-fade-in fast">
+                <div class="Box-header">
+                  <button class="Box-btn-octicon btn-octicon float-right" type="button" aria-label="Close dialog" data-close-dialog onclick="closeDialog('kyc-model-{{ .ID }}');">
+                    <svg class="octicon octicon-x" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true">
+                      <path fill-rule="evenodd" 
+                        d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z">
+                      </path>
+                    </svg>
+                  </button>
+                  <h3 class="Box-title">Phản hồi cho ứng viên</h3>
+                </div>
+                <div class="overflow-auto p-2">
+                  <form action="/admin/users/{{$.User.ID}}/partner/{{.ID}}/reject" method="post">
+                    <div class="form-group">
+                      <div class="form-group-header">
+                        <label for="example-textarea">Nội dung phản hồi</label>
+                      </div>
+                      <div class="form-group-body">
+                        <textarea class="form-control" name="Feedback"></textarea>
+                      </div>
+                    </div>
+                    <button class="btn btn-primary mr-1" type="submit" onclick="return confirm('chắc nghen?');">Xác nhận</button>
+                  </form>
+                </div>
+                <div class="Box-footer"></div>
+              </details-dialog>
+            </details>  
+          </div>
+        </div>
+        {{ end }}
+        {{ if eq .Status "approved" }}
+        <div class="Subhead-description mb-3">
+          <div class="Subhead-description mb-3">
+            Người dùng <strong>{{ $.User.FirstName }} {{ $.User.LastName }}</strong> đã được duyệt làm đối tác
+          </div>
+          <div class="d-flex">
+            <div>
+              <details class="details-reset details-overlay details-overlay-dark" id="kyc-model-{{ .ID }}">
+                <summary class="btn mr-1" aria-haspopup="dialog">Xem CV</summary>
+                <details-dialog class="Box Box--overlay d-flex flex-column anim-fade-in fast">
+                  <div class="Box-header">
+                    <button class="Box-btn-octicon btn-octicon float-right" type="button" aria-label="Close dialog" data-close-dialog onclick="closeDialog('kyc-model-{{ .ID }}');">
+                      <svg class="octicon octicon-x" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true">
+                        <path fill-rule="evenodd" 
+                          d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z">
+                        </path>
+                      </svg>
+                    </button>
+                    <h3 class="Box-title">CV của ứng viên</h3>
+                  </div>
+                  <div class="overflow-auto">
+                    <ul>
+                      <li class="Box-row">
+                        <strong>CV của ứng viên</strong>
+                        <img class="avatar v-align-middle mr-2 mt-1" src="{{ .CVLink }}"  width="414" height="348">
+                      </li>
+                    </ul>
+                  </div>
+                  <div class="Box-footer"></div>
+                </details-dialog>
+              </details>  
+            </div>
+          </div>
+        </div>
+        {{ end }}
+
+        {{ if eq .Status "rejected" }}
+        <div class="Subhead-description mb-3">
+          <div class="Subhead-description mb-3">
+            Người dùng <strong>{{ $.User.FirstName }} {{ $.User.LastName }}</strong> đã bị từ chối ứng viên với lý do: <strong>{{ .Feedback }}</strong>
+          </div>
+          <div class="d-flex">
+            <div>
+              <details class="details-reset details-overlay details-overlay-dark" id="kyc-model-{{ .ID }}">
+                <summary class="btn mr-1" aria-haspopup="dialog">Xem CV</summary>
+                <details-dialog class="Box Box--overlay d-flex flex-column anim-fade-in fast">
+                  <div class="Box-header">
+                    <button class="Box-btn-octicon btn-octicon float-right" type="button" aria-label="Close dialog" data-close-dialog onclick="closeDialog('kyc-model-{{ .ID }}');">
+                      <svg class="octicon octicon-x" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true">
+                        <path fill-rule="evenodd" 
+                          d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z">
+                        </path>
+                      </svg>
+                    </button>
+                    <h3 class="Box-title">CV của ứng viên</h3>
+                  </div>
+                  <div class="overflow-auto">
+                    <ul>
+                      <li class="Box-row">
+                        <strong>CV của ứng viên</strong>
+                        <img class="avatar v-align-middle mr-2 mt-1" src="{{ .CVLink }}"  width="414" height="348">
+                      </li>
+                    </ul>
+                  </div>
+                  <div class="Box-footer"></div>
+                </details-dialog>
+              </details>
+            </div>
+          </div>
+        </div>
+        {{ end }}
+      {{ end }}
+    {{ end }}
+    <!-- End Partner details -->
 
   {{template "pagination" . }}
 </div>

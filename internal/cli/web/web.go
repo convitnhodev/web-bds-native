@@ -582,7 +582,7 @@ func (a *router) islogined(next http.HandlerFunc) http.HandlerFunc {
 func (a *router) createComment(w http.ResponseWriter, r *http.Request) {
 	f := form.New(nil)
 	slug := r.URL.Query().Get(":slug")
-	id := a.session.GetString(r, "user")
+	id := a.session.GetInt(r, "user")
 
 	ok := false
 	defer func() {
@@ -598,7 +598,7 @@ func (a *router) createComment(w http.ResponseWriter, r *http.Request) {
 
 	f.Values = r.PostForm
 	f.Set("Slug", slug)
-	f.Set("UserId", id)
+	f.Set("UserId", fmt.Sprint(id))
 	f.Required("Message")
 
 	if !f.Valid() {
@@ -618,9 +618,9 @@ func (a *router) createComment(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *router) uploadKYC(w http.ResponseWriter, r *http.Request) {
-	f := form.Form{}
-	userId := a.session.GetString(r, "user")
-	user, err := a.App.Users.ID(userId)
+	f := form.New(nil)
+	userId := a.session.GetInt(r, "user")
+	user, err := a.App.Users.ID(fmt.Sprint(userId))
 	ok := false
 
 	if err != nil {
@@ -629,17 +629,22 @@ func (a *router) uploadKYC(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO: check user có verified phone chưa
+	if !hasRole(user, "verify_phone") {
+		http.Redirect(w, r, "/upgrade-user?to=verified_id", http.StatusSeeOther)
+		return
+	}
 
 	defer func() {
 		if !ok {
 			a.render(w, r, "kyc.page.html", &templateData{
-				Form: &f,
+				Form: f,
 				User: user,
 			})
 		}
 	}()
 
 	if r.Method == "POST" {
+		r.Body = http.MaxBytesReader(w, r.Body, 30<<20)
 		if err := r.ParseMultipartForm(30 << 20); err != nil {
 			log.Println(err)
 			f.Errors.Add("err", "err_parse_form")
@@ -665,7 +670,7 @@ func (a *router) uploadKYC(w http.ResponseWriter, r *http.Request) {
 		}
 		defer frontFile.Close()
 
-		frontFileName, err := a.App.LocalFile.UploadFile(fmt.Sprintf("users.%s/", userId), frontFile, handler)
+		frontFileName, err := a.App.LocalFile.UploadFile(fmt.Sprintf("users.%d/", userId), frontFile, handler)
 		if err != nil {
 			log.Println(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -683,7 +688,7 @@ func (a *router) uploadKYC(w http.ResponseWriter, r *http.Request) {
 		}
 		defer frontFile.Close()
 
-		backFileName, err := a.App.LocalFile.UploadFile(fmt.Sprintf("users.%s/", userId), backFile, handler)
+		backFileName, err := a.App.LocalFile.UploadFile(fmt.Sprintf("users.%d/", userId), backFile, handler)
 		if err != nil {
 			log.Println(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -701,7 +706,7 @@ func (a *router) uploadKYC(w http.ResponseWriter, r *http.Request) {
 		}
 		defer frontFile.Close()
 
-		selfieFileName, err := a.App.LocalFile.UploadFile(fmt.Sprintf("users.%s/", userId), selfieFile, handler)
+		selfieFileName, err := a.App.LocalFile.UploadFile(fmt.Sprintf("users.%d/", userId), selfieFile, handler)
 		if err != nil {
 			log.Println(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -710,21 +715,133 @@ func (a *router) uploadKYC(w http.ResponseWriter, r *http.Request) {
 
 		f.Set("SelfieImage", *selfieFileName)
 
-		if err := a.App.Users.UpdateKYCStatus(userId, "submited_kyc"); err != nil {
+		if err := a.App.Users.UpdateKYCStatus(fmt.Sprint(userId), "submited_kyc"); err != nil {
 			log.Println(err)
 			f.Errors.Add("err", "could_not_kyc")
 			return
 		}
 
-		if err := a.App.KYC.SubmitKYC(userId, &f); err != nil {
+		if err := a.App.KYC.SubmitKYC(fmt.Sprint(userId), f); err != nil {
 			log.Println(err)
 			f.Errors.Add("err", "could_not_kyc")
 			return
 		}
 
 		ok = true
-		http.Redirect(w, r, "kyc.page.html", http.StatusSeeOther)
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 	}
+}
+
+func (a *router) upgradeUser(w http.ResponseWriter, r *http.Request) {
+	to := r.URL.Query().Get("to")
+	userId := a.session.GetInt(r, "user")
+	user, err := a.App.Users.ID(fmt.Sprint(userId))
+
+	log.Println(userId)
+
+	if err != nil {
+		a.render(w, r, "500.page.html", &templateData{})
+		return
+	}
+
+	goLink := "/"
+	switch to {
+	case "verified_id":
+		if hasRole(user, "verify_phone") {
+			if !hasRole(user, "verified_id") {
+				goLink = "/kyc"
+			}
+		} else {
+			goLink = "/verify-phone"
+		}
+	case "deein_partner":
+		if hasRole(user, "verified_id") {
+			if !hasRole(user, "deein_partner") {
+				goLink = "/apply-partner"
+			}
+		} else {
+			goLink = "/kyc"
+		}
+	}
+
+	http.Redirect(w, r, goLink, http.StatusSeeOther)
+}
+
+func (a *router) applyPartner(w http.ResponseWriter, r *http.Request) {
+	f := form.New(nil)
+	userId := a.session.GetInt(r, "user")
+	user, err := a.App.Users.ID(fmt.Sprint(userId))
+	ok := false
+
+	if err != nil {
+		a.render(w, r, "500.page.html", &templateData{})
+		return
+	}
+
+	if !hasRole(user, "verified_id") {
+		http.Redirect(w, r, "/upgrade-user?to=deein_partner", http.StatusSeeOther)
+		return
+	}
+
+	defer func() {
+		if !ok {
+			a.render(w, r, "apply.partner.page.html", &templateData{
+				Form: f,
+				User: user,
+			})
+		}
+	}()
+
+	if r.Method == "POST" {
+		r.Body = http.MaxBytesReader(w, r.Body, 30<<20)
+		if err := r.ParseMultipartForm(30 << 20); err != nil {
+			log.Println(err)
+			f.Errors.Add("err", "err_parse_form")
+			return
+		}
+
+		f.Values = r.PostForm
+		f.Required("Message")
+
+		if !f.Valid() {
+			log.Println("form invalid", f.Errors)
+			return
+		}
+
+		// Front file
+		file, handler, err := r.FormFile("UploadFile")
+		if err != nil && http.ErrMissingFile != err {
+			log.Println(err)
+			f.Errors.Add("err", "err_could_not_upload")
+			return
+		}
+		defer file.Close()
+
+		cvFileName, err := a.App.LocalFile.UploadFile(fmt.Sprintf("partner.%d/", userId), file, handler)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		f.Set("CVLink", *cvFileName)
+
+		if err := a.App.Users.UpdatePartnerStatus(fmt.Sprint(userId), "apply"); err != nil {
+			log.Println(err)
+			f.Errors.Add("err", "could_not_submit_partner")
+			return
+		}
+
+		if err := a.App.Partner.SubmitPartner(fmt.Sprint(userId), f); err != nil {
+			log.Println(err)
+			f.Errors.Add("err", "could_not_submit_partner")
+			return
+		}
+
+		ok = true
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+	}
+
 }
 
 func (a *router) robots(w http.ResponseWriter, r *http.Request) {
@@ -803,6 +920,11 @@ func run(c *root.Cmd) error {
 
 	// comment
 	mux.Post("/comments/:slug/create", use(a.createComment, a.islogined))
+
+	// upgrade
+	mux.Get("/upgrade-user", use(a.upgradeUser, a.islogined))
+	mux.Get("/apply-partner", use(a.applyPartner, a.islogined))
+	mux.Post("/apply-partner", use(a.applyPartner, a.islogined))
 
 	// kyc
 	mux.Get("/kyc", use(a.uploadKYC, a.islogined))

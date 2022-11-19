@@ -26,7 +26,7 @@
                     <label>Tiêu đề *</label>
                 </div>
                 <div class="form-group-body">
-                    <input class="form-control" autocomplete="off" spellcheck="false" name="Title"
+                    <input class="form-control" autocomplete="off" spellcheck="false" name="Title" required
                         value="{{.Get `Title`}}">
                 </div>
                 {{with .Errors.Get `Title`}}
@@ -41,8 +41,8 @@
                     <label>Mô tả ngắn</label>
                 </div>
                 <div class="form-group-body">
-                    <input class="form-control" autocomplete="off" spellcheck="false" name="Short"
-                        value="{{.Get `Short`}}">
+                    <textarea class="form-control" autocomplete="off" spellcheck="false" name="Short"
+                        value="{{.Get `Short`}}"></textarea>
                 </div>
                 {{with .Errors.Get `Short`}}
                 <p class="note error">{{.}}</p>

@@ -132,17 +132,19 @@ func (a *router) adminProducts(w http.ResponseWriter, r *http.Request) {
 func (a *router) adminUsers(w http.ResponseWriter, r *http.Request) {
 	p := a.App.AdminUsers.Pagination.Query(r.URL)
 	kycStatus := r.URL.Query().Get("kyc_status")
+	partnerStatus := r.URL.Query().Get("partner_status")
 
-	users, err := a.App.AdminUsers.Find(kycStatus)
+	users, err := a.App.AdminUsers.Find(kycStatus, partnerStatus)
 	if err != nil {
 		log.Println(err)
 		http.Error(w, "bad request", 400)
 		return
 	}
 	a.adminrender(w, r, "users.page.html", &templateData{
-		Users:      users,
-		IsKYCQuery: kycStatus != "",
-		Pagination: p,
+		Users:          users,
+		IsKYCQuery:     kycStatus != "",
+		IsPartnerQuery: partnerStatus != "",
+		Pagination:     p,
 	})
 }
 
@@ -161,10 +163,18 @@ func (a *router) adminUsersDetail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	partnerList, err := a.App.Partner.User(r.URL.Query().Get(":id"))
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "bad request", 400)
+		return
+	}
+
 	a.adminrender(w, r, "users.detail.page.html", &templateData{
-		User:    user,
-		KYCList: kycList,
-		Logs:    nil,
+		User:        user,
+		KYCList:     kycList,
+		PartnerList: partnerList,
+		Logs:        nil,
 	})
 }
 
@@ -206,7 +216,7 @@ func (a *router) adminRejectKYC(w http.ResponseWriter, r *http.Request) {
 	userId := r.URL.Query().Get(":id")
 	kycId := r.URL.Query().Get(":kycId")
 	ok := false
-	f := form.Form{}
+	f := form.New(nil)
 
 	defer func() {
 		if !ok {
@@ -222,10 +232,17 @@ func (a *router) adminRejectKYC(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
+			partnerList, err := a.App.Partner.User(r.URL.Query().Get(":id"))
+			if err != nil {
+				log.Println(err)
+				return
+			}
+
 			a.adminrender(w, r, "users.detail.page.html", &templateData{
-				Form:    &f,
-				User:    user,
-				KYCList: kycList,
+				Form:        f,
+				User:        user,
+				PartnerList: partnerList,
+				KYCList:     kycList,
 			})
 		}
 	}()
@@ -254,6 +271,114 @@ func (a *router) adminRejectKYC(w http.ResponseWriter, r *http.Request) {
 
 	// Update Role, KCS status user
 	err = a.App.Users.UpdateKYCStatus(
+		userId,
+		status,
+	)
+
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "500 - internal server error", 500)
+		return
+	}
+
+	ok = true
+
+	http.Redirect(w, r, fmt.Sprintf("/admin/users/%s/detail", userId), http.StatusSeeOther)
+}
+
+func (a *router) adminApprovePartner(w http.ResponseWriter, r *http.Request) {
+	userId := r.URL.Query().Get(":id")
+	partnerId := r.URL.Query().Get(":partnerId")
+
+	// Update KYC status
+	status := "approved"
+	err := a.App.Partner.FeedbackPartner(
+		partnerId,
+		userId,
+		status,
+		"",
+	)
+
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "500 - internal server error", 500)
+		return
+	}
+
+	// Update Role, KCS status user
+	err = a.App.Users.UpdatePartnerStatus(
+		userId,
+		status,
+	)
+
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "500 - internal server error", 500)
+		return
+	}
+
+	http.Redirect(w, r, fmt.Sprintf("/admin/users/%s/detail", userId), http.StatusSeeOther)
+}
+
+func (a *router) adminRejectPartner(w http.ResponseWriter, r *http.Request) {
+	userId := r.URL.Query().Get(":id")
+	partnerId := r.URL.Query().Get(":partnerId")
+	ok := false
+	f := form.New(nil)
+
+	defer func() {
+		if !ok {
+			user, err := a.App.AdminUsers.ID(r.URL.Query().Get(":id"))
+			if err != nil {
+				log.Println(err)
+				return
+			}
+
+			kycList, err := a.App.KYC.User(r.URL.Query().Get(":id"))
+			if err != nil {
+				log.Println(err)
+				return
+			}
+
+			partnerList, err := a.App.Partner.User(r.URL.Query().Get(":id"))
+			if err != nil {
+				log.Println(err)
+				return
+			}
+
+			a.adminrender(w, r, "users.detail.page.html", &templateData{
+				Form:        f,
+				User:        user,
+				PartnerList: partnerList,
+				KYCList:     kycList,
+			})
+		}
+	}()
+
+	if err := r.ParseForm(); err != nil {
+		f.Errors.Add("err", "err_parse_form")
+		return
+	}
+
+	f.Values = r.PostForm
+
+	// Update KYC status
+	status := "rejected"
+	err := a.App.Partner.FeedbackPartner(
+		partnerId,
+		userId,
+		status,
+		f.Get("Feedback"),
+	)
+
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "500 - internal server error", 500)
+		return
+	}
+
+	// Update Role, KCS status user
+	err = a.App.Users.UpdatePartnerStatus(
 		userId,
 		status,
 	)
@@ -327,7 +452,8 @@ func (a *router) adminUpdateAttachment(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	if r.Method == "POST" {
-		if err := r.ParseMultipartForm(10 << 20); err != nil {
+		r.Body = http.MaxBytesReader(w, r.Body, 101<<20)
+		if err := r.ParseMultipartForm(101 << 20); err != nil {
 			f.Errors.Add("err", "err_parse_form")
 			return
 		}
@@ -469,18 +595,19 @@ func (a *router) adminPosts(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *router) adminCreatePost(w http.ResponseWriter, r *http.Request) {
-	f := form.Form{}
+	f := form.New(nil)
 
 	ok := false
 	defer func() {
 		if !ok {
 			a.adminrender(w, r, "posts.update.page.html", &templateData{
-				Form: &f,
+				Form: f,
 			})
 		}
 	}()
 
 	if r.Method == "POST" {
+		r.Body = http.MaxBytesReader(w, r.Body, 10<<20)
 		if err := r.ParseMultipartForm(10 << 20); err != nil {
 			log.Println(err)
 			f.Errors.Add("err", "err_parse_form")
@@ -526,7 +653,7 @@ func (a *router) adminCreatePost(w http.ResponseWriter, r *http.Request) {
 			f.Set("Thumbnail", post.Thumbnail)
 		}
 
-		if err := a.App.Posts.Update(post, &f); err != nil {
+		if err := a.App.Posts.Update(post, f); err != nil {
 			log.Println(err)
 			f.Errors.Add("err", "could_not_create_post")
 			return
@@ -557,6 +684,7 @@ func (a *router) adminUpdatePost(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	if r.Method == "POST" {
+		r.Body = http.MaxBytesReader(w, r.Body, 10<<20)
 		if err := r.ParseMultipartForm(10 << 20); err != nil {
 			log.Println(err)
 			f.Errors.Add("err", "err_parse_form")
@@ -668,4 +796,7 @@ func registerAdminRoute(mux *pat.PatternServeMux, a *router) {
 
 	mux.Get("/admin/users/:id/kyc/:kycId/approve", use(a.adminApproveKYC, a.isadmin))
 	mux.Post("/admin/users/:id/kyc/:kycId/reject", use(a.adminRejectKYC, a.isadmin))
+
+	mux.Get("/admin/users/:id/partner/:partnerId/approve", use(a.adminApprovePartner, a.isadmin))
+	mux.Post("/admin/users/:id/partner/:partnerId/reject", use(a.adminRejectPartner, a.isadmin))
 }
