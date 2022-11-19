@@ -72,7 +72,7 @@ func (m *LogModel) Find(userId string, date string) ([]*models.Log, error) {
 
 	if date != "" {
 		loc := len(wheres) + 1
-		wheres = append(wheres, fmt.Sprintf("logs.created_at = $%d", loc))
+		wheres = append(wheres, fmt.Sprintf("logs.created_at::DATE = $%d", loc))
 		values = append(values, date)
 	}
 	orderStm := "ORDER BY logs.id DESC"
