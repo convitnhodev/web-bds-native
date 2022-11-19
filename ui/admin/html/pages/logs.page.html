@@ -63,7 +63,9 @@
               <div class="d-flex">
                 <strong>{{ .Actor.FirstName}} {{ .Actor.LastName }}</strong>
               </div>
-              <div class="text-small color-fg-subtle" style="word-wrap: break-word;max-width: 750px;margin-left: auto;margin-right: auto;">{{ .Content }}</div>
+              <div class="text-small color-fg-subtle" style="word-wrap: break-word;max-width: 750px;margin-left: auto;margin-right: auto;">
+                <strong>Vào lúc {{ .CreatedAt.Format "2006-01-02 15:04" }}</strong>: {{ .Content }}
+              </div>
             </div>
           </div>
         </div>
