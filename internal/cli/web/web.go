@@ -247,6 +247,8 @@ func (a *router) verifyEmail(w http.ResponseWriter, r *http.Request) {
 		}
 
 		ok = true
+		a.App.Log.Add(fmt.Sprint(user.ID), fmt.Sprintf("Người dùng %d xác nhận email thành công.", user.ID))
+
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 
 	}
@@ -299,6 +301,8 @@ func (a *router) verifyPhone(w http.ResponseWriter, r *http.Request) {
 			log.Println(err)
 			f.Errors.Add("err", "err_could_not_verified_phone")
 		}
+
+		a.App.Log.Add(fmt.Sprint(user.ID), fmt.Sprintf("Người dùng %d xác nhận số điện thoại thành công.", user.ID))
 
 		ok = true
 		http.Redirect(w, r, "/verify/phone", http.StatusSeeOther)
@@ -364,6 +368,8 @@ func (a *router) register(w http.ResponseWriter, r *http.Request) {
 					log.Println(err)
 				}
 			}
+
+			a.App.Log.Add(fmt.Sprint(user.ID), fmt.Sprintf("Người dùng %d đăng ký thành công.", user.ID))
 		}
 
 		ok = true
@@ -372,7 +378,9 @@ func (a *router) register(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *router) logout(w http.ResponseWriter, r *http.Request) {
-	a.session.Remove(r, "user")
+	userId := a.session.Pop(r, "user")
+	a.App.Log.Add(fmt.Sprint(userId), fmt.Sprintf("Người dùng %d đăng xuất thành công.", userId))
+
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
@@ -420,7 +428,7 @@ func (a *router) login(w http.ResponseWriter, r *http.Request) {
 		ok = true
 		a.session.Put(r, "user", user.ID)
 
-		a.App.Log.Add(fmt.Sprint(user.ID), fmt.Sprintf("Người dùng %d đăng nhập thành công", user.ID))
+		a.App.Log.Add(fmt.Sprint(user.ID), fmt.Sprintf("Người dùng %d đăng nhập thành công.", user.ID))
 
 		http.Redirect(w, r, r.Header.Get("Referer"), http.StatusSeeOther)
 	}
@@ -487,6 +495,8 @@ func (a *router) forgotPassword(w http.ResponseWriter, r *http.Request) {
 
 		ok = true
 		a.session.Put(r, "reset_pwd_phone", phoneNum)
+		a.App.Log.Add(fmt.Sprint(user.ID), fmt.Sprintf("Người dùng %d yêu cầu cài lại mật khẩu qua điện thoại thành công.", user.ID))
+
 		http.Redirect(w, r, "/reset-password", http.StatusSeeOther)
 	}
 }
@@ -548,6 +558,7 @@ func (a *router) resetPassword(w http.ResponseWriter, r *http.Request) {
 				}
 
 				a.App.Users.UpdateNewPassword(fmt.Sprint(user.ID), f.Get("Password"))
+				a.App.Log.Add(fmt.Sprint(user.ID), fmt.Sprintf("Người dùng %d đổi mật khẩu bằng mã gửi qua điện thoại thành công.", user.ID))
 			}
 		} else if userId > 0 {
 			// Trường hợp reset by old password
@@ -562,6 +573,7 @@ func (a *router) resetPassword(w http.ResponseWriter, r *http.Request) {
 				}
 
 				a.App.Users.UpdateNewPassword(fmt.Sprint(user.ID), f.Get("Password"))
+				a.App.Log.Add(fmt.Sprint(user.ID), fmt.Sprintf("Người dùng %d đổi mật khẩu bằng mật khẩu cũ thành công.", user.ID))
 			}
 		}
 
@@ -616,6 +628,7 @@ func (a *router) createComment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ok = true
+	a.App.Log.Add(fmt.Sprint(id), fmt.Sprintf("Người dùng %d có một bình luận tại %s thành công.", id, slug))
 
 	w.Write([]byte("Ok"))
 }
@@ -730,6 +743,8 @@ func (a *router) uploadKYC(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		a.App.Log.Add(fmt.Sprint(userId), fmt.Sprintf("Người dùng %d gửi một yêu cầu KYC.", userId))
+
 		ok = true
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	}
@@ -841,6 +856,7 @@ func (a *router) applyPartner(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		a.App.Log.Add(fmt.Sprint(userId), fmt.Sprintf("Người dùng %d ứng tuyển làm đối tác Deein.", userId))
 		ok = true
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	}

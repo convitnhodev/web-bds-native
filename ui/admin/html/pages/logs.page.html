@@ -64,7 +64,7 @@
                 <strong>{{ .Actor.FirstName}} {{ .Actor.LastName }}</strong>
               </div>
               <div class="text-small color-fg-subtle" style="word-wrap: break-word;max-width: 750px;margin-left: auto;margin-right: auto;">
-                <strong>Vào lúc {{ .CreatedAt.Format "2006-01-02 15:04" }}</strong>: {{ .Content }}
+                <strong>Vào lúc {{ tz_format .CreatedAt "2006-01-02 15:04" "Asia/Ho_Chi_Minh"}}</strong>: {{ .Content }}
               </div>
             </div>
           </div>

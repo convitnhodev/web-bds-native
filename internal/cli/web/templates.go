@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/deeincom/deeincom/config"
 	"github.com/deeincom/deeincom/pkg/form"
@@ -65,6 +66,7 @@ var functions = template.FuncMap{
 	"sureFind":        sureFind,
 	"find_post_tags":  findPostByTags,
 	"to_cdn_link":     toCDNLink,
+	"tz_format":       formatDatetime,
 }
 
 // sureFind always find an element in list l
@@ -213,4 +215,14 @@ func toCDNLink(s string) string {
 		return s
 	}
 	return file.CloudLink
+}
+
+func formatDatetime(v time.Time, tpl string, loc string) string {
+	tz, err := time.LoadLocation(loc)
+
+	if err != nil {
+		return ""
+	}
+
+	return v.In(tz).Format(tpl)
 }
