@@ -112,7 +112,7 @@ func (a *router) adminAttachments(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	a.App.Log.Add(fmt.Sprint(userId), fmt.Sprintf("Người dùng %d xem thông tin danh sách sản phẩm.", userId))
+	a.App.Log.Add(fmt.Sprint(userId), fmt.Sprintf("Người dùng %d xem thông tin danh sách tệp đính kèm của sản phẩm %d.", userId, product.ID))
 	a.adminrender(w, r, "attachments.page.html", &templateData{
 		Product:     product,
 		Pagination:  p,
@@ -471,6 +471,7 @@ func (a *router) adminUpdateAttachment(w http.ResponseWriter, r *http.Request) {
 	ok := false
 	defer func() {
 		if !ok {
+			a.App.Log.Add(fmt.Sprint(userId), fmt.Sprintf("Người dùng %d xem thông tin tệp đính kèm %d của sản phẩm %d.", userId, attachment.ID, product.ID))
 			a.adminrender(w, r, "attachments.update.page.html", &templateData{
 				Form:    f,
 				Product: product,
@@ -522,7 +523,6 @@ func (a *router) adminUpdateAttachment(w http.ResponseWriter, r *http.Request) {
 		a.App.Log.Add(fmt.Sprint(userId), fmt.Sprintf("Người dùng %d cập nhật thông tin tệp đính kèm %d cho sản phẩm %d.", userId, attachment.ID, product.ID))
 		http.Redirect(w, r, fmt.Sprintf("/admin/products/%d/attachments", attachment.Product.ID), http.StatusSeeOther)
 	}
-
 }
 
 func (a *router) adminUpdateProduct(w http.ResponseWriter, r *http.Request) {
@@ -539,6 +539,7 @@ func (a *router) adminUpdateProduct(w http.ResponseWriter, r *http.Request) {
 	ok := false
 	defer func() {
 		if !ok {
+			a.App.Log.Add(fmt.Sprint(userId), fmt.Sprintf("Người dùng %d xem thông tin sản phẩm %d.", userId, product.ID))
 			a.adminrender(w, r, "products.update.page.html", &templateData{
 				Form: f,
 			})
@@ -716,6 +717,7 @@ func (a *router) adminUpdatePost(w http.ResponseWriter, r *http.Request) {
 	ok := false
 	defer func() {
 		if !ok {
+			a.App.Log.Add(fmt.Sprint(userId), fmt.Sprintf("Người dùng %d xem bài viết %d.", userId, post.ID))
 			a.adminrender(w, r, "posts.update.page.html", &templateData{
 				Form: f,
 			})
@@ -825,6 +827,7 @@ func (a *router) adminLogs(w http.ResponseWriter, r *http.Request) {
 	userId := a.session.GetInt(r, "user")
 	userInfo := r.URL.Query().Get("user_info")
 	date := r.URL.Query().Get("date")
+	p := a.App.Log.Pagination.Query(r.URL)
 	f := form.New(nil)
 
 	f.Set("Date", date)
@@ -837,8 +840,9 @@ func (a *router) adminLogs(w http.ResponseWriter, r *http.Request) {
 
 	defer func() {
 		a.adminrender(w, r, "logs.page.html", &templateData{
-			Logs: logs,
-			Form: f,
+			Logs:       logs,
+			Form:       f,
+			Pagination: p,
 		})
 	}()
 
