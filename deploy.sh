@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-SITE_NAME=deein
-SERVER=deein
+SITE_NAME=$1
+SERVER=$2
 ENTRY_FILE=./cmd/deein/main.go
 BUILD_PATH=./build/$SITE_NAME
 CONFIG_DIR=./deploy/$SITE_NAME
