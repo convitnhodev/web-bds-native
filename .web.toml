@@ -6,15 +6,20 @@ cmd = "make build"
 full_bin = "APP_ENV=dev ./tmp/main web"
 include_ext = ["go", "html"]
 exclude_dir = [
+    "posts",
+    "upload",
     "logs",
-    "ui/basic/static"
+    "sql",
+    "ui/basic/static",
+    "node",
+    "deploy"
 ]
 include_dir = []
 exclude_file = [".DS_Store"]
 exclude_unchanged = true
 log = "air.log"
 delay = 1000
-stop_on_error = true
+stop_on_error = false
 send_interrupt = false
 kill_delay = 500
 
