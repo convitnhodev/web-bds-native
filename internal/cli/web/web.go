@@ -128,6 +128,10 @@ func (a *router) productDetail(w http.ResponseWriter, r *http.Request) {
 		comments = []*models.Comment{}
 	}
 
+	for _, v := range comments {
+		log.Println(len(v.ChildComments))
+	}
+
 	a.render(w, r, "detail.page.html", &templateData{
 		Product:     product,
 		Attachments: attachments,

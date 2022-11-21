@@ -90,15 +90,16 @@ type Post struct {
 }
 
 type Comment struct {
-	ID           int
-	UserId       int
-	ParrentId    *int
-	Poster       User
-	Slug         string
-	Message      string
-	IsCensorship bool
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
+	ID            int
+	UserId        int
+	ParrentId     *int
+	Poster        User
+	ChildComments []*Comment
+	Slug          string
+	Message       string
+	IsCensorship  bool
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
 }
 
 type File struct {

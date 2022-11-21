@@ -92,12 +92,30 @@ func (m *CommentModel) Slug(slug string) ([]*models.Comment, error) {
 	defer rows.Close()
 
 	list := []*models.Comment{}
+	commentMap := make(map[int]*models.Comment)
 	for rows.Next() {
 		o := &models.Comment{}
 		if err := scanComment(rows, o); err != nil {
 			log.Println(err)
 		}
-		list = append(list, o)
+
+		if o.ParrentId == nil {
+			v, has := commentMap[o.ID]
+			if has {
+				o.ChildComments = v.ChildComments
+			}
+			commentMap[o.ID] = o
+
+			list = append(list, o)
+		} else {
+			v, has := commentMap[*o.ParrentId]
+			if has {
+				v.ChildComments = append(v.ChildComments, o)
+			} else {
+				parentComment := &models.Comment{}
+				parentComment.ChildComments = []*models.Comment{o}
+			}
+		}
 	}
 
 	return list, nil
