@@ -206,7 +206,7 @@
                   class="block focus:outline-none"
                 >
                   <span class="absolute inset-0" aria-hidden="true"></span>
-                  <p class="truncate font-medium text-gray-900">{{ .Title }}</p>
+                  <p class="truncate font-bold text-gray-900">{{ .Title }}</p>
                 </a>
               </div>
               <svg
@@ -253,10 +253,28 @@
             </button>
           </div>
         </div>
+        {{$user := .User}} {{if $user}}
+        <div class="mt-4">
+          <div class="mt-1">
+            <textarea
+              rows="4"
+              id="comment"
+              class="block w-full rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
+            ></textarea>
+          </div>
+          <button
+            type="button"
+            class="mt-4 inline-flex items-center rounded-md border border-transparent bg-sky-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2"
+          >
+            Gửi Bình Luận
+          </button>
+        </div>
+        {{end}}
+        <!---->
         {{if .Comments}}
-        <div class="mt-8 space-y-2">
+        <div class="mt-4 space-y-2">
           {{range .Comments}}
-          <div class="flex space-x-4 text-gray-500 bg-gray-50 p-4 rounded">
+          <div class="text-gray-500 bg-gray-50 p-4 rounded">
             <div class="flex-1">
               <h3 class="font-bold text-gray-900">
                 {{.Poster.FirstName}} {{.Poster.LastName}}
@@ -271,6 +289,22 @@
                 <p>{{.Message}}</p>
               </div>
             </div>
+            {{if $user}}
+            <div class="mt-4">
+              <div class="mt-1">
+                <textarea
+                  rows="2"
+                  class="block w-full rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
+                ></textarea>
+              </div>
+              <button
+                type="button"
+                class="mt-2 inline-flex items-center rounded-md border border-transparent bg-sky-600 px-2 py-1 text-sm font-bold text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2"
+              >
+                Gửi Trả Lời
+              </button>
+            </div>
+            {{end}}
           </div>
           {{range .ChildComments}}
           <div class="ml-6 flex space-x-4 text-gray-500 bg-gray-50 p-4 rounded">
