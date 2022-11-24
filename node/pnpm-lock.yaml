@@ -2,12 +2,14 @@ lockfileVersion: 5.4
 
 specifiers:
   '@unocss/cli': ^0.46.5
+  '@unocss/preset-typography': ^0.46.5
   '@unocss/preset-uno': ^0.46.5
   '@unocss/preset-web-fonts': ^0.46.5
   mini-svg-data-uri: ^1.4.4
 
 devDependencies:
   '@unocss/cli': 0.46.5
+  '@unocss/preset-typography': 0.46.5
   '@unocss/preset-uno': 0.46.5
   '@unocss/preset-web-fonts': 0.46.5
   mini-svg-data-uri: 1.4.4
@@ -130,6 +132,12 @@ packages:
 
   /@unocss/preset-mini/0.46.5:
     resolution: {integrity: sha512-pSiCUeNoLs9F5ux7BzsTKqQhTABvwtggv45Kza2wDIStPESLYHInPUHF57e753IhKdZSpX08gSRiYF4mXVcFWg==}
+    dependencies:
+      '@unocss/core': 0.46.5
+    dev: true
+
+  /@unocss/preset-typography/0.46.5:
+    resolution: {integrity: sha512-wAf9XNNzJWrXEFWuEUXfY5Jmx7HPv5Mi+3EkOcPi8at7lcncWkF0PmLY/nI95nfXQZipkV+aDyHp3TsDn9FgAw==}
     dependencies:
       '@unocss/core': 0.46.5
     dev: true

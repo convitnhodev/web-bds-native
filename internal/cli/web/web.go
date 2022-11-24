@@ -87,9 +87,11 @@ func (a *router) render(w http.ResponseWriter, r *http.Request, name string, td 
 
 	buf.WriteTo(w)
 }
+
 func (a *router) terms(w http.ResponseWriter, r *http.Request) {
 	a.render(w, r, "terms.page.html", &templateData{})
 }
+
 func (a *router) privacy(w http.ResponseWriter, r *http.Request) {
 	a.render(w, r, "privacy.page.html", &templateData{})
 }
@@ -878,6 +880,13 @@ func (a *router) robots(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Disallow: /")
 }
 
+func (a *router) blog(w http.ResponseWriter, r *http.Request) {
+	a.render(w, r, "blog.page.html", &templateData{})
+}
+func (a *router) blogDetail(w http.ResponseWriter, r *http.Request) {
+	a.render(w, r, "blog.detail.page.html", &templateData{})
+}
+
 func run(c *root.Cmd) error {
 	begin := time.Now().UnixNano() // bắt đầu tính thời gian
 
@@ -948,6 +957,10 @@ func run(c *root.Cmd) error {
 	mux.Get("/upgrade-user", use(a.upgradeUser, a.islogined))
 	mux.Get("/apply-partner", use(a.applyPartner, a.islogined))
 	mux.Post("/apply-partner", use(a.applyPartner, a.islogined))
+
+	// blog
+	mux.Get("/blog", use(a.blog))
+	mux.Get("/blog/:slug", use(a.blogDetail))
 
 	// kyc
 	mux.Get("/kyc", use(a.uploadKYC, a.islogined))

@@ -1,3 +1,4 @@
+import presetTypography from '@unocss/preset-typography';
 import presetUno from '@unocss/preset-uno';
 import presetWebFonts from '@unocss/preset-web-fonts';
 import svgToDataUri from 'mini-svg-data-uri';
@@ -11,6 +12,7 @@ export default {
         sans: 'Barlow',
       },
     }),
+    presetTypography(),
   ],
   preflights: [
     {
