@@ -30,7 +30,7 @@
               Mua chung thật - tài sản hiện hữu - pháp lý rõ ràng - lợi nhuận an
               toàn - bền vững
             </p>
-            {{ if not .User}}
+            {{if not .User}}
             <div class="mt-10 sm:mt-12">
               <form
                 method="post"
@@ -152,46 +152,46 @@
           Có nhiều cái đang mở bán
         </p>
       </div>
-      {{ if .Products }}
+      {{if .Products}}
       <div
         class="mx-auto mt-12 grid max-w-lg gap-5 lg:max-w-none lg:grid-cols-3"
       >
-        {{ range .Products }}
+        {{range .Products}}
         <div class="flex flex-col overflow-hidden rounded-lg shadow-lg">
           <div class="flex-shrink-0">
             <img
               class="h-48 w-full object-cover"
-              src="{{ to_cdn_link .PosterLink }}"
-              alt=""
+              src="{{to_cdn_link .PosterLink}}"
+              alt="{{.Title}}"
             />
           </div>
           <div class="flex flex-1 flex-col justify-between bg-white p-6">
             <div class="flex-1">
-              <a href="/real-estate/{{ .Slug }}" class="mt-2 block">
-                <p class="text-3xl font-semibold text-gray-900">{{ .Title }}</p>
-                <p class="mt-3 text-base text-gray-500">{{ .Short }}</p>
+              <a href="/real-estate/{{.Slug}}" class="mt-2 block">
+                <p class="text-3xl font-semibold text-gray-900">{{.Title}}</p>
+                <p class="mt-3 text-base text-gray-500">{{.Short}}</p>
               </a>
             </div>
             <div class="mt-6 flex items-center">
               <div>
                 <p class="text-lg font-medium text-gray-900">
-                  {{ .Ward }}, {{ .District }}, {{ .City }}
+                  {{.Ward}}, {{.District}}, {{.City}}
                 </p>
                 <div class="mt-4 flex space-x-1 text-sm text-gray-500">
                   <span class="px-2 py-1 bg-blue-100 text-blue-500 uppercase">
-                    Diện tích: {{ .Area }}m<sup>2</sup>
+                    Diện tích: {{.Area}}m<sup>2</sup>
                   </span>
                   <span class="px-2 py-1 bg-green-100 text-green-500 uppercase">
-                    Hướng: {{ .HouseDirection }}
+                    Hướng: {{.HouseDirection}}
                   </span>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        {{ end }}
+        {{end}}
       </div>
-      {{ else }}
+      {{else}}
       <div
         class="mt-8 rounded-md min-h-48 bg-gray-100 px-4 py-16 sm:px-6 sm:py-24 md:grid md:place-items-center lg:px-8"
       >
@@ -217,7 +217,7 @@
           </div>
         </div>
       </div>
-      {{ end }}
+      {{end}}
     </div>
   </div>
   <div class="relative bg-gray-800">
@@ -263,7 +263,7 @@
             <p class="mt-4 text-lg leading-6 text-sky-200">
               Tài sản mua chung trên deein an toàn pháp lý, khả thi về cam kết
             </p>
-            {{ if not .User }}
+            {{if not .User}}
             <a
               href="/register"
               class="mt-8 inline-flex items-center rounded-md border border-transparent bg-white px-5 py-3 text-base font-medium text-sky-600 shadow transition-all hover:bg-sky-50"

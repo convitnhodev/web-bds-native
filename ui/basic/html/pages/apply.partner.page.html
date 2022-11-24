@@ -1,5 +1,5 @@
 {{template "ui" .}}
-
+<!---->
 {{define "title" -}}
 <title>Ứng tuyền vào deein đối tác | deein.com</title>
 {{- end}}
@@ -7,7 +7,6 @@
 {{define "description" -}}
 <meta name="description" content="Ứng tuyền vào deein đối tác" />
 {{- end}}
-
 <!---->
 {{define "body" -}}
 <main class="px-4">
@@ -16,15 +15,15 @@
       Ứng tuyền vào deein đối tác
     </h2>
   </div>
-  {{ if eq .User.PartnerStatus "approved" }}
+  {{if eq .User.PartnerStatus "approved"}}
   <div class="mt-8 mb-16 sm:mx-auto sm:w-full sm:max-w-md relative">
     Bạn đã là đối tác của Deein!
   </div>
-  {{ else if eq .User.PartnerStatus "apply" }}
+  {{else if eq .User.PartnerStatus "apply"}}
   <div class="mt-8 mb-16 sm:mx-auto sm:w-full sm:max-w-md relative">
     Bạn đã ứng tuyển vào Deein xin vui lòng đợi để sớm được phản hồi!
   </div>
-  {{ else }}
+  {{else}}
   <div class="mt-8 mb-16 sm:mx-auto sm:w-full sm:max-w-md relative">
     <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
       {{if .Form.Errors.Get `err`}}
@@ -38,7 +37,12 @@
         </div>
       </div>
       {{end}}
-      <form class="space-y-6" id="login-form" method="post" enctype="multipart/form-data">
+      <form
+        class="space-y-6"
+        id="login-form"
+        method="post"
+        enctype="multipart/form-data"
+      >
         <div>
           <label for="password" class="block text-sm font-medium text-gray-700">
             Lời ngỏ *
@@ -100,6 +104,6 @@
       </div>
     </div>
   </div>
-  {{ end }}
+  {{end}}
 </main>
 {{- end}}
