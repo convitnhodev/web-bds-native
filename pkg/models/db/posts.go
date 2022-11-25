@@ -251,3 +251,15 @@ func (m *PostModel) Remove(id string) error {
 
 	return err
 }
+
+func (m *PostModel) GetBySlug(slug string) (*models.Post, error) {
+	q := m.query(`where posts.slug = $1`, true)
+	row := m.DB.QueryRow(q, slug)
+	o := new(models.Post)
+
+	if err := scanPost(row, o, true); err != nil {
+		return nil, errors.Wrap(err, "Post.GetBySlug")
+	}
+
+	return o, nil
+}
