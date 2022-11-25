@@ -881,7 +881,17 @@ func (a *router) robots(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *router) blog(w http.ResponseWriter, r *http.Request) {
-	a.render(w, r, "blog.page.html", &templateData{})
+	posts, err := a.App.Posts.Find()
+
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "bad request", 400)
+		return
+	}
+
+	a.render(w, r, "blog.page.html", &templateData{
+		Posts: posts,
+	})
 }
 func (a *router) blogDetail(w http.ResponseWriter, r *http.Request) {
 	a.render(w, r, "blog.detail.page.html", &templateData{})

@@ -67,6 +67,7 @@ var functions = template.FuncMap{
 	"find_post_tags":  findPostByTags,
 	"to_cdn_link":     toCDNLink,
 	"tz_format":       formatDatetime,
+	"filterPost":      filterPost,
 }
 
 // sureFind always find an element in list l
@@ -225,4 +226,16 @@ func formatDatetime(v time.Time, tpl string, loc string) string {
 	}
 
 	return v.In(tz).Format(tpl)
+}
+
+func filterPost(p []*models.Post, t string) []*models.Post {
+	var posts []*models.Post
+
+	for _, post := range p {
+		if post.PostType == t {
+			posts = append(posts, post)
+		}
+	}
+
+	return posts
 }
