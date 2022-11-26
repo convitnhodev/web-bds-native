@@ -384,9 +384,6 @@ func (a *router) register(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *router) logout(w http.ResponseWriter, r *http.Request) {
-	userId := a.session.Pop(r, "user")
-	a.App.Log.Add(fmt.Sprint(userId), fmt.Sprintf("Người dùng %d đăng xuất thành công.", userId))
-
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
@@ -433,8 +430,6 @@ func (a *router) login(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("DEBUG", "login", "success", user.ID)
 		ok = true
 		a.session.Put(r, "user", user.ID)
-
-		a.App.Log.Add(fmt.Sprint(user.ID), fmt.Sprintf("Người dùng %d đăng nhập thành công.", user.ID))
 
 		http.Redirect(w, r, r.Header.Get("Referer"), http.StatusSeeOther)
 	}

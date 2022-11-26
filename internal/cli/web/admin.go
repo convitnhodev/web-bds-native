@@ -96,7 +96,6 @@ func (a *router) adminHome(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *router) adminAttachments(w http.ResponseWriter, r *http.Request) {
-	userId := a.session.Get(r, "user")
 	p := a.App.AdminAttachments.Pagination.Query(r.URL)
 
 	product, err := a.App.Products.ID(r.URL.Query().Get(":id"))
@@ -112,7 +111,6 @@ func (a *router) adminAttachments(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	a.App.Log.Add(fmt.Sprint(userId), fmt.Sprintf("Người dùng %d xem thông tin danh sách tệp đính kèm của sản phẩm %d.", userId, product.ID))
 	a.adminrender(w, r, "attachments.page.html", &templateData{
 		Product:     product,
 		Pagination:  p,
@@ -121,7 +119,6 @@ func (a *router) adminAttachments(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *router) adminProducts(w http.ResponseWriter, r *http.Request) {
-	userId := a.session.Get(r, "user")
 	p := a.App.AdminProducts.Pagination.Query(r.URL)
 
 	products, err := a.App.Products.Find()
@@ -131,7 +128,6 @@ func (a *router) adminProducts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	a.App.Log.Add(fmt.Sprint(userId), fmt.Sprintf("Người dùng %d xem thông tin danh sách sản phẩm.", userId))
 	a.adminrender(w, r, "products.page.html", &templateData{
 		Products:   products,
 		Pagination: p,
@@ -139,7 +135,6 @@ func (a *router) adminProducts(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *router) adminUsers(w http.ResponseWriter, r *http.Request) {
-	userId := a.session.Get(r, "user")
 	p := a.App.AdminUsers.Pagination.Query(r.URL)
 	kycStatus := r.URL.Query().Get("kyc_status")
 	partnerStatus := r.URL.Query().Get("partner_status")
@@ -151,7 +146,6 @@ func (a *router) adminUsers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	a.App.Log.Add(fmt.Sprint(userId), fmt.Sprintf("Người dùng %d xem thông tin danh sách người dùng.", userId))
 	a.adminrender(w, r, "users.page.html", &templateData{
 		Users:          users,
 		IsKYCQuery:     kycStatus != "",
@@ -161,7 +155,6 @@ func (a *router) adminUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *router) adminUsersDetail(w http.ResponseWriter, r *http.Request) {
-	userId := a.session.Get(r, "user")
 	user, err := a.App.AdminUsers.ID(r.URL.Query().Get(":id"))
 	if err != nil {
 		log.Println(err)
@@ -183,7 +176,6 @@ func (a *router) adminUsersDetail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	a.App.Log.Add(fmt.Sprint(userId), fmt.Sprintf("Người dùng %d xem thông tin chi tiết user %d.", userId, user.ID))
 	a.adminrender(w, r, "users.detail.page.html", &templateData{
 		User:        user,
 		KYCList:     kycList,
@@ -471,7 +463,6 @@ func (a *router) adminUpdateAttachment(w http.ResponseWriter, r *http.Request) {
 	ok := false
 	defer func() {
 		if !ok {
-			a.App.Log.Add(fmt.Sprint(userId), fmt.Sprintf("Người dùng %d xem thông tin tệp đính kèm %d của sản phẩm %d.", userId, attachment.ID, product.ID))
 			a.adminrender(w, r, "attachments.update.page.html", &templateData{
 				Form:    f,
 				Product: product,
@@ -546,7 +537,6 @@ func (a *router) adminUpdateProduct(w http.ResponseWriter, r *http.Request) {
 	ok := false
 	defer func() {
 		if !ok {
-			a.App.Log.Add(fmt.Sprint(userId), fmt.Sprintf("Người dùng %d xem thông tin sản phẩm %d.", userId, product.ID))
 			a.adminrender(w, r, "products.update.page.html", &templateData{
 				Form: f,
 			})
@@ -627,7 +617,6 @@ func (a *router) adminUpdateProductMedia(w http.ResponseWriter, r *http.Request)
 }
 
 func (a *router) adminPosts(w http.ResponseWriter, r *http.Request) {
-	userId := a.session.GetInt(r, "user")
 	p := a.App.Posts.Pagination.Query(r.URL)
 
 	posts, err := a.App.Posts.Find()
@@ -637,7 +626,6 @@ func (a *router) adminPosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	a.App.Log.Add(fmt.Sprint(userId), fmt.Sprintf("Người dùng %d xem danh sách bài viết.", userId))
 	a.adminrender(w, r, "posts.page.html", &templateData{
 		Posts:      posts,
 		Pagination: p,
@@ -730,7 +718,6 @@ func (a *router) adminUpdatePost(w http.ResponseWriter, r *http.Request) {
 	ok := false
 	defer func() {
 		if !ok {
-			a.App.Log.Add(fmt.Sprint(userId), fmt.Sprintf("Người dùng %d xem bài viết %d.", userId, post.ID))
 			a.adminrender(w, r, "posts.update.page.html", &templateData{
 				Form: f,
 			})
@@ -809,7 +796,6 @@ func (a *router) adminChangeCensorshipComment(w http.ResponseWriter, r *http.Req
 }
 
 func (a *router) adminComments(w http.ResponseWriter, r *http.Request) {
-	userId := a.session.GetInt(r, "user")
 	p := a.App.Comments.Pagination.Query(r.URL)
 
 	comments, err := a.App.Comments.Find()
@@ -819,7 +805,6 @@ func (a *router) adminComments(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	a.App.Log.Add(fmt.Sprint(userId), fmt.Sprintf("Người dùng %d xem danh sách bình luận.", userId))
 	a.adminrender(w, r, "comments.page.html", &templateData{
 		Comments:   comments,
 		Pagination: p,
@@ -837,7 +822,6 @@ func (a *router) adminRemoveComent(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *router) adminLogs(w http.ResponseWriter, r *http.Request) {
-	userId := a.session.GetInt(r, "user")
 	userInfo := r.URL.Query().Get("user_info")
 	date := r.URL.Query().Get("date")
 	p := a.App.Log.Pagination.Query(r.URL)
@@ -882,12 +866,9 @@ func (a *router) adminLogs(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "bad request", 400)
 		return
 	}
-
-	a.App.Log.Add(fmt.Sprint(userId), fmt.Sprintf("Người dùng %d xem nhật ký hệ thống.", userId))
 }
 
 func (a *router) adminInvoices(w http.ResponseWriter, r *http.Request) {
-	userId := a.session.Get(r, "user")
 	p := a.App.Invoice.Pagination.Query(r.URL)
 
 	product, err := a.App.Products.ID(r.URL.Query().Get(":id"))
@@ -904,7 +885,6 @@ func (a *router) adminInvoices(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	a.App.Log.Add(fmt.Sprint(userId), fmt.Sprintf("Người dùng %d xem thông tin danh sách đầu tư của sản phẩm %d.", userId, product.ID))
 	a.adminrender(w, r, "invoices.page.html", &templateData{
 		Product:    product,
 		Pagination: p,
@@ -913,7 +893,6 @@ func (a *router) adminInvoices(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *router) adminViewInvoice(w http.ResponseWriter, r *http.Request) {
-	userId := a.session.GetInt(r, "user")
 
 	invoice, err := a.App.Invoice.ID(r.URL.Query().Get(":id"))
 	if err != nil {
@@ -936,7 +915,6 @@ func (a *router) adminViewInvoice(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	a.App.Log.Add(fmt.Sprint(userId), fmt.Sprintf("Người dùng %d xem chi tiết đơn đầu tư %d.", userId, invoice.ID))
 	a.adminrender(w, r, "invoices.view.page.html", &templateData{
 		Invoice:      invoice,
 		Payments:     payments,
