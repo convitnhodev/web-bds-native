@@ -493,6 +493,9 @@ func (a *router) forgotPassword(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
+			//Setting API and send phone
+			phone.ESMS_APIKEY = a.App.Config.ESMS_APIKEY
+			phone.ESMS_SECRET = a.App.Config.ESMS_SECRET
 			if err := phone.SendResetPwdPhone(phoneNum, token); err != nil {
 				log.Println(err)
 			}
