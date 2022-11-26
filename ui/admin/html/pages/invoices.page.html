@@ -1,0 +1,44 @@
+{{template "admin" .}}
+
+{{define "body"}}
+{{$label := split "accent:success:attention:severe:danger:open:closed:done:sponsors" ":"  }}
+
+<div class="container-lg">
+  <div class="col-12">
+
+    <div class="d-flex flex-items-center mb-3">
+      <h1 class="overflow-hidden flex-auto">
+        Danh sách đầu tư
+        <div class="text-small">{{.Product.Title}}</div>
+      </h1>
+    </div>
+
+    {{if .Invoices}}
+    <div class="Box">
+      <div>
+        {{range .Invoices}}
+        <div class="Box-row Box-row--hover-gray d-flex flex-items-center">
+          <span class="mr-3">Đơn {{.ID}}</span>
+          <div class="flex-auto">
+              <span class="Label Label--accent">{{.Status}}</span>
+          </div>
+          <a class="btn btn-xs mr-1" href="/admin/invoices/{{.ID}}/view">Thông tin chi tiết</a>
+        </div>
+        {{end}}
+      </div>
+    </div>
+
+    {{else}}
+    <div class="blankslate">
+        <img referrerpolicy="no-referrer"
+            src="https://media.discordapp.net/attachments/523522129296097290/981393406934806568/cry-min.jpg?width=112&height=112"
+            alt="anime not found" class="blankslate-image" />
+            <h3 class="blankslate-heading">Chưa có nhà đầu tư nào tiếp cận</h3>
+            <p>Hãy quay lại sau khi có nhà đầu tư xuống tiền.</p>
+    </div>
+    {{end}}
+
+  {{template "pagination" . }}
+</div>
+</div>
+{{end}}

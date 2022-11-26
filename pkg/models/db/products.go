@@ -48,6 +48,9 @@ var productColumes = []string{
 	"products.poster_link",
 	"products.house_certificate_link",
 	"products.finance_plan_link",
+	"products.num_of_slot",
+	"products.cost_per_slot",
+	"products.escrow_amount",
 }
 
 func (m *ProductModel) query(s string) string {
@@ -90,6 +93,9 @@ func scanProduct(r scanner, o *models.Product) error {
 		&o.PosterLink,
 		&o.HouseCertificateLink,
 		&o.FinancePlanLink,
+		&o.NumOfSlot,
+		&o.CostPerSlot,
+		&o.EscrowAmount,
 	); err != nil {
 		return errors.Wrap(err, "scanProduct")
 	}
@@ -180,7 +186,10 @@ func (m *ProductModel) Update(o *models.Product, f *form.Form) error {
 			business_advantage = $22,
 			product_type = $23,
 			legal = $24,
-			area = $25
+			area = $25,
+			num_of_slot = $26,
+			cost_per_slot = $27,
+			escrow_amount = $28
 		where
 			id = $1
 	`
@@ -210,6 +219,9 @@ func (m *ProductModel) Update(o *models.Product, f *form.Form) error {
 		f.Get("Type"),
 		f.Get("Legal"),
 		f.Get("Area"),
+		f.Get("NumOfSlot"),
+		f.Get("CostPerSlot"),
+		f.Get("EscrowAmount"),
 	)
 
 	return err

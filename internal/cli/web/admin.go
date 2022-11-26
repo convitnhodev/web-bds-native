@@ -534,6 +534,13 @@ func (a *router) adminUpdateProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	countInvoice, err := a.App.InvoiceItem.CountByProduct(product.ID)
+	if err != nil {
+		log.Println(err)
+		http.Redirect(w, r, "/admin/products", http.StatusSeeOther)
+		return
+	}
+
 	f := product.Form()
 
 	ok := false
@@ -554,6 +561,12 @@ func (a *router) adminUpdateProduct(w http.ResponseWriter, r *http.Request) {
 
 		f.Values = r.PostForm
 		f.Required("Title")
+
+		// Khi có hoá đơn không cho sửa slot
+		if *countInvoice > 0 && f.GetInt("NumOfSlot") != product.NumOfSlot {
+			f.Errors.Add("NumOfSlot", "err_product_buying")
+			return
+		}
 
 		if !f.Valid() {
 			log.Println("form invalid", f.Errors)
@@ -873,6 +886,65 @@ func (a *router) adminLogs(w http.ResponseWriter, r *http.Request) {
 	a.App.Log.Add(fmt.Sprint(userId), fmt.Sprintf("Người dùng %d xem nhật ký hệ thống.", userId))
 }
 
+func (a *router) adminInvoices(w http.ResponseWriter, r *http.Request) {
+	userId := a.session.Get(r, "user")
+	p := a.App.Invoice.Pagination.Query(r.URL)
+
+	product, err := a.App.Products.ID(r.URL.Query().Get(":id"))
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "bad request", 400)
+		return
+	}
+
+	invoices, err := a.App.Invoice.Find(product.ID)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "bad request", 400)
+		return
+	}
+
+	a.App.Log.Add(fmt.Sprint(userId), fmt.Sprintf("Người dùng %d xem thông tin danh sách đầu tư của sản phẩm %d.", userId, product.ID))
+	a.adminrender(w, r, "invoices.page.html", &templateData{
+		Product:    product,
+		Pagination: p,
+		Invoices:   invoices,
+	})
+}
+
+func (a *router) adminViewInvoice(w http.ResponseWriter, r *http.Request) {
+	userId := a.session.GetInt(r, "user")
+
+	invoice, err := a.App.Invoice.ID(r.URL.Query().Get(":id"))
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "500 - internal server error", 500)
+		return
+	}
+
+	payments, err := a.App.Payment.InvoiceID(invoice.ID)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "bad request", 400)
+		return
+	}
+
+	invoiceItems, err := a.App.InvoiceItem.InvoiceID(invoice.ID)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "bad request", 400)
+		return
+	}
+
+	a.App.Log.Add(fmt.Sprint(userId), fmt.Sprintf("Người dùng %d xem chi tiết đơn đầu tư %d.", userId, invoice.ID))
+	a.adminrender(w, r, "invoices.view.page.html", &templateData{
+		Invoice:      invoice,
+		Payments:     payments,
+		InvoiceItems: invoiceItems,
+	})
+
+}
+
 func registerAdminRoute(mux *pat.PatternServeMux, a *router) {
 	mux.Get("/admin", use(a.adminHome, a.isadmin))
 	mux.Get("/admin/products", use(a.adminProducts, a.isadmin))
@@ -887,6 +959,9 @@ func registerAdminRoute(mux *pat.PatternServeMux, a *router) {
 	mux.Post("/admin/attachments/:id/update", use(a.adminUpdateAttachment, a.isadmin))
 	mux.Get("/admin/attachments/:id/update", use(a.adminUpdateAttachment, a.isadmin))
 	mux.Get("/admin/attachments/create", use(a.adminCreateAttachment, a.isadmin))
+
+	mux.Get("/admin/products/:id/invoices", use(a.adminInvoices, a.isadmin))
+	mux.Get("/admin/invoices/:id/view", use(a.adminViewInvoice, a.isadmin))
 
 	mux.Get("/admin/posts", use(a.adminPosts, a.isadmin))
 	mux.Get("/admin/posts/create", use(a.adminCreatePost, a.isadmin))

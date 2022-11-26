@@ -65,7 +65,7 @@ func (l *LocalFile) UploadFile(prefix_path string, file io.Reader, fileHeader *m
 
 	root := filepath.Join(l.Root, prefix_path)
 	if _, err := os.Stat(root); os.IsNotExist(err) {
-		err := os.MkdirAll(root, os.ModeDir)
+		err := os.MkdirAll(root, os.ModePerm)
 		if err != nil {
 			return nil, err
 		}

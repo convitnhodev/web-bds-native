@@ -19,38 +19,32 @@ import (
 var strictPolicy = bluemonday.StrictPolicy()
 
 type templateData struct {
-	User       *models.User
-	Users      []*models.User
-	Pagination *db.Pagination
-
-	Localhost  bool
-	CurrentURL string
-
-	Flash string
-
-	Form     *form.Form
-	Products []*models.Product
-	Product  *models.Product
-
-	Attachments []*models.Attachment
-	Attachment  *models.Attachment
-
-	Log  *models.Log
-	Logs []*models.Log
-
-	Posts []*models.Post
-	Post  *models.Post
-
-	Comments []*models.Comment
-
+	User              *models.User
+	Users             []*models.User
+	Pagination        *db.Pagination
+	Localhost         bool
+	CurrentURL        string
+	Flash             string
+	Form              *form.Form
+	Products          []*models.Product
+	Product           *models.Product
+	Attachments       []*models.Attachment
+	Attachment        *models.Attachment
+	Log               *models.Log
+	Logs              []*models.Log
+	Posts             []*models.Post
+	Post              *models.Post
+	Comments          []*models.Comment
+	Invoices          []*models.Invoice
+	Payments          []*models.Payment
+	InvoiceItems      []*models.InvoiceItem
+	Invoice           *models.Invoice
 	KYCList           []*models.KYC
 	PartnerList       []*models.Partner
 	IsKYCQuery        bool
 	IsPartnerQuery    bool
 	IsResetPwdByToken bool
-
-	//Config
-	Config *config.Config
+	Config            *config.Config
 }
 
 var functions = template.FuncMap{
@@ -155,6 +149,9 @@ func translate(s string) string {
 
 	case "user_query_err":
 		return "Lỗi không truy vấn được người dùng."
+
+	case "err_product_buying":
+		return "Lỗi không thể sửa lô khi sản phẩm đã được bán."
 	}
 	return s
 }

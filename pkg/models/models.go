@@ -70,6 +70,9 @@ type Product struct {
 	FrontWidth           int
 	StreetWidth          int
 	PavementWidth        int
+	NumOfSlot            int
+	CostPerSlot          int
+	EscrowAmount         int
 	CreatedAt            time.Time
 	UpdatedAt            time.Time
 }
@@ -147,6 +150,38 @@ type Log struct {
 	CreatedAt time.Time
 }
 
+type Invoice struct {
+	ID              int
+	UserId          int
+	Status          string
+	InvoiceSerect   string
+	InvoiceSyncedAt *time.Time
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
+}
+
+type InvoiceItem struct {
+	ID          int
+	InvoiceId   int
+	ProductId   int
+	Quatity     int
+	CostPerSlot int
+	Amount      int
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+}
+
+type Payment struct {
+	ID        int
+	InvoiceId int
+	Amount    int
+	Menthod   string
+	PayType   string
+	TxType    string
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
 func (o *Product) Form() *form.Form {
 	f := form.New(nil)
 	f.Set("Title", o.Title)
@@ -173,6 +208,10 @@ func (o *Product) Form() *form.Form {
 	f.Set("FrontWidth", fmt.Sprint(o.FrontWidth))
 	f.Set("StreetWidth", fmt.Sprint(o.StreetWidth))
 	f.Set("PavementWidth", fmt.Sprint(o.PavementWidth))
+
+	f.Set("CostPerSlot", fmt.Sprint(o.CostPerSlot))
+	f.Set("NumOfSlot", fmt.Sprint(o.NumOfSlot))
+	f.Set("EscrowAmount", fmt.Sprint(o.EscrowAmount))
 
 	return f
 }

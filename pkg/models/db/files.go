@@ -15,7 +15,7 @@ type FileModel struct {
 	Pagination *Pagination
 }
 
-var fileUserColumes = []string{
+var fileColumes = []string{
 	"files.id",
 	"files.local_path",
 	"files.cloud_link",
@@ -40,7 +40,7 @@ func scanFile(r scanner, o *models.File) error {
 }
 
 func (m *FileModel) query(s string) string {
-	return fmt.Sprintf(`SELECT %s FROM files %s`, strings.Join(fileUserColumes, ","), s)
+	return fmt.Sprintf(`SELECT %s FROM files %s`, strings.Join(fileColumes, ","), s)
 }
 
 func (m *FileModel) count(s string) string {

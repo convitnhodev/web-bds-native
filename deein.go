@@ -31,6 +31,9 @@ type App struct {
 	KYC              *db.KYCModel
 	Partner          *db.PartnerModel
 	Log              *db.LogModel
+	Invoice          *db.InvoiceModel
+	InvoiceItem      *db.InvoiceItemModel
+	Payment          *db.PaymentModel
 	LocalFile        *files.LocalFile
 	B2Scheduler      *files.LocalToB2
 }
@@ -187,6 +190,36 @@ func New(c *config.Config) (*App, error) {
 			},
 		},
 		Log: &db.LogModel{
+			DB: conn,
+			Pagination: &db.Pagination{
+				DB:      conn,
+				Min:     25,
+				Max:     100,
+				Default: 25,
+				Data:    &db.PaginationData{Limit: 25},
+			},
+		},
+		Invoice: &db.InvoiceModel{
+			DB: conn,
+			Pagination: &db.Pagination{
+				DB:      conn,
+				Min:     25,
+				Max:     100,
+				Default: 25,
+				Data:    &db.PaginationData{Limit: 25},
+			},
+		},
+		InvoiceItem: &db.InvoiceItemModel{
+			DB: conn,
+			Pagination: &db.Pagination{
+				DB:      conn,
+				Min:     25,
+				Max:     100,
+				Default: 25,
+				Data:    &db.PaginationData{Limit: 25},
+			},
+		},
+		Payment: &db.PaymentModel{
 			DB: conn,
 			Pagination: &db.Pagination{
 				DB:      conn,
