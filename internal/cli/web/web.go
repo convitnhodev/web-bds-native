@@ -881,10 +881,31 @@ func (a *router) robots(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *router) blog(w http.ResponseWriter, r *http.Request) {
-	a.render(w, r, "blog.page.html", &templateData{})
+	posts, err := a.App.Posts.Find()
+
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "bad request", 400)
+		return
+	}
+
+	a.render(w, r, "blog.page.html", &templateData{
+		Posts: posts,
+	})
 }
 func (a *router) blogDetail(w http.ResponseWriter, r *http.Request) {
-	a.render(w, r, "blog.detail.page.html", &templateData{})
+	slug := r.URL.Query().Get(":slug")
+	post, err := a.App.Posts.GetBySlug(slug)
+
+	if err != nil {
+		log.Println(err)
+		a.render(w, r, "404.page.html", &templateData{})
+		return
+	}
+
+	a.render(w, r, "blog.detail.page.html", &templateData{
+		Post: post,
+	})
 }
 
 func run(c *root.Cmd) error {

@@ -28,7 +28,8 @@ func SendVerifyPhone(user *models.User) error {
 }
 
 func SendResetPwdPhone(phone string, token string) error {
-	content := fmt.Sprintf("%s la ma xac minh dùng để cài đặt lại mật khẩu tại %s cua ban", token, Brandname)
+	// content sms là cố định, ko thể thay text !
+	content := fmt.Sprintf("%s la ma xac minh dang ky %s cua ban", token, Brandname)
 
 	return SendSMS(phone, content)
 }
