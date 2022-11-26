@@ -118,6 +118,31 @@ func (m *PostModel) Find() ([]*models.Post, error) {
 	return list, nil
 }
 
+func (m *PostModel) Published() ([]*models.Post, error) {
+	q := m.query("where posts.published_at <= now() order by posts.id desc", true)
+	count := m.count("")
+
+	if err := m.Pagination.Count(count); err != nil {
+		return nil, err
+	}
+
+	rows, err := m.DB.Query(m.Pagination.Generate(q))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	list := []*models.Post{}
+	for rows.Next() {
+		o := &models.Post{}
+		if err := scanPost(rows, o, true); err != nil {
+			log.Println(err)
+		}
+		list = append(list, o)
+	}
+	return list, nil
+}
+
 func (m *PostModel) Tags(tags []string) []*models.Post {
 	q := m.query(
 		fmt.Sprintf(

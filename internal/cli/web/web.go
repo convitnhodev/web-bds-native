@@ -881,7 +881,7 @@ func (a *router) robots(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *router) blog(w http.ResponseWriter, r *http.Request) {
-	posts, err := a.App.Posts.Find()
+	posts, err := a.App.Posts.Published()
 
 	if err != nil {
 		log.Println(err)
