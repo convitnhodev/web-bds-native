@@ -19,6 +19,33 @@ export default {
       getCSS: () => '.preload *{transition-property: none;}',
     },
     {
+      getCSS: ({ theme }) => `.dee-ol1 {
+  padding-left: 4.75rem;
+}
+.dee-ol1 li {
+  position: relative;
+}
+.dee-ol1 li:where(:not(:first-child)) {
+  margin-top: 2rem;
+}
+.dee-ol1 li::before {
+  left: -4.75rem;
+  position: absolute;
+  font-weight: bold;
+  content: counter(list-item);
+  background-color: ${theme.colors.sky['600']};
+  color: white;
+  width: 4rem;
+  height: 4rem;
+  font-size: 2rem;
+  display: inline-flex;
+  border-radius: ${theme.borderRadius.md};
+  justify-content: center;
+  align-items: center;
+}
+`,
+    },
+    {
       getCSS: ({ theme }) => {
         const spacing = {
           px: '1px',

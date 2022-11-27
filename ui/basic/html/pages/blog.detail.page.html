@@ -10,7 +10,11 @@
       class="mx-auto max-w-prose text-base lg:grid lg:max-w-none lg:grid-cols-2 lg:gap-8"
     >
       <div>
-        <!-- <h2 class="text-lg font-semibold text-sky-600"></h2> -->
+        <h2 class="text-lg font-semibold text-sky-600">
+          {{range .Post.Tags}}
+          <a href="#">{{.}}</a>
+          {{end}}
+        </h2>
         <h3
           class="mt-2 text-3xl font-bold leading-8 tracking-tight text-gray-900 sm:text-4xl"
         >

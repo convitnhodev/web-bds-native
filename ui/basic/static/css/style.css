@@ -9,6 +9,31 @@
 }
 
 .preload *{transition-property: none;}
+.dee-ol1 {
+  padding-left: 4.75rem;
+}
+.dee-ol1 li {
+  position: relative;
+}
+.dee-ol1 li:where(:not(:first-child)) {
+  margin-top: 2rem;
+}
+.dee-ol1 li::before {
+  left: -4.75rem;
+  position: absolute;
+  font-weight: bold;
+  content: counter(list-item);
+  background-color: #0284c7;
+  color: white;
+  width: 4rem;
+  height: 4rem;
+  font-size: 2rem;
+  display: inline-flex;
+  border-radius: 0.375rem;
+  justify-content: center;
+  align-items: center;
+}
+
 [type='text'], [type='email'], [type='url'], [type='password'], [type='number'], [type='date'], [type='datetime-local'], [type='month'], [type='search'], [type='tel'], [type='time'], [type='week'], [multiple], textarea, select { appearance: none;
 background-color: #fff;
 border-color: #6b7280;
@@ -233,6 +258,7 @@ line-height: inherit; }
 .divide-y>:not([hidden])~:not([hidden]){--un-divide-y-reverse:0;border-top-width:calc(1px * calc(1 - var(--un-divide-y-reverse)));border-bottom-width:calc(1px * var(--un-divide-y-reverse));border-top-style:solid;border-bottom-style:solid;}
 .divide-y-2>:not([hidden])~:not([hidden]){--un-divide-y-reverse:0;border-top-width:calc(2px * calc(1 - var(--un-divide-y-reverse)));border-bottom-width:calc(2px * var(--un-divide-y-reverse));border-top-style:solid;border-bottom-style:solid;}
 .divide-gray-200>:not([hidden])~:not([hidden]){--un-divide-opacity:1;border-color:rgba(229,231,235,var(--un-divide-opacity));}
+.divide-sky-200>:not([hidden])~:not([hidden]){--un-divide-opacity:1;border-color:rgba(186,230,253,var(--un-divide-opacity));}
 .\[\&\.dee--within-screen\]\:overflow-hidden.dee--within-screen,
 .overflow-hidden{overflow:hidden;}
 .overflow-auto{overflow:auto;}
@@ -268,7 +294,8 @@ line-height: inherit; }
 .bg-purple-200{--un-bg-opacity:1;background-color:rgba(233,213,255,var(--un-bg-opacity));}
 .bg-red-50{--un-bg-opacity:1;background-color:rgba(254,242,242,var(--un-bg-opacity));}
 .bg-rose-200{--un-bg-opacity:1;background-color:rgba(254,205,211,var(--un-bg-opacity));}
-.bg-sky-100{--un-bg-opacity:1;background-color:rgba(224,242,254,var(--un-bg-opacity));}
+.bg-sky-100,
+.hover\:bg-sky-100:hover{--un-bg-opacity:1;background-color:rgba(224,242,254,var(--un-bg-opacity));}
 .bg-sky-50,
 .hover\:bg-sky-50:hover{--un-bg-opacity:1;background-color:rgba(240,249,255,var(--un-bg-opacity));}
 .bg-sky-500{--un-bg-opacity:1;background-color:rgba(14,165,233,var(--un-bg-opacity));}
