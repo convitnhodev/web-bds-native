@@ -23,26 +23,55 @@ var invoiceColumes = []string{
 	"invoices.invoice_serect",
 	"invoices.created_at",
 	"invoices.updated_at",
+	"users.id",
+	"users.first_name",
+	"users.last_name",
+	"users.email",
+	"users.phone",
 }
 
-func scanInvoice(r scanner, o *models.Invoice) error {
-	if err := r.Scan(
-		&o.ID,
-		&o.UserId,
-		&o.Status,
-		&o.InvoiceSyncedAt,
-		&o.InvoiceSerect,
-		&o.CreatedAt,
-		&o.UpdatedAt,
-	); err != nil {
-		return errors.Wrap(err, "scanInvoice")
+func scanInvoice(r scanner, o *models.Invoice, includeUser bool) error {
+	if includeUser {
+		o.User = models.User{}
+		if err := r.Scan(
+			&o.ID,
+			&o.UserId,
+			&o.Status,
+			&o.InvoiceSyncedAt,
+			&o.InvoiceSerect,
+			&o.CreatedAt,
+			&o.UpdatedAt,
+			&o.User.ID,
+			&o.User.FirstName,
+			&o.User.LastName,
+			&o.User.Email,
+			&o.User.Phone,
+		); err != nil {
+			return errors.Wrap(err, "scanInvoice")
+		}
+	} else {
+		if err := r.Scan(
+			&o.ID,
+			&o.UserId,
+			&o.Status,
+			&o.InvoiceSyncedAt,
+			&o.InvoiceSerect,
+			&o.CreatedAt,
+			&o.UpdatedAt,
+		); err != nil {
+			return errors.Wrap(err, "scanInvoice")
+		}
 	}
 
 	return nil
 }
 
-func (m *InvoiceModel) query(s string) string {
-	return fmt.Sprintf(`SELECT %s FROM invoices %s`, strings.Join(invoiceColumes, ","), s)
+func (m *InvoiceModel) query(s string, includeUser bool) string {
+	if includeUser {
+		return fmt.Sprintf(`SELECT %s FROM invoices JOIN users ON invoices.user_id = users.id %s`, strings.Join(invoiceColumes, ","), s)
+	} else {
+		return fmt.Sprintf(`SELECT %s FROM invoices %s`, strings.Join(invoiceColumes, ","), s)
+	}
 }
 
 func (m *InvoiceModel) count(s string) string {
@@ -50,12 +79,31 @@ func (m *InvoiceModel) count(s string) string {
 }
 
 func (m *InvoiceModel) ID(id string) (*models.Invoice, error) {
-	q := m.query("WHERE invoices.id = $1")
+	q := m.query("WHERE invoices.id = $1", true)
 
 	row := m.DB.QueryRow(q, id)
 	o := new(models.Invoice)
-	if err := scanInvoice(row, o); err != nil {
+	if err := scanInvoice(row, o, true); err != nil {
 		return nil, errors.Wrap(err, "InvoiceModel.ID")
+	}
+
+	return o, nil
+}
+
+func (m *InvoiceModel) Buy(userId int, serect string) (*models.Invoice, error) {
+	q := `
+	INSERT INTO invoices (user_id, status, invoice_serect)
+	VALUES($1, 'open'::invoice_status, $2);
+	RETURNING id`
+
+	row := m.DB.QueryRow(q,
+		userId,
+		serect,
+	)
+
+	o := new(models.Invoice)
+	if err := row.Scan(&o.ID); err != nil {
+		return nil, errors.Wrap(err, "Invoice.Buy")
 	}
 
 	return o, nil
@@ -72,7 +120,7 @@ func (m *InvoiceModel) Find(productId int) ([]*models.Invoice, error) {
 			FROM invoice_items
 			WHERE invoice_items.product_id = $1
 		)
-	`, strings.Join(invoiceColumes, ","))
+	`, strings.Join(invoiceColumes[0:7], ","))
 
 	count := `
 		SELECT
@@ -99,7 +147,7 @@ func (m *InvoiceModel) Find(productId int) ([]*models.Invoice, error) {
 	list := []*models.Invoice{}
 	for rows.Next() {
 		o := &models.Invoice{}
-		if err := scanInvoice(rows, o); err != nil {
+		if err := scanInvoice(rows, o, false); err != nil {
 			log.Println(err)
 		}
 		list = append(list, o)

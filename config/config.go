@@ -23,6 +23,9 @@ type Config struct {
 	B2AccountId            string
 	B2AccountKey           string
 	UploadToB2At           string
+	ServerIP               string
+	ATPNotifyUrl           string
+	ATPRedirectUrl         string
 }
 
 // Default config
@@ -43,6 +46,20 @@ func (c *Config) Default() error {
 		return errors.New("please config B2AccountKey backblaze(config.json)")
 	}
 
+	/*	TODO: Enable when ready
+		if c.ServerIP == "" {
+			return errors.New("please config ServerIP (config.json)")
+		}
+
+		if c.ATPNotifyUrl == "" {
+			return errors.New("please config ATPNotifyUrl (config.json)")
+		}
+
+		if c.ATPRedirectUrl == "" {
+			return errors.New("please config ATPRedirectUrl (config.json)")
+		}
+	*/
+
 	if c.UploadToB2At == "" {
 		c.UploadToB2At = "19:00"
 	}
@@ -52,7 +69,7 @@ func (c *Config) Default() error {
 	}
 
 	if c.MappingUploadLocalLink == "" {
-		c.MappingUploadLocalLink = "/upload"
+		c.MappingUploadLocalLink = "/"
 	}
 
 	if c.UploadingRoot == "" {

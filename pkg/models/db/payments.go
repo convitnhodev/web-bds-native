@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/deeincom/deeincom/pkg/models"
@@ -18,7 +19,7 @@ var paymentColumes = []string{
 	"payments.id",
 	"payments.invoice_id",
 	"payments.amount",
-	"payments.menthod",
+	"payments.method",
 	"payments.pay_type",
 	"payments.tx_type",
 	"payments.created_at",
@@ -30,7 +31,7 @@ func scanPayment(r scanner, o *models.Payment) error {
 		&o.ID,
 		&o.InvoiceId,
 		&o.Amount,
-		&o.Menthod,
+		&o.Method,
 		&o.PayType,
 		&o.TxType,
 		&o.CreatedAt,
@@ -51,5 +52,21 @@ func (m *PaymentModel) count(s string) string {
 }
 
 func (m *PaymentModel) InvoiceID(invoiceId int) ([]*models.Payment, error) {
-	return nil, nil
+	q := m.query("WHERE payments.invoice_id = $1")
+
+	rows, err := m.DB.Query(q, invoiceId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	list := []*models.Payment{}
+	for rows.Next() {
+		o := &models.Payment{}
+		if err := scanPayment(rows, o); err != nil {
+			log.Println(err)
+		}
+		list = append(list, o)
+	}
+	return list, nil
 }

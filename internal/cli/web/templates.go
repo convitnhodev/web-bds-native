@@ -41,6 +41,7 @@ type templateData struct {
 	Invoice           *models.Invoice
 	KYCList           []*models.KYC
 	PartnerList       []*models.Partner
+	SumAmount         int
 	IsKYCQuery        bool
 	IsPartnerQuery    bool
 	IsResetPwdByToken bool
@@ -62,6 +63,7 @@ var functions = template.FuncMap{
 	"to_cdn_link":     toCDNLink,
 	"tz_format":       formatDatetime,
 	"filterPost":      filterPost,
+	"parse_enum":      parseEum,
 }
 
 // sureFind always find an element in list l
@@ -153,6 +155,9 @@ func translate(s string) string {
 
 	case "err_product_buying":
 		return "Lỗi không thể sửa lô khi sản phẩm đã được bán."
+
+	case "product_buy_quatity_less_than_zero":
+		return "Số lượng lô phải lớn hơn 0."
 	}
 	return s
 }
@@ -215,7 +220,11 @@ func toCDNLink(s string) string {
 	return file.CloudLink
 }
 
-func formatDatetime(v time.Time, tpl string, loc string) string {
+func formatDatetime(v *time.Time, tpl string, loc string) string {
+	if v == nil {
+		return ""
+	}
+
 	tz, err := time.LoadLocation(loc)
 
 	if err != nil {
@@ -235,4 +244,29 @@ func filterPost(p []*models.Post, t string) []*models.Post {
 	}
 
 	return posts
+}
+
+var PaymentMethodEnumMapping map[string]string = map[string]string{
+	"appotapay":     "AppotaPay",
+	"bank_transfer": "Chuyển khoản",
+}
+var PaymentTypeEnumMapping map[string]string = map[string]string{
+	"escrow": "Thanh toán đặt cọc",
+	"full":   "Thanh toán toàn bộ",
+}
+var TransactionTypeEnumMapping map[string]string = map[string]string{
+	"pay":    "Thanh toán",
+	"refund": "Hoàn tiền",
+}
+
+func parseEum(typeEnum string, value string) string {
+	switch typeEnum {
+	case "PaymentMethod":
+		return PaymentMethodEnumMapping[value]
+	case "PaymentType":
+		return PaymentTypeEnumMapping[value]
+	case "TransactionType":
+		return TransactionTypeEnumMapping[value]
+	}
+	return ""
 }

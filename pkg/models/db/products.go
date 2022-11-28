@@ -193,6 +193,23 @@ func (m *ProductModel) Update(o *models.Product, f *form.Form) error {
 		where
 			id = $1
 	`
+
+	// Xử lí slug
+	slug := slugify.Slugify(f.Get("Title"))
+	if slug != o.Slug {
+		productCount := 0
+		count := m.count("WHERE id != $1 And slug like $2")
+
+		row := m.DB.QueryRow(count, o.ID, fmt.Sprintf("%s%s", slug, "%"))
+		if err := row.Scan(&productCount); err != nil {
+			return err
+		}
+
+		if productCount > 0 {
+			slug = fmt.Sprintf("%s-%d", slug, productCount)
+		}
+	}
+
 	_, err := m.DB.Exec(q,
 		o.ID,
 		f.Get("Title"),
@@ -213,7 +230,7 @@ func (m *ProductModel) Update(o *models.Product, f *form.Form) error {
 		f.GetInt("FrontWidth"),
 		f.GetInt("StreetWidth"),
 		f.GetInt("PavementWidth"),
-		slugify.Slugify(f.Get("Title")),
+		slug,
 		f.Get("FullContent"),
 		f.Get("BusinessAdvantage"),
 		f.Get("Type"),
@@ -223,6 +240,19 @@ func (m *ProductModel) Update(o *models.Product, f *form.Form) error {
 		f.Get("CostPerSlot"),
 		f.Get("EscrowAmount"),
 	)
+
+	if err != nil {
+		return err
+	}
+
+	if slug != o.Slug {
+		prefix := "/real-estate"
+		_, err = m.DB.Exec(
+			"UPDATE comments SET slug = $2 WHERE slug = $1;",
+			fmt.Sprintf("%s/%s", prefix, o.Slug),
+			fmt.Sprintf("%s/%s", prefix, slug),
+		)
+	}
 
 	return err
 }

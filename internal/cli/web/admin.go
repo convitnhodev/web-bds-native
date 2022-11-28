@@ -915,7 +915,13 @@ func (a *router) adminViewInvoice(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	sumAmount := 0
+	for _, it := range invoiceItems {
+		sumAmount += it.Amount
+	}
+
 	a.adminrender(w, r, "invoices.view.page.html", &templateData{
+		SumAmount:    sumAmount,
 		Invoice:      invoice,
 		Payments:     payments,
 		InvoiceItems: invoiceItems,

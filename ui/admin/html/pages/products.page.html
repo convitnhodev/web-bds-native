@@ -28,7 +28,7 @@
       <div>
         {{range .Products}}
         <div class="Box-row Box-row--hover-gray d-flex flex-items-center">
-          <span class="mr-3">{{.Title}}</span>
+          <a class="mr-3" href="/real-estate/{{ .Slug }}" target="_blank"><strong>{{.Title}}</strong></a>
           <div class="flex-auto">
           </div>
           <a class="btn btn-xs mr-2" href="/admin/products/{{.ID}}/invoices">Danh sách đầu tư</a>

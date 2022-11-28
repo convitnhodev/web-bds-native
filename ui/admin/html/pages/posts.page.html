@@ -26,7 +26,7 @@
             <img class="avatar" src="{{ to_cdn_link .Thumbnail }}" width="38" height="38"/>
             <div class="ml-2">
               <div class="d-flex">
-                <strong>{{.Title}}</strong>
+                <a href="/blog/{{ .Slug }}" target="_blank"><strong>{{.Title}}</strong></a>
                 <div class="ml-2">
                   {{ range .Tags }}
                   <span class="Label ml-1 Label--sponsors">{{.}}</span>

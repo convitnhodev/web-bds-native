@@ -1,0 +1,1 @@
+CREATE INDEX idx_products_slug ON products USING btree(slug);

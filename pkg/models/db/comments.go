@@ -58,8 +58,8 @@ func (m *CommentModel) count(s string) string {
 }
 
 func (m *CommentModel) Find() ([]*models.Comment, error) {
-	q := m.query("WHERE is_censorship = False ORDER BY comments.id desc")
-	count := m.count("")
+	q := m.query("WHERE comments.is_censorship = False ORDER BY comments.id desc")
+	count := m.count("WHERE comments.is_censorship = False")
 
 	if err := m.Pagination.Count(count); err != nil {
 		return nil, err

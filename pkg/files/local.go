@@ -8,7 +8,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/deeincom/deeincom/pkg/models/db"
 	"github.com/pkg/errors"
@@ -20,12 +19,11 @@ type LocalFile struct {
 	Files                  *db.FileModel
 }
 
-func (l *LocalFile) GenNamefile(filename string) string {
+func (l *LocalFile) GenNamefile(filename string, file io.Reader) string {
 	h := sha1.New()
 	ext := filepath.Ext(filename)
-	filenameWithoutExt := strings.TrimSuffix(filename, ext)
 
-	h.Write([]byte(filenameWithoutExt + "-" + time.Now().Format("20060102150405")))
+	io.Copy(h, file)
 	sha1_hash := hex.EncodeToString(h.Sum(nil)) + ext
 
 	return sha1_hash
@@ -71,7 +69,7 @@ func (l *LocalFile) UploadFile(prefix_path string, file io.Reader, fileHeader *m
 		}
 	}
 
-	dstFilename := filepath.Join(root, l.GenNamefile(fileHeader.Filename))
+	dstFilename := filepath.Join(root, l.GenNamefile(fileHeader.Filename, file))
 	dst, err := os.Create(dstFilename)
 	if err != nil {
 		return nil, err

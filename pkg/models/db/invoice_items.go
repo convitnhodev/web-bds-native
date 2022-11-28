@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/deeincom/deeincom/pkg/models"
@@ -23,9 +24,13 @@ var invoiceItemsColumes = []string{
 	"invoice_items.amount",
 	"invoice_items.created_at",
 	"invoice_items.updated_at",
+	"products.id",
+	"products.title",
+	"products.slug",
 }
 
-func scanInvoiceItems(r scanner, o *models.InvoiceItem) error {
+func scanInvoiceItem(r scanner, o *models.InvoiceItem) error {
+	o.Product = models.Product{}
 	if err := r.Scan(
 		&o.ID,
 		&o.InvoiceId,
@@ -35,6 +40,9 @@ func scanInvoiceItems(r scanner, o *models.InvoiceItem) error {
 		&o.Amount,
 		&o.CreatedAt,
 		&o.UpdatedAt,
+		&o.Product.ID,
+		&o.Product.Title,
+		&o.Product.Slug,
 	); err != nil {
 		return errors.Wrap(err, "scanInvoice")
 	}
@@ -43,7 +51,7 @@ func scanInvoiceItems(r scanner, o *models.InvoiceItem) error {
 }
 
 func (m *InvoiceItemModel) query(s string) string {
-	return fmt.Sprintf(`SELECT %s FROM invoice_items %s`, strings.Join(invoiceItemsColumes, ","), s)
+	return fmt.Sprintf(`SELECT %s FROM invoice_items JOIN products ON invoice_items.product_id = products.id %s`, strings.Join(invoiceItemsColumes, ","), s)
 }
 
 func (m *InvoiceItemModel) count(s string) string {
@@ -63,5 +71,44 @@ func (m *InvoiceItemModel) CountByProduct(productId int) (*int, error) {
 }
 
 func (m *InvoiceItemModel) InvoiceID(invoiceId int) ([]*models.InvoiceItem, error) {
-	return nil, nil
+	q := m.query("WHERE invoice_items.invoice_id = $1")
+
+	rows, err := m.DB.Query(q, invoiceId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	list := []*models.InvoiceItem{}
+	for rows.Next() {
+		o := &models.InvoiceItem{}
+		if err := scanInvoiceItem(rows, o); err != nil {
+			log.Println(err)
+		}
+		list = append(list, o)
+	}
+	return list, nil
+}
+
+func (m *InvoiceItemModel) Buy(invoiceId int, productId int, quatity int, cost int, amount int) (*models.InvoiceItem, error) {
+	q := `
+	INSERT INTO public.invoice_items
+	(invoice_id, product_id, quatity, cost_per_slot, amount)
+	VALUES($1, $2, $3, $4, $5);
+	RETURNING id`
+
+	row := m.DB.QueryRow(q,
+		invoiceId,
+		productId,
+		quatity,
+		cost,
+		amount,
+	)
+
+	o := new(models.InvoiceItem)
+	if err := row.Scan(&o.ID); err != nil {
+		return nil, errors.Wrap(err, "InvoiceItemModel.Buy")
+	}
+
+	return o, nil
 }

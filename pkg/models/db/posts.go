@@ -222,17 +222,47 @@ func (m *PostModel) Update(o *models.Post, f *form.Form) error {
 		publishedAt = &time
 	}
 
+	// Xử lí slug
+	slug := slugify.Slugify(f.Get("Title"))
+
+	if slug != o.Slug {
+		postCount := 0
+		count := m.count("WHERE id != $1 And slug like $2")
+
+		row := m.DB.QueryRow(count, o.ID, fmt.Sprintf("%s%s", slug, "%"))
+		if err := row.Scan(&postCount); err != nil {
+			return err
+		}
+
+		if postCount > 0 {
+			slug = fmt.Sprintf("%s-%d", slug, postCount)
+		}
+	}
+
 	_, err := m.DB.Exec(q,
 		o.ID,
 		f.Get("Title"),
 		f.Get("Short"),
-		slugify.Slugify(f.Get("Title")),
+		slug,
 		f.Get("Content"),
 		&publishedAt,
 		fmt.Sprintf("{%s}", strings.Join(tags, ",")),
 		f.Get("Thumbnail"),
 		f.Get("PostType"),
 	)
+
+	if err != nil {
+		return err
+	}
+
+	if slug != o.Slug {
+		prefix := "/blog"
+		_, err = m.DB.Exec(
+			"UPDATE comments SET slug = $2 WHERE slug = $1;",
+			fmt.Sprintf("%s/%s", prefix, o.Slug),
+			fmt.Sprintf("%s/%s", prefix, slug),
+		)
+	}
 
 	return err
 }

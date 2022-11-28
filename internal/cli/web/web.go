@@ -18,6 +18,7 @@ import (
 	"github.com/bmizerany/pat"
 	deein "github.com/deeincom/deeincom"
 	"github.com/deeincom/deeincom/internal/cli/root"
+	"github.com/deeincom/deeincom/pkg/appotapay"
 	"github.com/deeincom/deeincom/pkg/email"
 	"github.com/deeincom/deeincom/pkg/form"
 	"github.com/deeincom/deeincom/pkg/helper"
@@ -130,15 +131,115 @@ func (a *router) productDetail(w http.ResponseWriter, r *http.Request) {
 		comments = []*models.Comment{}
 	}
 
-	for _, v := range comments {
-		log.Println(len(v.ChildComments))
-	}
-
 	a.render(w, r, "detail.page.html", &templateData{
 		Product:     product,
 		Attachments: attachments,
 		Comments:    comments,
 	})
+
+}
+
+func (a *router) checkoutProduct(w http.ResponseWriter, r *http.Request) {
+	f := form.New(nil)
+	slug := r.URL.Query().Get(":slug")
+	product, err := a.App.Products.GetBySlug(slug)
+	ok := false
+	if err != nil {
+		log.Println(err)
+		a.render(w, r, "404.page.html", &templateData{})
+		return
+	}
+
+	defer func() {
+		if !ok {
+			// TODO checkout
+			a.render(w, r, "detail.page.html", &templateData{
+				Form:    f,
+				Product: product,
+			})
+		}
+	}()
+
+	if r.Method == "POST" {
+		userId := a.session.GetInt(r, "user")
+		if userId == 0 {
+			ok = true
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			return
+		}
+
+		user, err := a.App.Users.ID(fmt.Sprint(userId))
+
+		// check user có verified id chưa
+		if !hasRole(user, "verified_id") {
+			http.Redirect(w, r, "/upgrade-user?to=verified_id", http.StatusSeeOther)
+			return
+		}
+
+		f.Values = r.PostForm
+		f.Required("Quatity")
+
+		// TODO: validate BankCode, PaymentMethod
+
+		if f.GetInt("Quatity") <= 0 {
+			f.Errors.Add("err", "product_buy_quatity_less_than_zero")
+			return
+		}
+
+		if !f.Valid() {
+			log.Println("form invalid", f.Errors)
+			return
+		}
+
+		invoice, err := a.App.Invoice.Buy(userId, helper.RandString(6))
+
+		if err != nil {
+			a.render(w, r, "500.page.html", &templateData{})
+			return
+		}
+
+		amount := f.GetInt("Quatity") * product.CostPerSlot
+		invoiceItem, err := a.App.InvoiceItem.Buy(
+			invoice.ID,
+			product.ID,
+			f.GetInt("Quatity"),
+			product.CostPerSlot,
+			amount,
+		)
+
+		if err != nil {
+			a.render(w, r, "500.page.html", &templateData{})
+			return
+		}
+
+		res, err := appotapay.Checkout(
+			&appotapay.ATPPayload{
+				Amount:        amount,
+				OrderId:       fmt.Sprint(invoice.ID),
+				OrderInfo:     fmt.Sprintf("Thanh invoice %d", invoice.ID),
+				BankCode:      "",
+				PaymentMethod: "",
+				ClientIP:      a.App.Config.ServerIP,
+				ExtraData:     "",
+				NotifyUrl:     a.App.Config.ATPNotifyUrl,
+				RedirectUrl:   a.App.Config.ATPRedirectUrl,
+			},
+		)
+
+		ok = true
+		a.App.Log.Add(
+			fmt.Sprint(userId),
+			fmt.Sprintf(
+				"Người dùng %d đầu tư vào sản phẩm %d với hoá đơn %d với chi tiết tại %d.",
+				userId,
+				product.ID,
+				invoice.ID,
+				invoiceItem.ID,
+			),
+		)
+
+		http.Redirect(w, r, res.PaymentUrl, http.StatusSeeOther)
+	}
 }
 
 func (a *router) verifyEmailResult(w http.ResponseWriter, r *http.Request) {
@@ -648,7 +749,7 @@ func (a *router) uploadKYC(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: check user có verified phone chưa
+	// check user có verified phone chưa
 	if !hasRole(user, "verify_phone") {
 		http.Redirect(w, r, "/upgrade-user?to=verified_id", http.StatusSeeOther)
 		return
@@ -758,8 +859,6 @@ func (a *router) upgradeUser(w http.ResponseWriter, r *http.Request) {
 	to := r.URL.Query().Get("to")
 	userId := a.session.GetInt(r, "user")
 	user, err := a.App.Users.ID(fmt.Sprint(userId))
-
-	log.Println(userId)
 
 	if err != nil {
 		a.render(w, r, "500.page.html", &templateData{})
@@ -941,6 +1040,9 @@ func run(c *root.Cmd) error {
 
 	// product detail
 	mux.Get("/real-estate/:slug", use(a.productDetail))
+
+	mux.Get("/real-estate/:slug/checkout", use(a.checkoutProduct))
+	mux.Post("/real-estate/:slug/checkout", use(a.checkoutProduct))
 
 	// đăng ký
 	mux.Post("/register", use(a.register))

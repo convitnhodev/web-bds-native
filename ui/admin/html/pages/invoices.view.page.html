@@ -8,8 +8,93 @@
             <h1>Thông tin chi tiết đơn đầu tư</h1>
         </h1>
 
+         <!-- User -->
+        <div class="Subhead">
+            <h2 class="Subhead-heading">Thông tin khách hàng</h2>
+        </div>
 
+        <div>
+            <p>Tên khách hàng: <strong>{{ .Invoice.User.FirstName }} {{ .Invoice.User.LastName }}</strong></p>
+            <p>Số điện thoại: <strong>{{ .Invoice.User.Phone }}</strong></p>
+            <p>Email: <strong>{{ .Invoice.User.Email }}</strong></p>
+            <p>Mã bí mật để liên lạc xác nhận với nhà đầu tư: <strong>{{ .Invoice.InvoiceSerect }}</strong></p>
+            <p>Nhận tiền lúc: <strong>{{ tz_format .Invoice.InvoiceSyncedAt "2006-01-02 15:04" "Asia/Ho_Chi_Minh" }}</strong></p>
+        </div>
+        
+        <!-- InvoiceItems -->
+        <div class="Subhead">
+            <h2 class="Subhead-heading">Danh sách đầu tư</h2>
+        </div>
+
+        {{ if .InvoiceItems }}
+        <div class="d-flex flex-column">
+            <div class="Box mb-3">
+                <div>
+                {{range .InvoiceItems}}
+                    <div class="Box-row Box-row--hover-gray d-flex flex-justify-between">
+                        <div class="float-left">
+                            <p>
+                                Sản phẩm: 
+                                <a target="_blank" href="/real-estate/{{ .Product.Slug }}">
+                                    <strong>{{ .Product.Title }}</strong>
+                                </a>
+                            </p>
+                            <p>Giá 1 lô: <strong>{{ .CostPerSlot }} vnd</strong></p>
+                            <p>Số lô mua: <strong>{{ .Quatity }}</strong></p>
+                        </div>
+                        <div class="float-right mr-1">
+                            <p>Tổng: <strong>{{ .Amount }} vnd</strong></p>
+                        </div>
+                    </div>
+                {{end}}
+                </div>
+            </div>
+            <div>
+                <h4 class="float-right">Tổng tiền: {{ .SumAmount }} vnd</h4>
+            </div>
+        </div>
+        {{ end }}
+
+       
+        <!-- Payments -->
+        <div class="Subhead">
+            <h2 class="Subhead-heading">Lịch sử thanh toán</h2>
+        </div>
+        {{ if .Payments }}
+        <div class="Box mb-3">
+            <div>
+            {{range .Payments}}
+                <div class="Box-row Box-row--hover-gray d-flex flex-justify-between">
+                    <div class="float-left">
+                        <p>
+                            Số tiền thanh toán: <strong>{{ .Amount }} vnd</strong>
+                        </p>
+                        <p>
+                            Thanh toán qua kênh: <strong>{{ parse_enum "PaymentMethod" .Method }}</strong>
+                        </p>
+                        <p>
+                            Loại thanh toán: <strong>{{ parse_enum "PaymentType" .PayType }}</strong>
+                        </p>
+                        <p>
+                            Loại giao dịch: <strong>{{ parse_enum "TransactionType" .TxType }}</strong>
+                        </p>
+                    </div>
+                    <div class="float-right mr-1">
+                        <p><strong>Lúc {{ tz_format .CreatedAt "2006-01-02 15:04" "Asia/Ho_Chi_Minh" }}</strong></p>
+                    </div>
+                </div>
+              {{end}}
+            </div>
+        </div>
+        {{ else }}
+        <div class="blankslate">
+            <img referrerpolicy="no-referrer"
+                src="https://media.discordapp.net/attachments/523522129296097290/981393406934806568/cry-min.jpg?width=112&height=112"
+                alt="anime not found" class="blankslate-image" />
+                <h3 class="blankslate-heading">Khách hàng chưa thanh toán.</h3>
+                <p>Hãy quay lại sau khi có nhà đầu tư xuống tiền.</p>
+        </div>
+        {{ end}}
     </div>
-</div>
 </div>
 {{end}}

@@ -153,6 +153,7 @@ type Log struct {
 type Invoice struct {
 	ID              int
 	UserId          int
+	User            User
 	Status          string
 	InvoiceSerect   string
 	InvoiceSyncedAt *time.Time
@@ -164,6 +165,7 @@ type InvoiceItem struct {
 	ID          int
 	InvoiceId   int
 	ProductId   int
+	Product     Product
 	Quatity     int
 	CostPerSlot int
 	Amount      int
@@ -175,7 +177,7 @@ type Payment struct {
 	ID        int
 	InvoiceId int
 	Amount    int
-	Menthod   string
+	Method    string
 	PayType   string
 	TxType    string
 	CreatedAt time.Time

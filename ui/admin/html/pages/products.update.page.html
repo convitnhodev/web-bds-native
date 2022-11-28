@@ -324,7 +324,7 @@
                         value="{{.Get `NumOfSlot`}}">
                 </div>
                 {{with .Errors.Get `NumOfSlot`}}
-                <p class="note error">{{.}}</p>
+                <p class="note error">{{ __ . }}</p>
                 {{else}}
                 <p class="note">Vd: 88</p>
                 {{end}}
