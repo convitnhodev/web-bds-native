@@ -65,15 +65,11 @@ func (c *Config) Default() error {
 	}
 
 	if c.B2Prefix == "" {
-		c.B2Prefix = "upload"
+		c.B2Prefix = ""
 	}
 
 	if c.MappingUploadLocalLink == "" {
 		c.MappingUploadLocalLink = "/"
-	}
-
-	if c.UploadingRoot == "" {
-		c.UploadingRoot = "upload"
 	}
 
 	if len(c.ProductTypes) == 0 {

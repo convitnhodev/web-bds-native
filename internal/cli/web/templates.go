@@ -60,7 +60,6 @@ var functions = template.FuncMap{
 	"buildPagination": buildPagination,
 	"sureFind":        sureFind,
 	"find_post_tags":  findPostByTags,
-	"to_cdn_link":     toCDNLink,
 	"tz_format":       formatDatetime,
 	"filterPost":      filterPost,
 	"parse_enum":      parseEum,
@@ -210,14 +209,6 @@ func findPostByTags(s string) []*models.Post {
 	posts := app.Posts.Tags(tags)
 
 	return posts
-}
-
-func toCDNLink(s string) string {
-	file, err := app.Files.Local(s)
-	if err != nil || file.CloudLink == "" {
-		return s
-	}
-	return file.CloudLink
 }
 
 func formatDatetime(v *time.Time, tpl string, loc string) string {

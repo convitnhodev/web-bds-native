@@ -85,7 +85,7 @@ func (l *LocalToB2) UploadLocalToB2(localPath string) (*string, error) {
 	}
 	defer f.Close()
 
-	obj := l.Bucket.Object(newLocalPath)
+	obj := l.Bucket.Object(suffixPath)
 	w := obj.NewWriter(l.Context)
 
 	defer w.Close()

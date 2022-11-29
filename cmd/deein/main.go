@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 
 	deein "github.com/deeincom/deeincom"
 	"github.com/deeincom/deeincom/config"
@@ -19,10 +20,11 @@ func main() {
 	fmt.Println("starting cmd: ", os.Args[1])
 	for _, cmd := range root.CmdSet {
 		cfg := cmd.String("cfg", "config.json", "path to config file")
+		uploadFolder := cmd.String("uploaddir", "./upload", "thư mục upload files")
 
 		if os.Args[1] == cmd.Name() {
 			cmd.Parse(os.Args[2:])
-			cmd.App = newApp(*cfg)
+			cmd.App = newApp(*cfg, *uploadFolder)
 
 			err := cmd.Exec()
 			if err != nil {
@@ -40,7 +42,7 @@ func main() {
 	}
 }
 
-func newApp(cfg string) *deein.App {
+func newApp(cfg string, uploadFolder string) *deein.App {
 	retryNum := 0
 retry:
 	c, err := config.Read(cfg)
@@ -63,6 +65,13 @@ retry:
 	if err != nil {
 		panic(err)
 	}
+
+	fullUploadFolder, err := filepath.Abs(uploadFolder)
+	if err != nil {
+		panic(err)
+	}
+	c.UploadingRoot = fullUploadFolder
+
 	log.Println("CONFIG: OK")
 	app, err := deein.New(c)
 	if err != nil {

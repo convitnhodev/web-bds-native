@@ -66,13 +66,13 @@
                     </div>
 
                         {{if eq (.Get `ContentType`) `image` }}
-                            <img src="{{ to_cdn_link (.Get `Link`) }}" alt="preview">
+                            <img src="{{ .Get `Link` }}" alt="preview">
                         {{end}}
                         {{if eq (.Get `ContentType`) `document` }}
 
                         {{end}}
                         {{if eq (.Get `ContentType`) `video` }}
-                            <video src="{{ to_cdn_link (.Get `Link`)}}"></video>
+                            <video src="{{ .Get `Link` }}"></video>
                         {{end}}
                     {{end}}
                 </div>

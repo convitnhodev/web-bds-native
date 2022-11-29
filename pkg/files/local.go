@@ -19,11 +19,11 @@ type LocalFile struct {
 	Files                  *db.FileModel
 }
 
-func (l *LocalFile) GenNamefile(filename string, file io.Reader) string {
+func (l *LocalFile) GenNamefile(filename string, bytes []byte) string {
 	h := sha1.New()
 	ext := filepath.Ext(filename)
 
-	io.Copy(h, file)
+	h.Write(bytes)
 	sha1_hash := hex.EncodeToString(h.Sum(nil)) + ext
 
 	return sha1_hash
@@ -69,7 +69,13 @@ func (l *LocalFile) UploadFile(prefix_path string, file io.Reader, fileHeader *m
 		}
 	}
 
-	dstFilename := filepath.Join(root, l.GenNamefile(fileHeader.Filename, file))
+	bytes, err := io.ReadAll(file)
+	if err != nil {
+		return nil, err
+	}
+
+	hashFilename := l.GenNamefile(fileHeader.Filename, bytes)
+	dstFilename := filepath.Join(root, hashFilename)
 	dst, err := os.Create(dstFilename)
 	if err != nil {
 		return nil, err
@@ -77,7 +83,7 @@ func (l *LocalFile) UploadFile(prefix_path string, file io.Reader, fileHeader *m
 	defer dst.Close()
 
 	// Copy the uploaded file to the created file on the filesystem
-	if _, err := io.Copy(dst, file); err != nil {
+	if _, err := dst.Write(bytes); err != nil {
 		return nil, err
 	}
 
