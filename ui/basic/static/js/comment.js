@@ -30,7 +30,7 @@ commentSubmit.addEventListener('click', async () => {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: `Message=${comment.value}`,
+      body: `Message=${comment.value}&ParentId=null`,
     });
 
     if (resp.ok) {
