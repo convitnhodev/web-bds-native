@@ -17,7 +17,7 @@
       <div class="rounded-md bg-red-50 p-4 mb-4 hidden">
         <div class="flex">
           <div class="ml-3">
-            <h3 class="text-sm font-medium text-red-600">
+            <h3 class="text-sm font-bold text-red-600">
               {{__ (.Form.Errors.Get `err`)}}
             </h3>
           </div>
@@ -29,7 +29,7 @@
         <div>
           <label
             for="verify-value"
-            class="block text-sm font-medium text-gray-700"
+            class="block text-sm font-bold text-gray-700"
           >
             Email
           </label>
@@ -45,7 +45,7 @@
             />
             <button
               type="button"
-              class="w-20 font-medium text-sm text-sky-600 hover:text-sky-500 disabled:text-gray-500 disabled:hover:text-gray-500"
+              class="w-20 font-bold text-sm text-sky-600 hover:text-sky-500 disabled:text-gray-500 disabled:hover:text-gray-500"
               id="send-code"
               data-verify="email"
             >
@@ -57,7 +57,7 @@
           </p>
         </div>
         <div>
-          <label for="code" class="block text-sm font-medium text-gray-700">
+          <label for="code" class="block text-sm font-bold text-gray-700">
             Mã xác nhận
           </label>
           <div class="mt-1">
@@ -73,7 +73,7 @@
         <div>
           <button
             type="submit"
-            class="flex w-full justify-center rounded-md border border-transparent bg-sky-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2"
+            class="flex w-full justify-center rounded-md border border-transparent bg-sky-600 py-2 px-4 text-sm font-bold text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2"
             id="register-form-submit"
           >
             Xác nhận
