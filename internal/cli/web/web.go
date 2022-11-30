@@ -126,7 +126,7 @@ func (a *router) productDetail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	comments, err := a.App.Comments.Slug(slug)
+	comments, err := a.App.Comments.Slug(fmt.Sprintf("/blog/%s", slug))
 	if err != nil {
 		comments = []*models.Comment{}
 	}
@@ -1000,8 +1000,14 @@ func (a *router) blogDetail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	comments, err := a.App.Comments.Slug(fmt.Sprintf("/real-estate/%s", slug))
+	if err != nil {
+		comments = []*models.Comment{}
+	}
+
 	a.render(w, r, "blog.detail.page.html", &templateData{
-		Post: post,
+		Post:     post,
+		Comments: comments,
 	})
 }
 
