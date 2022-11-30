@@ -153,7 +153,7 @@ func (a *router) checkoutProduct(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if !ok {
 			// TODO checkout
-			a.render(w, r, "detail.page.html", &templateData{
+			a.render(w, r, "checkout.page.html", &templateData{
 				Form:    f,
 				Product: product,
 			})
