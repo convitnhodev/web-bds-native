@@ -1,5 +1,9 @@
 {{template "ui" .}}
 <!---->
+{{define "header.scripts-after" -}}
+<script src="/static/js/comment.js" defer></script>
+{{- end}}
+<!---->
 {{define "body" -}}
 <div class="overflow-hidden bg-white">
   <div class="relative mx-auto max-w-7xl py-16 px-4 sm:px-6 lg:px-8">
@@ -75,6 +79,199 @@
         >
           {{.Post.Content | html}}
         </div>
+
+        <div class="border-b border-gray-200">
+          <div
+            class="-mb-px flex space-x-8"
+            aria-orientation="horizontal"
+            role="tablist"
+          >
+            <button
+              class="font-bold border-sky-600 text-sky-600 hover:text-gray-800 hover:border-gray-300 whitespace-nowrap border-b-2 py-6"
+              role="tab"
+              type="button"
+            >
+              Bình Luận
+            </button>
+          </div>
+        </div>
+        {{$user := .User}} {{if $user}}
+        <div class="mt-4 rounded-md bg-green-50 p-4 hidden" id="comment-alert">
+          <div class="flex">
+            <div class="flex-shrink-0">
+              <svg
+                class="h-5 w-5 text-green-400"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </div>
+            <div class="ml-3">
+              <p class="text-sm font-medium text-green-800">
+                Đã gửi bình luận. Bình luận sẽ được BQT duyệt trước khi hiển
+                thị.
+              </p>
+            </div>
+            <div class="ml-auto pl-3">
+              <div class="-mx-1.5 -my-1.5">
+                <button
+                  id="comment-alert-hide"
+                  type="button"
+                  class="inline-flex rounded-md bg-green-50 p-1.5 text-green-500 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 focus:ring-offset-green-50"
+                >
+                  <svg
+                    class="h-5 w-5"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-4">
+          <div class="mt-1">
+            <textarea
+              rows="4"
+              id="comment"
+              class="block w-full rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
+            ></textarea>
+          </div>
+          <button
+            id="comment-submit"
+            data-slug="blog%2F{{.Post.Slug}}"
+            type="button"
+            class="mt-4 inline-flex items-center rounded-md border border-transparent bg-sky-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2"
+          >
+            Gửi Bình Luận
+          </button>
+        </div>
+        {{end}}
+        <!---->
+        {{if .Comments}}
+        <div class="mt-4 space-y-2">
+          {{range .Comments}}
+          <div class="text-gray-500 bg-gray-50 p-4 rounded">
+            <div class="flex-1">
+              <h3 class="font-bold text-gray-900">
+                {{.Poster.FirstName}} {{.Poster.LastName}}
+                <time
+                  class="font-normal text-sm text-gray-500 ml-2"
+                  datetime="{{tz_format .CreatedAt `2006-01-02 15:04` `Asia/Ho_Chi_Minh`}}"
+                >
+                  {{tz_format .CreatedAt "2006-01-02 15:04" "Asia/Ho_Chi_Minh"}}
+                </time>
+              </h3>
+              <div class="prose prose-sm mt-4 max-w-none text-gray-500">
+                <p>{{.Message}}</p>
+              </div>
+            </div>
+            {{if $user}}
+            <div
+              class="mt-4 rounded-md bg-green-50 p-4 hidden"
+              data-comment="alert"
+              data-parent="{{.ID}}"
+            >
+              <div class="flex">
+                <div class="flex-shrink-0">
+                  <svg
+                    class="h-5 w-5 text-green-400"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </div>
+                <div class="ml-3">
+                  <p class="text-sm font-medium text-green-800">
+                    Đã gửi bình luận. Bình luận sẽ được BQT duyệt trước khi hiển
+                    thị.
+                  </p>
+                </div>
+                <div class="ml-auto pl-3">
+                  <div class="-mx-1.5 -my-1.5">
+                    <button
+                      data-comment="alert-hide"
+                      data-parent="{{.ID}}"
+                      type="button"
+                      class="inline-flex rounded-md bg-green-50 p-1.5 text-green-500 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 focus:ring-offset-green-50"
+                    >
+                      <svg
+                        class="h-5 w-5"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path
+                          d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="mt-4">
+              <div class="mt-1">
+                <textarea
+                  data-comment="comment"
+                  data-parent="{{.ID}}"
+                  rows="2"
+                  class="block w-full rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
+                ></textarea>
+              </div>
+              <button
+                data-comment="submit"
+                data-parent="{{.ID}}"
+                data-slug="blog%2F{{.Slug}}"
+                type="button"
+                class="mt-2 inline-flex items-center rounded-md border border-transparent bg-sky-600 px-2 py-1 text-sm font-bold text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2"
+              >
+                Gửi Trả Lời
+              </button>
+            </div>
+            {{end}}
+          </div>
+          {{range .ChildComments}}
+          <div class="ml-6 flex space-x-4 text-gray-500 bg-gray-50 p-4 rounded">
+            <div class="flex-1">
+              <h3 class="font-bold text-gray-900">
+                {{.Poster.FirstName}} {{.Poster.LastName}}
+                <time
+                  class="font-normal text-sm text-gray-500 ml-2"
+                  datetime="{{tz_format .CreatedAt `2006-01-02 15:04` `Asia/Ho_Chi_Minh`}}"
+                >
+                  {{tz_format .CreatedAt "2006-01-02 15:04" "Asia/Ho_Chi_Minh"}}
+                </time>
+              </h3>
+              <div class="prose prose-sm mt-4 max-w-none text-gray-500">
+                <p>{{.Message}}</p>
+              </div>
+            </div>
+          </div>
+          {{end}} {{end}}
+        </div>
+        {{end}}
       </div>
     </div>
   </div>

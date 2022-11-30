@@ -10,6 +10,7 @@
 <!---->
 {{define "header.css-after" -}}
 <link rel="stylesheet" href="/static/css/carousel.css" />
+<link rel="stylesheet" href="/static/css/iframe.css" />
 {{- end}}
 <!---->
 {{define "header.scripts-before" -}}
@@ -25,24 +26,6 @@
 {{- end}}
 <!---->
 {{define "body" -}}
-<style>
-  iframe-container {
-    overflow: hidden;
-    /* Calculated from the aspect ration of the content (in case of 16:9 it is 9/16=
-  0.5625) */
-    padding-top: 56.25%;
-    position: relative;
-  }
-
-  .iframe-container iframe {
-    border: 0;
-    height: 100%;
-    left: 0;
-    position: absolute;
-    top: 0;
-    width: 100%;
-  }
-</style>
 <main>
   <div class="bg-white">
     <div
@@ -74,10 +57,7 @@
                   {{range .Attachments}} {{if eq .ContentType `image`}}
                   <div class="embla__slide">
                     <div class="embla__slide__inner">
-                      <img
-                        class="embla__slide__img"
-                        src="{{.Link}}"
-                      />
+                      <img class="embla__slide__img" src="{{.Link}}" />
                     </div>
                   </div>
                   {{end}} {{end}}
@@ -93,10 +73,7 @@
                       class="embla__slide__inner embla__slide__inner--thumb"
                       type="button"
                     >
-                      <img
-                        class="embla__slide__thumbnail"
-                        src="{{.Link}}"
-                      />
+                      <img class="embla__slide__thumbnail" src="{{.Link}}" />
                     </button>
                   </div>
                   {{end}} {{end}}
@@ -202,10 +179,7 @@
           >
             <div class="flex justify-between space-x-3">
               <div class="min-w-0 flex-1">
-                <a
-                  href="{{.Link}}"
-                  class="block focus:outline-none"
-                >
+                <a href="{{.Link}}" class="block focus:outline-none">
                   <span class="absolute inset-0" aria-hidden="true"></span>
                   <p class="truncate font-bold text-gray-900">{{.Title}}</p>
                 </a>
