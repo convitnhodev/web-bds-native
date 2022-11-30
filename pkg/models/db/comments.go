@@ -126,13 +126,24 @@ func (m *CommentModel) Create(f *form.Form) (*models.Comment, error) {
 		INSERT INTO comments (user_id, parent_id, slug, message, is_censorship)
 		VALUES ($1, $2, $3, $4, false)
 		RETURNING id`
+	parrentId := f.GetInt("ParentId")
 
-	row := m.DB.QueryRow(q,
-		f.GetInt("UserId"),
-		f.GetInt("ParentId"),
-		f.Get("Slug"),
-		f.Get("Message"),
-	)
+	var row *sql.Row
+	if parrentId > 0 {
+		row = m.DB.QueryRow(q,
+			f.GetInt("UserId"),
+			parrentId,
+			f.Get("Slug"),
+			f.Get("Message"),
+		)
+	} else {
+		row = m.DB.QueryRow(q,
+			f.GetInt("UserId"),
+			nil,
+			f.Get("Slug"),
+			f.Get("Message"),
+		)
+	}
 
 	o := new(models.Comment)
 	if err := row.Scan(&o.ID); err != nil {
