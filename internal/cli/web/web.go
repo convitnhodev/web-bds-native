@@ -20,6 +20,7 @@ import (
 	"github.com/deeincom/deeincom/internal/cli/root"
 	"github.com/deeincom/deeincom/pkg/appotapay"
 	"github.com/deeincom/deeincom/pkg/email"
+	"github.com/deeincom/deeincom/pkg/files"
 	"github.com/deeincom/deeincom/pkg/form"
 	"github.com/deeincom/deeincom/pkg/helper"
 	"github.com/deeincom/deeincom/pkg/models"
@@ -42,9 +43,18 @@ type router struct {
 func init() {
 	rand.Seed(time.Now().UnixNano())
 	cmd := root.New("web")
+	uploaddir := ""
 	cmd.StringVar(&port, "port", ":3000", "port của web")
 	cmd.StringVar(&fe, "fe", "ui/basic", "thư mục chứa theme cho fe")
 	cmd.StringVar(&be, "be", "ui/admin", "thư mục chứa theme cho be")
+	cmd.StringVar(&uploaddir, "uploaddir", "./upload", "thư mục upload files")
+
+	fullUploaddir, err := filepath.Abs(uploaddir)
+	if err != nil {
+		panic(err)
+	}
+	files.RootUploadPath = fullUploaddir
+
 	cmd.Action(func() error {
 		return run(cmd)
 	})
@@ -152,7 +162,6 @@ func (a *router) checkoutProduct(w http.ResponseWriter, r *http.Request) {
 
 	defer func() {
 		if !ok {
-			// TODO checkout
 			a.render(w, r, "checkout.page.html", &templateData{
 				Form:    f,
 				Product: product,

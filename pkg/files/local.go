@@ -3,15 +3,19 @@ package files
 import (
 	"crypto/sha1"
 	"encoding/hex"
+	"fmt"
 	"io"
 	"mime/multipart"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 
 	"github.com/deeincom/deeincom/pkg/models/db"
 	"github.com/pkg/errors"
 )
+
+var RootUploadPath string
 
 type LocalFile struct {
 	Root                   string
@@ -29,7 +33,12 @@ func (l *LocalFile) GenNamefile(filename string, bytes []byte) string {
 	return sha1_hash
 }
 
-func (l *LocalFile) UploadFile(prefix_path string, file io.Reader, fileHeader *multipart.FileHeader) (*string, error) {
+func (l *LocalFile) JoinURL(base string, paths ...string) string {
+	p := path.Join(paths...)
+	return fmt.Sprintf("%s/%s", strings.TrimRight(base, "/"), strings.TrimLeft(p, "/"))
+}
+
+func (l *LocalFile) UploadFile(prefixPath string, file io.Reader, fileHeader *multipart.FileHeader) (*string, error) {
 	header := fileHeader.Header
 	size := fileHeader.Size
 	Mb := int64(1024 * 1024)
@@ -61,7 +70,7 @@ func (l *LocalFile) UploadFile(prefix_path string, file io.Reader, fileHeader *m
 		return nil, errors.New("File type no support")
 	}
 
-	root := filepath.Join(l.Root, prefix_path)
+	root := filepath.Join(RootUploadPath, prefixPath)
 	if _, err := os.Stat(root); os.IsNotExist(err) {
 		err := os.MkdirAll(root, os.ModePerm)
 		if err != nil {
@@ -88,7 +97,7 @@ func (l *LocalFile) UploadFile(prefix_path string, file io.Reader, fileHeader *m
 	}
 
 	// Create new row for local file
-	localLink := filepath.Join(l.MappingUploadLocalLink, strings.TrimPrefix(dstFilename, l.Root))
+	localLink := l.JoinURL(l.MappingUploadLocalLink, strings.TrimPrefix(dstFilename, RootUploadPath))
 	if _, err := l.Files.Create(localLink); err != nil {
 		return nil, err
 	}

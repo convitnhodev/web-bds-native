@@ -69,7 +69,7 @@ func (c *Config) Default() error {
 	}
 
 	if c.MappingUploadLocalLink == "" {
-		c.MappingUploadLocalLink = "/"
+		c.MappingUploadLocalLink = "https://cdn.deein.com/"
 	}
 
 	if len(c.ProductTypes) == 0 {

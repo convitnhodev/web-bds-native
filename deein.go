@@ -59,7 +59,6 @@ func New(c *config.Config) (*App, error) {
 	}
 
 	lf := files.LocalFile{
-		Root:                   c.UploadingRoot,
 		MappingUploadLocalLink: c.MappingUploadLocalLink,
 		Files:                  &Files,
 	}
@@ -70,7 +69,6 @@ func New(c *config.Config) (*App, error) {
 		c.B2BucketName,
 		c.UploadToB2At,
 		c.B2Prefix,
-		c.UploadingRoot,
 		c.MappingUploadLocalLink,
 		&Files,
 	)

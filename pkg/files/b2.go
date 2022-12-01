@@ -21,7 +21,6 @@ type LocalToB2 struct {
 	AccountKey             string
 	UploadToB2At           string
 	B2Prefix               string
-	RootUploadPath         string
 	MappingUploadLocalLink string
 	Bucket                 *b2.Bucket
 	Context                context.Context
@@ -33,7 +32,6 @@ func NewB2Scheduler(
 	bucketName string,
 	uploadToB2At string,
 	b2Prefix string,
-	rootUploadPath string,
 	mappingUploadLocalLink string,
 	files *db.FileModel,
 ) (*LocalToB2, error) {
@@ -57,7 +55,6 @@ func NewB2Scheduler(
 		accountKey,
 		uploadToB2At,
 		b2Prefix,
-		rootUploadPath,
 		mappingUploadLocalLink,
 		bucket,
 		ctx,
@@ -76,7 +73,7 @@ func (l *LocalToB2) StartScheduler() {
 
 func (l *LocalToB2) UploadLocalToB2(localPath string) (*string, error) {
 	suffixPath := strings.TrimPrefix(localPath, l.MappingUploadLocalLink)
-	newLocalPath := filepath.Join(l.RootUploadPath, suffixPath)
+	newLocalPath := filepath.Join(RootUploadPath, suffixPath)
 
 	f, err := os.Open(newLocalPath)
 	if err != nil {
