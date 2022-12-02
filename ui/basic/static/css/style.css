@@ -273,6 +273,8 @@ line-height: inherit; }
 .overflow-auto{overflow:auto;}
 .truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .whitespace-nowrap{white-space:nowrap;}
+.whitespace-pre-wrap{white-space:pre-wrap;}
+.break-words{overflow-wrap:break-word;}
 .border{border-width:1px;border-style:solid;}
 .border-b{border-bottom-width:1px;border-bottom-style:solid;}
 .border-b-2{border-bottom-width:2px;border-bottom-style:solid;}
