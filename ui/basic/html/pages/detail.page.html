@@ -55,19 +55,21 @@
               <div class="embla__viewport">
                 <div class="embla__container">
                   {{range .Attachments}}
-                  <div class="embla__slide">
-                    <div class="embla__slide__inner">
-                      {{if eq .ContentType `image`}}
-                      <img class="embla__slide__img" src="{{to_cdn_url .Link}}" />
-                      {{end}}
-                      <!---->
-                      {{if eq .ContentType `video`}}
-                      <video controls class="w-full h-full object-cover">
-                        <source src="{{to_cdn_url .Link}}" type="{{.MineType}}" />
-                      </video>
-                      {{end}}
+                    {{if or (eq .ContentType `image`) (eq .ContentType `video`)}}
+                    <div class="embla__slide">
+                      <div class="embla__slide__inner">
+                        {{if eq .ContentType `image`}}
+                        <img class="embla__slide__img" src="{{to_cdn_url .Link}}" />
+                        {{end}}
+                        <!---->
+                        {{if eq .ContentType `video`}}
+                        <video controls class="w-full h-full object-cover">
+                          <source src="{{to_cdn_url .Link}}" type="{{.MineType}}" />
+                        </video>
+                        {{end}}
+                      </div>
                     </div>
-                  </div>
+                    {{end}}
                   {{end}}
                 </div>
               </div>
