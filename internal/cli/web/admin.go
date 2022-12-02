@@ -158,6 +158,7 @@ func (a *router) adminUsers(w http.ResponseWriter, r *http.Request) {
 
 func (a *router) adminUsersDetail(w http.ResponseWriter, r *http.Request) {
 	user, err := a.App.AdminUsers.ID(r.URL.Query().Get(":id"))
+
 	if err != nil {
 		log.Println(err)
 		http.Error(w, "bad request", 400)
@@ -179,7 +180,7 @@ func (a *router) adminUsersDetail(w http.ResponseWriter, r *http.Request) {
 	}
 
 	a.adminrender(w, r, "users.detail.page.html", &templateData{
-		User:        user,
+		UserInfo:    user,
 		KYCList:     kycList,
 		PartnerList: partnerList,
 		Logs:        nil,
@@ -251,7 +252,7 @@ func (a *router) adminRejectKYC(w http.ResponseWriter, r *http.Request) {
 
 			a.adminrender(w, r, "users.detail.page.html", &templateData{
 				Form:        f,
-				User:        user,
+				UserInfo:    user,
 				PartnerList: partnerList,
 				KYCList:     kycList,
 			})
@@ -362,7 +363,7 @@ func (a *router) adminRejectPartner(w http.ResponseWriter, r *http.Request) {
 
 			a.adminrender(w, r, "users.detail.page.html", &templateData{
 				Form:        f,
-				User:        user,
+				UserInfo:    user,
 				PartnerList: partnerList,
 				KYCList:     kycList,
 			})

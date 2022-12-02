@@ -777,7 +777,6 @@ func (a *router) uploadKYC(w http.ResponseWriter, r *http.Request) {
 		if !ok {
 			a.render(w, r, "kyc.page.html", &templateData{
 				Form: f,
-				User: user,
 			})
 		}
 	}()
@@ -936,7 +935,6 @@ func (a *router) applyPartner(w http.ResponseWriter, r *http.Request) {
 		if !ok {
 			a.render(w, r, "apply.partner.page.html", &templateData{
 				Form: f,
-				User: user,
 			})
 		}
 	}()

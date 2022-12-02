@@ -21,6 +21,7 @@ var strictPolicy = bluemonday.StrictPolicy()
 
 type templateData struct {
 	User              *models.User
+	UserInfo          *models.User
 	Users             []*models.User
 	Pagination        *db.Pagination
 	Localhost         bool

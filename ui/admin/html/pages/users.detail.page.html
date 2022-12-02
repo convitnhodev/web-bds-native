@@ -22,7 +22,7 @@
 
     <div class="Subhead">
         <h2 class="Subhead-heading">Thông tin chi tiết</h2>
-        <div class="Subhead-description">{{.User.FirstName}} {{.User.LastName}} ‧ {{.User.Phone}}  ‧ {{.User.Email}}</div>
+        <div class="Subhead-description">{{.UserInfo.FirstName}} {{.UserInfo.LastName}} ‧ {{.UserInfo.Phone}}  ‧ {{.UserInfo.Email}}</div>
       </div>
     <div class="d-flex flex-items-center mb-3">
       <h1 class="overflow-hidden flex-auto">
@@ -38,7 +38,7 @@
       {{ range .KYCList }}
         {{ if eq .Status "submited_kyc" }}
         <div class="Subhead-description mb-3">
-          Tại {{ .CreatedAt.Format "Ngày 02 Tháng 01 Năm 2006" }}, Người dùng <strong>{{ $.User.FirstName }} {{ $.User.LastName }}</strong> đang chờ chờ duyệt KYC
+          Tại {{ .CreatedAt.Format "Ngày 02 Tháng 01 Năm 2006" }}, Người dùng <strong>{{ $.UserInfo.FirstName }} {{ $.UserInfo.LastName }}</strong> đang chờ chờ duyệt KYC
         </div>
         <div class="d-flex">
           <div>
@@ -75,7 +75,7 @@
               </details-dialog>
             </details>  
           </div>
-          <a class="btn btn-primary mr-1" href="/admin/users/{{$.User.ID}}/kyc/{{.ID}}/approve" onclick="return confirm('chắc nghen?');">Duyệt KYC</a>
+          <a class="btn btn-primary mr-1" href="/admin/users/{{$.UserInfo.ID}}/kyc/{{.ID}}/approve" onclick="return confirm('chắc nghen?');">Duyệt KYC</a>
           <div>
             <details class="details-reset details-overlay details-overlay-dark" id="kyc-model-{{ .ID }}">
               <summary class="btn color-fg-danger mr-1" aria-haspopup="dialog">Từ chối KYC</summary>
@@ -91,7 +91,7 @@
                   <h3 class="Box-title">Phản hồi</h3>
                 </div>
                 <div class="overflow-auto p-2">
-                  <form action="/admin/users/{{$.User.ID}}/kyc/{{.ID}}/reject" method="post">
+                  <form action="/admin/users/{{$.UserInfo.ID}}/kyc/{{.ID}}/reject" method="post">
                     <div class="form-group">
                       <div class="form-group-header">
                         <label for="example-textarea">Phản hồi cho user</label>
@@ -112,7 +112,7 @@
         {{ if eq .Status "approved_kyc" }}
         <div class="Subhead-description mb-3">
           <div class="Subhead-description mb-3">
-            Người dùng <strong>{{ $.User.FirstName }} {{ $.User.LastName }}</strong> đã được duyệt KYC
+            Người dùng <strong>{{ $.UserInfo.FirstName }} {{ $.UserInfo.LastName }}</strong> đã được duyệt KYC
           </div>
           <div class="d-flex">
             <div>
@@ -156,7 +156,7 @@
         {{ if eq .Status "rejected_kyc" }}
         <div class="Subhead-description mb-3">
           <div class="Subhead-description mb-3">
-            Người dùng <strong>{{ $.User.FirstName }} {{ $.User.LastName }}</strong> đã bị từ chối KYC với lý do: <strong>{{ .Feedback }}</strong>
+            Người dùng <strong>{{ $.UserInfo.FirstName }} {{ $.UserInfo.LastName }}</strong> đã bị từ chối KYC với lý do: <strong>{{ .Feedback }}</strong>
           </div>
           <div class="d-flex">
             <div>
@@ -208,7 +208,7 @@
     {{ range .PartnerList }}
         {{ if eq .Status "apply" }}
         <div class="Subhead-description mb-3">
-          Tại {{ .CreatedAt.Format "Ngày 02 Tháng 01 Năm 2006" }}, Người dùng <strong>{{ $.User.FirstName }} {{ $.User.LastName }}</strong> đã ứng tuyển làm đối tác
+          Tại {{ .CreatedAt.Format "Ngày 02 Tháng 01 Năm 2006" }}, Người dùng <strong>{{ $.UserInfo.FirstName }} {{ $.UserInfo.LastName }}</strong> đã ứng tuyển làm đối tác
         </div>
         <div class="d-flex">
           <div>
@@ -237,7 +237,7 @@
               </details-dialog>
             </details>  
           </div>
-          <a class="btn btn-primary mr-1" href="/admin/users/{{$.User.ID}}/partner/{{.ID}}/approve" onclick="return confirm('chắc nghen?');">Duyệt ứng viên</a>
+          <a class="btn btn-primary mr-1" href="/admin/users/{{$.UserInfo.ID}}/partner/{{.ID}}/approve" onclick="return confirm('chắc nghen?');">Duyệt ứng viên</a>
           <div>
             <details class="details-reset details-overlay details-overlay-dark" id="kyc-model-{{ .ID }}">
               <summary class="btn color-fg-danger mr-1" aria-haspopup="dialog">Từ chối ứng viên</summary>
@@ -253,7 +253,7 @@
                   <h3 class="Box-title">Phản hồi cho ứng viên</h3>
                 </div>
                 <div class="overflow-auto p-2">
-                  <form action="/admin/users/{{$.User.ID}}/partner/{{.ID}}/reject" method="post">
+                  <form action="/admin/users/{{$.UserInfo.ID}}/partner/{{.ID}}/reject" method="post">
                     <div class="form-group">
                       <div class="form-group-header">
                         <label for="example-textarea">Nội dung phản hồi</label>
@@ -274,7 +274,7 @@
         {{ if eq .Status "approved" }}
         <div class="Subhead-description mb-3">
           <div class="Subhead-description mb-3">
-            Người dùng <strong>{{ $.User.FirstName }} {{ $.User.LastName }}</strong> đã được duyệt làm đối tác
+            Người dùng <strong>{{ $.UserInfo.FirstName }} {{ $.UserInfo.LastName }}</strong> đã được duyệt làm đối tác
           </div>
           <div class="d-flex">
             <div>
@@ -310,7 +310,7 @@
         {{ if eq .Status "rejected" }}
         <div class="Subhead-description mb-3">
           <div class="Subhead-description mb-3">
-            Người dùng <strong>{{ $.User.FirstName }} {{ $.User.LastName }}</strong> đã bị từ chối ứng viên với lý do: <strong>{{ .Feedback }}</strong>
+            Người dùng <strong>{{ $.UserInfo.FirstName }} {{ $.UserInfo.LastName }}</strong> đã bị từ chối ứng viên với lý do: <strong>{{ .Feedback }}</strong>
           </div>
           <div class="d-flex">
             <div>
