@@ -115,9 +115,16 @@ func (a *router) home(w http.ResponseWriter, r *http.Request) {
 		a.render(w, r, "404.page.html", &templateData{})
 		return
 	}
+	posts, err := a.App.Posts.Published()
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "bad request", 400)
+		return
+	}
 
 	a.render(w, r, "home.page.html", &templateData{
 		Products: products,
+		Posts:    posts,
 	})
 }
 

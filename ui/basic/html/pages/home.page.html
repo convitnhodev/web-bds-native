@@ -287,6 +287,161 @@
       </div>
     </div>
   </div>
+  <div>
+    {{if .Posts}}
+    <!---->
+    {{$blogs := filterPost .Posts `blog`}}
+    <!---->
+    {{$events := filterPost .Posts `event`}}
+    <div class="relative mx-auto max-w-lg lg:max-w-7xl px-4 sm:px-6 lg:px-8">
+      {{if $blogs}}
+      <!---->
+      {{$mainPost := index $blogs 0}}
+      <div class="grid gap-16">
+        <div>
+          <img
+            class="h-80 w-full object-cover rounded"
+            src="{{$mainPost.Thumbnail}}"
+            alt=""
+          />
+          <div class="mt-4">
+            {{range $mainPost.Tags}}
+            <a href="#" class="inline-block">
+              <span
+                class="inline-flex items-center px-3 py-0.5 rounded-full text-sm font-bold bg-sky-100 text-sky-800"
+              >
+                {{.}}
+              </span>
+            </a>
+            {{end}}
+          </div>
+          <a href="/blog/{{$mainPost.Slug}}" class="mt-4 block">
+            <p class="text-3xl font-bold text-gray-900">{{$mainPost.Title}}</p>
+            <p class="mt-3 text-base text-gray-500">{{$mainPost.Short}}</p>
+          </a>
+          <div class="mt-6 flex items-center">
+            <div>
+              <p class="text-sm font-bold text-gray-900">
+                <a href="#">
+                  {{$mainPost.Poster.FirstName}} {{$mainPost.Poster.LastName}}
+                </a>
+              </p>
+              <div class="flex space-x-1 text-sm text-gray-500">
+                <time
+                  datetime="{{tz_format $mainPost.PublishedAt `2006-01-02 15:04` `Asia/Ho_Chi_Minh`}}"
+                >
+                  {{tz_format $mainPost.PublishedAt `2006-01-02 15:04`
+                  `Asia/Ho_Chi_Minh`}}
+                </time>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="mt-6 border-t grid gap-16 pt-6 lg:grid-cols-3 lg:gap-x-5 lg:gap-y-12"
+      >
+        {{range $blogs}}
+        <div>
+          <div>
+            {{range .Tags}}
+            <a href="#" class="inline-block">
+              <span
+                class="inline-flex items-center px-3 py-0.5 rounded-full text-sm font-bold bg-sky-100 text-sky-800"
+              >
+                {{.}}
+              </span>
+            </a>
+            {{end}}
+          </div>
+          <img
+            class="h-48 w-full object-cover rounded mt-4"
+            src="{{.Thumbnail}}"
+            alt=""
+          />
+          <a href="/blog/{{.Slug}}" class="mt-4 block">
+            <p class="text-xl font-bold text-gray-900">{{.Title}}</p>
+            <p class="mt-3 text-base text-gray-500">{{.Short}}</p>
+          </a>
+          <div class="mt-6 flex items-center">
+            <div>
+              <p class="text-sm font-bold text-gray-900">
+                <a href="#"> {{.Poster.FirstName}} {{.Poster.LastName}} </a>
+              </p>
+              <div class="flex space-x-1 text-sm text-gray-500">
+                <time
+                  datetime="{{tz_format .PublishedAt `2006-01-02 15:04` `Asia/Ho_Chi_Minh`}}"
+                >
+                  {{tz_format .PublishedAt `2006-01-02 15:04`
+                  `Asia/Ho_Chi_Minh`}}
+                </time>
+              </div>
+            </div>
+          </div>
+        </div>
+        {{end}}
+      </div>
+      {{end}}
+      <!---->
+      {{if $events}}
+      <div class="mt-12 py-16 px-10 rounded-lg -mx-10 bg-sky-50">
+        <div class="">
+          <h2
+            class="text-xl font-bold tracking-tight text-gray-900 sm:text-2xl"
+          >
+            Sự Kiện
+          </h2>
+        </div>
+        <div class="mt-6 grid gap-16 lg:grid-cols-4 lg:gap-x-5 lg:gap-y-12">
+          {{range $events}}
+          <div>
+            <div class="h-1 w-full bg-sky-500 mb-4"></div>
+            <p class="text-sm text-gray-500">
+              <time
+                datetime="{{tz_format .PublishedAt `2006-01-02 15:04` `Asia/Ho_Chi_Minh`}}"
+              >
+                {{tz_format .PublishedAt `2006-01-02 15:04` `Asia/Ho_Chi_Minh`}}
+              </time>
+            </p>
+            <a href="/blog/{{.Slug}}" class="mt-2 block">
+              <p class="text-xl font-bold text-gray-900">{{.Title}}</p>
+            </a>
+          </div>
+          {{end}}
+        </div>
+      </div>
+      {{end}}
+    </div>
+    {{else}}
+    <div class="relative mx-auto max-w-lg lg:max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div
+        class="mt-8 rounded-md min-h-48 bg-gray-100 px-4 py-16 sm:px-6 sm:py-24 md:grid md:place-items-center lg:px-8"
+      >
+        <div class="mx-auto max-w-max">
+          <div class="sm:flex">
+            <p
+              class="text-4xl font-bold tracking-tight text-sky-600 sm:text-5xl"
+            >
+              :sad:
+            </p>
+            <div class="sm:ml-6">
+              <div class="sm:border-l sm:border-gray-200 sm:pl-6">
+                <h1
+                  class="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl"
+                >
+                  Chưa có gì ở đây
+                </h1>
+                <p class="mt-4 text-base text-gray-500">
+                  Nhớ trở lại vào lúc khác nhé.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {{end}}
+  </div>
   <div class="bg-white">
     <div
       class="mx-auto max-w-7xl divide-y-2 divide-gray-200 py-16 px-4 sm:py-24 sm:px-6 lg:px-8"

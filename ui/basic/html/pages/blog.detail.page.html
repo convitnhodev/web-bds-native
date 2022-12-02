@@ -176,7 +176,7 @@
                 </time>
               </h3>
               <div class="prose prose-sm mt-4 max-w-none text-gray-500">
-                <p>{{.Message}}</p>
+                <p class="whitespace-pre-wrap break-words">{{.Message}}</p>
               </div>
             </div>
             {{if $user}}
@@ -231,7 +231,19 @@
                 </div>
               </div>
             </div>
-            <div class="mt-4">
+            <button
+              data-comment="reply"
+              data-parent="{{.ID}}"
+              type="button"
+              class="inline-flex items-center rounded-md border border-transparent px-2 py-1 text-sm font-bold text-sky-500"
+            >
+              Trả Lời
+            </button>
+            <div
+              class="mt-4 hidden"
+              data-comment="reply-section"
+              data-parent="{{.ID}}"
+            >
               <div class="mt-1">
                 <textarea
                   data-comment="comment"
@@ -265,11 +277,13 @@
                 </time>
               </h3>
               <div class="prose prose-sm mt-4 max-w-none text-gray-500">
-                <p>{{.Message}}</p>
+                <p class="whitespace-pre-wrap break-words">{{.Message}}</p>
               </div>
             </div>
           </div>
-          {{end}} {{end}}
+          {{end}}
+          <!---->
+          {{end}}
         </div>
         {{end}}
       </div>

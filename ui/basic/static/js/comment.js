@@ -47,6 +47,19 @@ commentSubmit.addEventListener('click', async () => {
   }
 });
 
+const commentReplies = document.querySelectorAll('[data-comment="reply"]');
+
+commentReplies.forEach((el) => {
+  const parent = el.getAttribute('data-parent');
+  const replySection = document.querySelector(
+    `[data-comment="reply-section"][data-parent="${parent}"]`
+  );
+
+  el.addEventListener('click', () => {
+    replySection.classList.toggle('hidden');
+  });
+});
+
 const commentSubmits = document.querySelectorAll('[data-comment="submit"]');
 
 commentSubmits.forEach((el) => {
