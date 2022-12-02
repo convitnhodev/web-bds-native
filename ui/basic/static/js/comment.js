@@ -30,7 +30,7 @@ commentSubmit.addEventListener('click', async () => {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: `Message=${comment.value}&ParentId=null`,
+      body: `Message=${encodeURIComponent(comment.value)}&ParentId=null`,
     });
 
     if (resp.ok) {
@@ -101,7 +101,7 @@ commentSubmits.forEach((el) => {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: `Message=${commentChild.value}&ParentId=${parent}`,
+        body: `Message=${encodeURIComponent(commentChild.value)}&ParentId=${parent}`,
       });
 
       if (resp.ok) {

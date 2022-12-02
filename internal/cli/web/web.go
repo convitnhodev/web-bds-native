@@ -730,6 +730,7 @@ func (a *router) createComment(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	if err := r.ParseForm(); err != nil {
+		log.Println(err)
 		f.Errors.Add("err", "err_parse_form")
 		return
 	}
