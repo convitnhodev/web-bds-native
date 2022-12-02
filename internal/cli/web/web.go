@@ -790,9 +790,6 @@ func (a *router) uploadKYC(w http.ResponseWriter, r *http.Request) {
 		}
 
 		f.Values = r.PostForm
-		f.Required("FrontIdentityCard")
-		f.Required("BackIdentityCard")
-		f.Required("SelfieImage")
 
 		if !f.Valid() {
 			log.Println("form invalid", f.Errors)
@@ -801,9 +798,13 @@ func (a *router) uploadKYC(w http.ResponseWriter, r *http.Request) {
 
 		// Front file
 		frontFile, handler, err := r.FormFile("FrontIdentityCard")
-		if err != nil && http.ErrMissingFile != err {
+		if err != nil {
 			log.Println(err)
-			f.Errors.Add("err", "err_could_not_upload")
+			if http.ErrMissingFile == err {
+				f.Errors.Add("err", "err_kyc_missing_front")
+			} else {
+				f.Errors.Add("err", "err_could_not_upload")
+			}
 			return
 		}
 		defer frontFile.Close()
@@ -814,17 +815,21 @@ func (a *router) uploadKYC(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-
 		f.Set("FrontIdentityCard", *frontFileName)
 
 		// Back file
-		backFile, handler, err := r.FormFile("FrontIdentityCard")
-		if err != nil && http.ErrMissingFile != err {
+		backFile, handler, err := r.FormFile("BackIdentityCard")
+		if err != nil {
 			log.Println(err)
+			if http.ErrMissingFile == err {
+				f.Errors.Add("err", "err_kyc_missing_back")
+			} else {
+				f.Errors.Add("err", "err_could_not_upload")
+			}
 			f.Errors.Add("err", "err_could_not_upload")
 			return
 		}
-		defer frontFile.Close()
+		defer backFile.Close()
 
 		backFileName, err := a.App.LocalFile.UploadFile(fmt.Sprintf("users.%d/", userId), backFile, handler)
 		if err != nil && !errors.Is(err, files.FileExists) {
@@ -836,13 +841,18 @@ func (a *router) uploadKYC(w http.ResponseWriter, r *http.Request) {
 		f.Set("BackIdentityCard", *backFileName)
 
 		// Selfie file
-		selfieFile, handler, err := r.FormFile("FrontIdentityCard")
-		if err != nil && http.ErrMissingFile != err {
+		selfieFile, handler, err := r.FormFile("SelfieImage")
+		if err != nil {
 			log.Println(err)
+			if http.ErrMissingFile == err {
+				f.Errors.Add("err", "err_kyc_missing_selfie")
+			} else {
+				f.Errors.Add("err", "err_could_not_upload")
+			}
 			f.Errors.Add("err", "err_could_not_upload")
 			return
 		}
-		defer frontFile.Close()
+		defer selfieFile.Close()
 
 		selfieFileName, err := a.App.LocalFile.UploadFile(fmt.Sprintf("users.%d/", userId), selfieFile, handler)
 		if err != nil && !errors.Is(err, files.FileExists) {
