@@ -231,7 +231,19 @@
                 </div>
               </div>
             </div>
-            <div class="mt-4">
+            <button
+              data-comment="reply"
+              data-parent="{{.ID}}"
+              type="button"
+              class="inline-flex items-center rounded-md border border-transparent px-2 py-1 text-sm font-bold text-sky-500"
+            >
+              Trả Lời
+            </button>
+            <div
+              class="mt-4 hidden"
+              data-comment="reply-section"
+              data-parent="{{.ID}}"
+            >
               <div class="mt-1">
                 <textarea
                   data-comment="comment"
@@ -269,7 +281,9 @@
               </div>
             </div>
           </div>
-          {{end}} {{end}}
+          {{end}}
+          <!---->
+          {{end}}
         </div>
         {{end}}
       </div>
