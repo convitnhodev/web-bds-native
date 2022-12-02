@@ -878,7 +878,7 @@ func (a *router) uploadKYC(w http.ResponseWriter, r *http.Request) {
 		a.App.Log.Add(fmt.Sprint(userId), fmt.Sprintf("Người dùng %d gửi một yêu cầu KYC.", userId))
 
 		ok = true
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+		a.render(w, r, "result.kyc.page.html", &templateData{})
 	}
 }
 
