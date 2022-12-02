@@ -502,6 +502,7 @@ func (a *router) register(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *router) logout(w http.ResponseWriter, r *http.Request) {
+	a.session.Remove(r, "user")
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
