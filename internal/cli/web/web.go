@@ -3,6 +3,7 @@ package web
 import (
 	"bytes"
 	"crypto/md5"
+	"errors"
 	"fmt"
 	"html/template"
 	"io"
@@ -759,7 +760,7 @@ func (a *router) uploadKYC(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// check user có verified phone chưa
-	if !hasRole(user, "verify_phone") {
+	if !hasRole(user, "verified_phone") {
 		http.Redirect(w, r, "/upgrade-user?to=verified_id", http.StatusSeeOther)
 		return
 	}
@@ -801,7 +802,7 @@ func (a *router) uploadKYC(w http.ResponseWriter, r *http.Request) {
 		defer frontFile.Close()
 
 		frontFileName, err := a.App.LocalFile.UploadFile(fmt.Sprintf("users.%d/", userId), frontFile, handler)
-		if err != nil {
+		if err != nil && !errors.Is(err, files.FileExists) {
 			log.Println(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -819,7 +820,7 @@ func (a *router) uploadKYC(w http.ResponseWriter, r *http.Request) {
 		defer frontFile.Close()
 
 		backFileName, err := a.App.LocalFile.UploadFile(fmt.Sprintf("users.%d/", userId), backFile, handler)
-		if err != nil {
+		if err != nil && !errors.Is(err, files.FileExists) {
 			log.Println(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -837,7 +838,7 @@ func (a *router) uploadKYC(w http.ResponseWriter, r *http.Request) {
 		defer frontFile.Close()
 
 		selfieFileName, err := a.App.LocalFile.UploadFile(fmt.Sprintf("users.%d/", userId), selfieFile, handler)
-		if err != nil {
+		if err != nil && !errors.Is(err, files.FileExists) {
 			log.Println(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -877,7 +878,7 @@ func (a *router) upgradeUser(w http.ResponseWriter, r *http.Request) {
 	goLink := "/"
 	switch to {
 	case "verified_id":
-		if hasRole(user, "verify_phone") {
+		if hasRole(user, "verified_phone") {
 			if !hasRole(user, "verified_id") {
 				goLink = "/kyc"
 			}
@@ -948,7 +949,7 @@ func (a *router) applyPartner(w http.ResponseWriter, r *http.Request) {
 		defer file.Close()
 
 		cvFileName, err := a.App.LocalFile.UploadFile(fmt.Sprintf("partner.%d/", userId), file, handler)
-		if err != nil {
+		if err != nil && !errors.Is(err, files.FileExists) {
 			log.Println(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

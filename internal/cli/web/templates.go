@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/deeincom/deeincom/config"
+	"github.com/deeincom/deeincom/pkg/files"
 	"github.com/deeincom/deeincom/pkg/form"
 	"github.com/deeincom/deeincom/pkg/models"
 	"github.com/deeincom/deeincom/pkg/models/db"
@@ -63,6 +64,7 @@ var functions = template.FuncMap{
 	"tz_format":       formatDatetime,
 	"filterPost":      filterPost,
 	"parse_enum":      parseEum,
+	"to_cdn_url":      toCdnUrl,
 }
 
 // sureFind always find an element in list l
@@ -209,6 +211,16 @@ func findPostByTags(s string) []*models.Post {
 	posts := app.Posts.Tags(tags)
 
 	return posts
+}
+
+func toCdnUrl(url string) string {
+	cdnUrl := app.Config.CDNUrl
+
+	if strings.HasPrefix(url, cdnUrl) {
+		return url
+	}
+
+	return files.JoinURL(cdnUrl, url)
 }
 
 func formatDatetime(v *time.Time, tpl string, loc string) string {

@@ -15,7 +15,7 @@
       <div>
         <img
           class="h-80 w-full object-cover rounded"
-          src="{{$mainPost.Thumbnail}}"
+          src="{{ to_cdn_url $mainPost.Thumbnail }}"
           alt=""
         />
         <div class="mt-4">
@@ -70,7 +70,7 @@
         </div>
         <img
           class="h-48 w-full object-cover rounded mt-4"
-          src="{{.Thumbnail}}"
+          src="{{ to_cdn_url .Thumbnail }}"
           alt=""
         />
         <a href="/blog/{{.Slug}}" class="mt-4 block">

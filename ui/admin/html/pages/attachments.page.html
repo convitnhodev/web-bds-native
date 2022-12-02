@@ -98,7 +98,7 @@
           {{ end }}
 
           <a class="btn btn-xs mr-1" href="/admin/attachments/{{.ID}}/update">sửa</a>
-          <a class="btn btn-danger btn-xs" href="/admin/attachments/{{.ID}}" onclick="return confirm('chắc nghen?');">xóa</a>
+          <a class="btn btn-danger btn-xs" href="/admin/products/{{ .Product.ID }}/attachments/{{ .ID }}/remove" onclick="return confirm('chắc nghen?');">xóa</a>
         </div>
         {{end}}
       </div>

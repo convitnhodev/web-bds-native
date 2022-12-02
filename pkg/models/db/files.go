@@ -67,6 +67,15 @@ func (m *FileModel) Create(localPath string) (*models.File, error) {
 	return o, nil
 }
 
+func (m *FileModel) Remove(localPath string) error {
+	q := "DELETE FROM files WHERE files.local_path = $1;"
+	_, err := m.DB.Exec(q,
+		localPath,
+	)
+
+	return err
+}
+
 func (m *FileModel) UploadCloudLink(localPath string, cloudLink string) error {
 	q := "UPDATE files SET cloud_link = $2, status = 'sync' WHERE files.local_path = $1"
 	_, err := m.DB.Exec(q, localPath, cloudLink)

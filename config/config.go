@@ -26,6 +26,7 @@ type Config struct {
 	ServerIP               string
 	ATPNotifyUrl           string
 	ATPRedirectUrl         string
+	CDNUrl                 string
 }
 
 // Default config
@@ -69,7 +70,11 @@ func (c *Config) Default() error {
 	}
 
 	if c.MappingUploadLocalLink == "" {
-		c.MappingUploadLocalLink = "https://cdn.deein.com/"
+		c.MappingUploadLocalLink = "/"
+	}
+
+	if c.CDNUrl == "" {
+		c.CDNUrl = "https://cdn.deein.com"
 	}
 
 	if len(c.ProductTypes) == 0 {

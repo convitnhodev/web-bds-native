@@ -57,7 +57,7 @@
                   {{range .Attachments}} {{if eq .ContentType `image`}}
                   <div class="embla__slide">
                     <div class="embla__slide__inner">
-                      <img class="embla__slide__img" src="{{.Link}}" />
+                      <img class="embla__slide__img" src="{{ to_cdn_url .Link }}" />
                     </div>
                   </div>
                   {{end}} {{end}}
@@ -73,7 +73,7 @@
                       class="embla__slide__inner embla__slide__inner--thumb"
                       type="button"
                     >
-                      <img class="embla__slide__thumbnail" src="{{.Link}}" />
+                      <img class="embla__slide__thumbnail" src="{{ to_cdn_url .Link }}" />
                     </button>
                   </div>
                   {{end}} {{end}}

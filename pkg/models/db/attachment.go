@@ -123,3 +123,12 @@ func (m *AttachmentModel) Update(o *models.Attachment, f *form.Form) error {
 
 	return err
 }
+
+func (m *AttachmentModel) Remove(id string) error {
+	q := "DELETE FROM attachments WHERE attachments.id = $1;"
+	_, err := m.DB.Exec(q,
+		id,
+	)
+
+	return err
+}

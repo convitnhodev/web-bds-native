@@ -2,12 +2,14 @@ package web
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"strings"
 
 	"github.com/bmizerany/pat"
+	"github.com/deeincom/deeincom/pkg/files"
 	"github.com/deeincom/deeincom/pkg/form"
 	"github.com/deeincom/deeincom/pkg/models"
 )
@@ -496,7 +498,11 @@ func (a *router) adminUpdateAttachment(w http.ResponseWriter, r *http.Request) {
 		fileName, err := a.App.LocalFile.UploadFile(fmt.Sprintf("products.%d/", attachment.Product.ID), file, handler)
 		if err != nil {
 			log.Println(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			if errors.Is(err, files.FileExists) {
+				f.Errors.Add("err", "could_not_attachment_exists")
+			} else {
+				f.Errors.Add("err", "err_could_not_upload")
+			}
 			return
 		}
 
@@ -506,6 +512,8 @@ func (a *router) adminUpdateAttachment(w http.ResponseWriter, r *http.Request) {
 		if err := a.App.Attachments.Update(attachment, f); err != nil {
 			log.Println(err)
 			f.Errors.Add("err", "could_not_update_attachment")
+			// Remove file khi không update được Attachments
+			a.App.LocalFile.RemoveLocalFile(*fileName)
 			return
 		}
 
@@ -514,6 +522,65 @@ func (a *router) adminUpdateAttachment(w http.ResponseWriter, r *http.Request) {
 		a.App.Log.Add(fmt.Sprint(userId), fmt.Sprintf("Người dùng %d cập nhật thông tin tệp đính kèm %d cho sản phẩm %d.", userId, attachment.ID, product.ID))
 		http.Redirect(w, r, fmt.Sprintf("/admin/products/%d/attachments", attachment.Product.ID), http.StatusSeeOther)
 	}
+}
+
+func (a *router) adminRemoveAttchment(w http.ResponseWriter, r *http.Request) {
+	userId := a.session.GetInt(r, "user")
+	productId := r.URL.Query().Get(":id")
+	attachmentId := r.URL.Query().Get(":attachmentId")
+
+	product, err := a.App.Products.ID(productId)
+	if err != nil {
+		log.Println(err)
+		http.Redirect(w, r, "/admin/products", http.StatusSeeOther)
+		return
+	}
+
+	attachment, err := a.App.Attachments.ID(attachmentId)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "500 - internal server error", 500)
+		return
+	}
+
+	// unlink docs
+	if product.FinancePlanLink == attachment.Link {
+		if err := a.App.Products.Set(productId, "finance_plan_link", ""); err != nil {
+			log.Println(err)
+			http.Error(w, "500 - internal server error", 500)
+			return
+		}
+	}
+
+	// unlink docs
+	if product.HouseCertificateLink == attachment.Link {
+		if err := a.App.Products.Set(productId, "house_certificate_link", ""); err != nil {
+			log.Println(err)
+			http.Error(w, "500 - internal server error", 500)
+			return
+		}
+	}
+
+	// unlink docs
+	if product.PosterLink == attachment.Link {
+		if err := a.App.Products.Set(productId, "poster_link", ""); err != nil {
+			log.Println(err)
+			http.Error(w, "500 - internal server error", 500)
+			return
+		}
+	}
+
+	err = a.App.Attachments.Remove(attachmentId)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "500 - internal server error", 500)
+		return
+	}
+
+	a.App.LocalFile.RemoveLocalFile(attachment.Link)
+	a.App.Log.Add(fmt.Sprint(userId), fmt.Sprintf("Người dùng %d xoá tệp đính kèm %s ở sản phẩm %s.", userId, attachmentId, productId))
+
+	http.Redirect(w, r, fmt.Sprintf("/admin/products/%s/attachments", productId), http.StatusSeeOther)
 }
 
 func (a *router) adminUpdateProduct(w http.ResponseWriter, r *http.Request) {
@@ -680,7 +747,7 @@ func (a *router) adminCreatePost(w http.ResponseWriter, r *http.Request) {
 			defer file.Close()
 
 			fileName, err := a.App.LocalFile.UploadFile(fmt.Sprintf("posts.%d/", post.ID), file, handler)
-			if err != nil {
+			if err != nil && !errors.Is(err, files.FileExists) {
 				log.Println(err)
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
@@ -751,7 +818,7 @@ func (a *router) adminUpdatePost(w http.ResponseWriter, r *http.Request) {
 			defer file.Close()
 
 			fileName, err := a.App.LocalFile.UploadFile(fmt.Sprintf("posts.%d/", post.ID), file, handler)
-			if err != nil {
+			if err != nil && !errors.Is(err, files.FileExists) {
 				log.Println(err)
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
@@ -943,6 +1010,7 @@ func registerAdminRoute(mux *pat.PatternServeMux, a *router) {
 	mux.Post("/admin/attachments/:id/update", use(a.adminUpdateAttachment, a.isadmin))
 	mux.Get("/admin/attachments/:id/update", use(a.adminUpdateAttachment, a.isadmin))
 	mux.Get("/admin/attachments/create", use(a.adminCreateAttachment, a.isadmin))
+	mux.Get("/admin/products/:id/attachments/:attachmentId/remove", use(a.adminRemoveAttchment, a.isadmin))
 
 	mux.Get("/admin/products/:id/invoices", use(a.adminInvoices, a.isadmin))
 	mux.Get("/admin/invoices/:id/view", use(a.adminViewInvoice, a.isadmin))

@@ -16,6 +16,7 @@ import (
 )
 
 var RootUploadPath string
+var FileExists = errors.New("File is exists")
 
 type LocalFile struct {
 	Root                   string
@@ -33,7 +34,7 @@ func (l *LocalFile) GenNamefile(filename string, bytes []byte) string {
 	return sha1_hash
 }
 
-func (l *LocalFile) JoinURL(base string, paths ...string) string {
+func JoinURL(base string, paths ...string) string {
 	p := path.Join(paths...)
 	return fmt.Sprintf("%s/%s", strings.TrimRight(base, "/"), strings.TrimLeft(p, "/"))
 }
@@ -85,6 +86,12 @@ func (l *LocalFile) UploadFile(prefixPath string, file io.Reader, fileHeader *mu
 
 	hashFilename := l.GenNamefile(fileHeader.Filename, bytes)
 	dstFilename := filepath.Join(root, hashFilename)
+	localLink := JoinURL(l.MappingUploadLocalLink, strings.TrimPrefix(dstFilename, RootUploadPath))
+
+	if _, err := os.Stat(dstFilename); err == nil {
+		return &localLink, FileExists
+	}
+
 	dst, err := os.Create(dstFilename)
 	if err != nil {
 		return nil, err
@@ -97,10 +104,20 @@ func (l *LocalFile) UploadFile(prefixPath string, file io.Reader, fileHeader *mu
 	}
 
 	// Create new row for local file
-	localLink := l.JoinURL(l.MappingUploadLocalLink, strings.TrimPrefix(dstFilename, RootUploadPath))
 	if _, err := l.Files.Create(localLink); err != nil {
 		return nil, err
 	}
 
 	return &localLink, nil
+}
+
+func (l *LocalFile) RemoveLocalFile(filename string) error {
+	suffixPath := strings.TrimPrefix(filename, l.MappingUploadLocalLink)
+	newLocalPath := filepath.Join(RootUploadPath, suffixPath)
+
+	if err := l.Files.Remove(filename); err != nil {
+		return err
+	}
+
+	return os.Remove(newLocalPath)
 }
