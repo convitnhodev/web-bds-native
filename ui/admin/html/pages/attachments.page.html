@@ -12,18 +12,21 @@
         <div class="text-small">{{.Product.Title}}</div>
       </h1>
 
-      <details class="dropdown details-reset details-overlay d-inline-block">
-        <summary class="btn btn-primary" aria-haspopup="true">
-            Tạo mới
-            <div class="dropdown-caret"></div>
-        </summary>
+      <div>
+        <a class="btn btn-xs mr-1" href="/admin/products/{{ .Product.ID }}/update">Sửa tài sản</a>
+        <details class="dropdown details-reset details-overlay d-inline-block">
+          <summary class="btn btn-primary" aria-haspopup="true">
+              Tạo mới
+              <div class="dropdown-caret"></div>
+          </summary>
 
-        <ul class="dropdown-menu dropdown-menu-se">
-            <li><a href="/admin/products/{{.Product.ID}}/attachments/create?type=document" class="dropdown-item" role="menuitem">Document</a></li>
-            <li><a href="/admin/products/{{.Product.ID}}/attachments/create?type=image" class="dropdown-item" role="menuitem">Image</a></li>
-            <li><a href="/admin/products/{{.Product.ID}}/attachments/create?type=video" class="dropdown-item" role="menuitem">Video</a></li>
-        </ul>
-      </details>
+          <ul class="dropdown-menu dropdown-menu-se">
+              <li><a href="/admin/products/{{.Product.ID}}/attachments/create?type=document" class="dropdown-item" role="menuitem">Document</a></li>
+              <li><a href="/admin/products/{{.Product.ID}}/attachments/create?type=image" class="dropdown-item" role="menuitem">Image</a></li>
+              <li><a href="/admin/products/{{.Product.ID}}/attachments/create?type=video" class="dropdown-item" role="menuitem">Video</a></li>
+          </ul>
+        </details>
+      </div>
     </div>
     {{if .Attachments}}
     <div class="Box">
