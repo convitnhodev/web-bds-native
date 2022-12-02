@@ -41,8 +41,7 @@
                     <label>Mô tả ngắn</label>
                 </div>
                 <div class="form-group-body">
-                    <textarea class="form-control" autocomplete="off" spellcheck="false" name="Short"
-                        value="{{.Get `Short`}}"></textarea>
+                    <textarea class="form-control" autocomplete="off" spellcheck="false" name="Short">{{.Get `Short`}}</textarea>
                 </div>
                 {{with .Errors.Get `Short`}}
                 <p class="note error">{{.}}</p>
