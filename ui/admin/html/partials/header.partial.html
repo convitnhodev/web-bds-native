@@ -3,11 +3,30 @@
 <div class="color-bg-subtle mb-3">
   <nav class="UnderlineNav">
     <div class="UnderlineNav-body" role="tablist">
+      {{if (has_role .User "admin") }}
       <a class="UnderlineNav-item ml-3" {{if contains .CurrentURL `/products` }} aria-current="page" {{end}} href="/admin/products">Quản lý tài sản</a>
+      {{end}}
+
+      {{if (has_role .User "deein_partner") }}
+      <a class="UnderlineNav-item ml-3" {{if contains .CurrentURL `/products` }} aria-current="page" {{end}} href="/admin/products">Quản lý tài sản đã đăng</a>
+      {{end}}
+
+
+      {{if (has_role .User "admin") }}
       <a class="UnderlineNav-item ml-3" {{if contains .CurrentURL `/posts` }} aria-current="page" {{end}} href="/admin/posts">Quản lý bài viết</a>
+      {{end}}
+
+      {{if (has_role .User "admin") }}
       <a class="UnderlineNav-item ml-3" {{if contains .CurrentURL `/comments` }} aria-current="page" {{end}} href="/admin/comments">Quản lý bình luận</a>
+      {{end}}
+
+      {{if (has_role .User "admin") }}
       <a class="UnderlineNav-item ml-3" {{if contains .CurrentURL `/users` }} aria-current="page" {{end}} href="/admin/users">Danh sách thành viên</a>
+      {{end}}
+
+      {{if (has_role .User "admin") }}
       <a class="UnderlineNav-item ml-3" {{if contains .CurrentURL `/logs` }} aria-current="page" {{end}} href="/admin/logs">Nhật ký hệ thống</a>
+      {{end}}
     </div>
   </nav>
 </div>

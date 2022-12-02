@@ -2,6 +2,7 @@ package web
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -84,6 +85,51 @@ func (a *router) isadmin(next http.HandlerFunc) http.HandlerFunc {
 	})
 }
 
+func (a *router) ispartner(next http.HandlerFunc) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		id := a.session.GetInt(r, "user")
+		if id == 0 {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		user, err := a.App.Users.ID(fmt.Sprint(id))
+		if err != nil {
+			log.Println(err)
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		var isPartner bool
+		var isAdmin bool
+
+		for _, role := range user.Roles {
+			if role == "admin" {
+				isAdmin = true
+			}
+
+			if role == "deein_partner" {
+				isPartner = true
+			}
+		}
+
+		if !isAdmin && !isPartner {
+			log.Println("user do not have role admin")
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		role := "deein_partner"
+		if isAdmin {
+			role = "admin"
+		}
+
+		ctx := context.WithValue(r.Context(), "role", role)
+
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
 func (a *router) adminRemoveProduct(w http.ResponseWriter, r *http.Request) {
 	userId := a.session.Get(r, "user")
 	productId := r.URL.Query().Get(":id")
@@ -122,8 +168,17 @@ func (a *router) adminAttachments(w http.ResponseWriter, r *http.Request) {
 
 func (a *router) adminProducts(w http.ResponseWriter, r *http.Request) {
 	p := a.App.AdminProducts.Pagination.Query(r.URL)
+	userId := a.session.GetInt(r, "user")
+	role := r.Context().Value("role")
 
-	products, err := a.App.Products.Find()
+	var products []*models.Product
+	var err error
+	if role == "admin" {
+		products, err = a.App.Products.Find()
+	} else {
+		products, err = a.App.Products.CreatedBy(userId)
+	}
+
 	if err != nil {
 		log.Println(err)
 		http.Error(w, "bad request", 400)
@@ -412,7 +467,16 @@ func (a *router) adminRejectPartner(w http.ResponseWriter, r *http.Request) {
 
 func (a *router) adminCreateProduct(w http.ResponseWriter, r *http.Request) {
 	userId := a.session.GetInt(r, "user")
-	product, err := a.App.Products.Create()
+	role := r.Context().Value("role")
+
+	var isCensorship bool
+	if role == "admin" {
+		isCensorship = true
+	} else {
+		isCensorship = false
+	}
+
+	product, err := a.App.Products.Create(userId, isCensorship)
 	if err != nil {
 		log.Println(err)
 		http.Error(w, "500 - internal server error", 500)
@@ -423,10 +487,25 @@ func (a *router) adminCreateProduct(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, fmt.Sprintf("/admin/products/%d/update", product.ID), http.StatusSeeOther)
 }
 
+func (a *router) adminApproveProduct(w http.ResponseWriter, r *http.Request) {
+	userId := a.session.GetInt(r, "user")
+	productId := r.URL.Query().Get(":id")
+
+	err := a.App.Products.Approve(productId)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "500 - internal server error", 500)
+		return
+	}
+
+	a.App.Log.Add(fmt.Sprint(userId), fmt.Sprintf("Người dùng %d duyệt sản phẩm %s.", userId, productId))
+	http.Redirect(w, r, "/admin/products", http.StatusSeeOther)
+}
+
 func (a *router) adminCreateAttachment(w http.ResponseWriter, r *http.Request) {
 	userId := a.session.GetInt(r, "user")
 	atype := r.URL.Query().Get("type")
-	pid := r.URL.Query().Get("pid")
+	pid := r.URL.Query().Get(":id")
 
 	product, err := a.App.Products.ID(pid)
 	if err != nil {
@@ -434,6 +513,7 @@ func (a *router) adminCreateAttachment(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "500 - internal server error", 500)
 		return
 	}
+
 	attachment, err := a.App.Attachments.Create(product, atype)
 	if err != nil {
 		log.Println(err)
@@ -442,12 +522,12 @@ func (a *router) adminCreateAttachment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	a.App.Log.Add(fmt.Sprint(userId), fmt.Sprintf("Người dùng %d tạo tệp đính kèm %d cho sản phẩm %d", userId, attachment.ID, product.ID))
-	http.Redirect(w, r, fmt.Sprintf("/admin/attachments/%d/update", attachment.ID), http.StatusSeeOther)
+	http.Redirect(w, r, fmt.Sprintf("/admin/products/%s/attachments/%d/update", pid, attachment.ID), http.StatusSeeOther)
 }
 
 func (a *router) adminUpdateAttachment(w http.ResponseWriter, r *http.Request) {
 	userId := a.session.GetInt(r, "user")
-	attachment, err := a.App.Attachments.ID(r.URL.Query().Get(":id"))
+	attachment, err := a.App.Attachments.ID(r.URL.Query().Get(":attachmentId"))
 	if err != nil {
 		log.Println(err)
 		http.Error(w, "500 - internal server error", 500)
@@ -488,33 +568,40 @@ func (a *router) adminUpdateAttachment(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		file, handler, err := r.FormFile("UploadFile")
-		if err != nil {
-			log.Println(err)
-			f.Errors.Add("err", "err_could_not_upload")
-			return
-		}
-		defer file.Close()
+		uploadFileLink := ""
+		if attachment.Link == "" {
+			file, handler, err := r.FormFile("UploadFile")
 
-		fileName, err := a.App.LocalFile.UploadFile(fmt.Sprintf("products.%d/", attachment.Product.ID), file, handler)
-		if err != nil {
-			log.Println(err)
-			if errors.Is(err, files.FileExists) {
-				f.Errors.Add("err", "could_not_attachment_exists")
-			} else {
+			if err != nil {
+				log.Println(err)
 				f.Errors.Add("err", "err_could_not_upload")
+				return
 			}
-			return
-		}
+			defer file.Close()
 
-		f.Set("Size", fmt.Sprint(handler.Size))
-		f.Set("Link", *fileName)
+			fileName, err := a.App.LocalFile.UploadFile(fmt.Sprintf("products.%d/", attachment.Product.ID), file, handler)
+			if err != nil {
+				log.Println(err)
+				if errors.Is(err, files.FileExists) {
+					f.Errors.Add("err", "could_not_attachment_exists")
+				} else {
+					f.Errors.Add("err", "err_could_not_upload")
+				}
+				return
+			}
+
+			f.Set("Size", fmt.Sprint(handler.Size))
+			f.Set("Link", *fileName)
+			uploadFileLink = *fileName
+		}
 
 		if err := a.App.Attachments.Update(attachment, f); err != nil {
 			log.Println(err)
 			f.Errors.Add("err", "could_not_update_attachment")
 			// Remove file khi không update được Attachments
-			a.App.LocalFile.RemoveLocalFile(*fileName)
+			if uploadFileLink != "" {
+				a.App.LocalFile.RemoveLocalFile(uploadFileLink)
+			}
 			return
 		}
 
@@ -961,8 +1048,7 @@ func (a *router) adminInvoices(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *router) adminViewInvoice(w http.ResponseWriter, r *http.Request) {
-
-	invoice, err := a.App.Invoice.ID(r.URL.Query().Get(":id"))
+	invoice, err := a.App.Invoice.ID(r.URL.Query().Get(":invoiceId"))
 	if err != nil {
 		log.Println(err)
 		http.Error(w, "500 - internal server error", 500)
@@ -998,23 +1084,23 @@ func (a *router) adminViewInvoice(w http.ResponseWriter, r *http.Request) {
 }
 
 func registerAdminRoute(mux *pat.PatternServeMux, a *router) {
-	mux.Get("/admin", use(a.adminHome, a.isadmin))
-	mux.Get("/admin/products", use(a.adminProducts, a.isadmin))
+	mux.Get("/admin", use(a.adminHome, a.ispartner))
+	mux.Get("/admin/products", use(a.adminProducts, a.ispartner))
 
 	mux.Get("/admin/products/:id/remove", use(a.adminRemoveProduct, a.isadmin))
-	mux.Post("/admin/products/:id/update", use(a.adminUpdateProduct, a.isadmin))
-	mux.Get("/admin/products/:id/update", use(a.adminUpdateProduct, a.isadmin))
-	mux.Get("/admin/products/create", use(a.adminCreateProduct, a.isadmin))
+	mux.Post("/admin/products/:id/update", use(a.adminUpdateProduct, a.ispartner))
+	mux.Get("/admin/products/:id/update", use(a.adminUpdateProduct, a.ispartner))
+	mux.Get("/admin/products/create", use(a.adminCreateProduct, a.ispartner))
 
-	mux.Get("/admin/products/:id/attachments", use(a.adminAttachments, a.isadmin))
-	mux.Get("/admin/products/:id/attachments/:attachmentId/updateMedia", use(a.adminUpdateProductMedia, a.isadmin))
-	mux.Post("/admin/attachments/:id/update", use(a.adminUpdateAttachment, a.isadmin))
-	mux.Get("/admin/attachments/:id/update", use(a.adminUpdateAttachment, a.isadmin))
-	mux.Get("/admin/attachments/create", use(a.adminCreateAttachment, a.isadmin))
-	mux.Get("/admin/products/:id/attachments/:attachmentId/remove", use(a.adminRemoveAttchment, a.isadmin))
-
+	mux.Get("/admin/products/:id/attachments", use(a.adminAttachments, a.ispartner))
+	mux.Get("/admin/products/:id/attachments/:attachmentId/updateMedia", use(a.adminUpdateProductMedia, a.ispartner))
+	mux.Post("/admin/products/:id/attachments/:attachmentId/update", use(a.adminUpdateAttachment, a.ispartner))
+	mux.Get("/admin/products/:id/attachments/:attachmentId/update", use(a.adminUpdateAttachment, a.ispartner))
+	mux.Get("/admin/products/:id/attachments/create", use(a.adminCreateAttachment, a.ispartner))
+	mux.Get("/admin/products/:id/attachments/:attachmentId/remove", use(a.adminRemoveAttchment, a.ispartner))
+	mux.Get("/admin/products/:id/approve", use(a.adminApproveProduct, a.isadmin))
 	mux.Get("/admin/products/:id/invoices", use(a.adminInvoices, a.isadmin))
-	mux.Get("/admin/invoices/:id/view", use(a.adminViewInvoice, a.isadmin))
+	mux.Get("/admin/products/:id/invoices/:invoiceId/view", use(a.adminViewInvoice, a.isadmin))
 
 	mux.Get("/admin/posts", use(a.adminPosts, a.isadmin))
 	mux.Get("/admin/posts/create", use(a.adminCreatePost, a.isadmin))

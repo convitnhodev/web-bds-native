@@ -8,7 +8,11 @@
 
     <div class="d-flex flex-items-center mb-3">
       <h1 class="overflow-hidden flex-auto">
+        {{if (has_role .User "admin") }}
         Tài sản
+        {{else if (has_role .User "deein_partner") }}
+        Tài sản đã đăng
+        {{end}}
       </h1>
 
       <details class="dropdown details-reset details-overlay d-inline-block">
@@ -28,13 +32,33 @@
       <div>
         {{range .Products}}
         <div class="Box-row Box-row--hover-gray d-flex flex-items-center">
-          <a class="mr-3" href="/real-estate/{{ .Slug }}" target="_blank"><strong>{{.Title}}</strong></a>
+          <div>
+            <a class="mr-3" href="/real-estate/{{ .Slug }}" target="_blank"><strong>{{.Title}}</strong></a>
+            {{if and (has_role $.User "deein_partner") .CensoredAt}}
+            <div class="text-small color-fg-subtle">
+              Đã duyệt  {{tz_format .CensoredAt "2006-01-02 15:04" "Asia/Ho_Chi_Minh"}}
+            </div>
+            {{end}}
+          </div>
           <div class="flex-auto">
           </div>
+          {{if (has_role $.User "admin") }}
           <a class="btn btn-xs mr-2" href="/admin/products/{{.ID}}/invoices">Danh sách đầu tư</a>
+          {{end}}
+
+          {{if and (has_role $.User "admin") (eq .IsCensorship false) }}
+          <a class="btn btn-xs mr-2" href="/admin/products/{{.ID}}/approve" onclick="return confirm('chắc nghen?');">Duyệt tài sản</a>
+          {{end}}
+
+          {{if or (has_role $.User "admin") (has_role $.User "deein_partner")}}
           <a class="btn btn-xs mr-2" href="/admin/products/{{.ID}}/attachments">files</a>
+          {{end}}
+          {{if or (has_role $.User "admin") (has_role $.User "deein_partner")}}
           <a class="btn btn-xs mr-2" href="/admin/products/{{.ID}}/update">sửa</a>
+          {{end}}
+          {{if (has_role $.User "admin") }}
           <a class="btn btn-danger btn-xs" href="/admin/products/{{.ID}}/remove" onclick="return confirm('chắc nghen?');">xóa</a>
+          {{end}}
         </div>
         {{end}}
       </div>

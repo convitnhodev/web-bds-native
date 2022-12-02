@@ -103,22 +103,37 @@ func (m *AttachmentModel) Create(product *models.Product, t string) (*models.Att
 }
 
 func (m *AttachmentModel) Update(o *models.Attachment, f *form.Form) error {
-	q := `
+	q := ""
+
+	if f.Get("Link") == "" {
+		q = `
 		update
 			attachments
 		set
 			updated_at = now(),
-			title = $2,
-			link = $3,
-			size = $4
+			title = $2
 		where
 			id = $1
-	`
+		`
+	} else {
+		q = fmt.Sprintf(
+			`update
+				attachments
+			set
+				updated_at = now(),
+				title = $2,
+				link = '%s',
+				size = %s
+			where
+				id = $1`,
+			f.Get("Link"),
+			f.Get("Size"),
+		)
+	}
+
 	_, err := m.DB.Exec(q,
 		o.ID,
 		f.Get("Title"),
-		f.Get("Link"),
-		f.Get("Size"),
 	)
 
 	return err

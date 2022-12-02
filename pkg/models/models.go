@@ -73,6 +73,9 @@ type Product struct {
 	NumOfSlot            int
 	CostPerSlot          int
 	EscrowAmount         int
+	CreatedBy            int
+	IsCensorship         bool
+	CensoredAt           *time.Time
 	CreatedAt            time.Time
 	UpdatedAt            time.Time
 }

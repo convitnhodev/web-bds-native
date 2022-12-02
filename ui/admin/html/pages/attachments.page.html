@@ -19,9 +19,9 @@
         </summary>
 
         <ul class="dropdown-menu dropdown-menu-se">
-            <li><a href="/admin/attachments/create?type=document&pid={{.Product.ID}}" class="dropdown-item" role="menuitem">Document</a></li>
-            <li><a href="/admin/attachments/create?type=image&pid={{.Product.ID}}" class="dropdown-item" role="menuitem">Image</a></li>
-            <li><a href="/admin/attachments/create?type=video&pid={{.Product.ID}}" class="dropdown-item" role="menuitem">Video</a></li>
+            <li><a href="/admin/products/{{.Product.ID}}/attachments/create?type=document" class="dropdown-item" role="menuitem">Document</a></li>
+            <li><a href="/admin/products/{{.Product.ID}}/attachments/create?type=image" class="dropdown-item" role="menuitem">Image</a></li>
+            <li><a href="/admin/products/{{.Product.ID}}/attachments/create?type=video" class="dropdown-item" role="menuitem">Video</a></li>
         </ul>
       </details>
     </div>
@@ -97,7 +97,7 @@
           </details>
           {{ end }}
 
-          <a class="btn btn-xs mr-1" href="/admin/attachments/{{.ID}}/update">sửa</a>
+          <a class="btn btn-xs mr-1" href="/admin/products/{{ .Product.ID }}/attachments/{{.ID}}/update">sửa</a>
           <a class="btn btn-danger btn-xs" href="/admin/products/{{ .Product.ID }}/attachments/{{ .ID }}/remove" onclick="return confirm('chắc nghen?');">xóa</a>
         </div>
         {{end}}

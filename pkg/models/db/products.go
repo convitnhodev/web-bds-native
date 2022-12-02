@@ -51,6 +51,9 @@ var productColumes = []string{
 	"products.num_of_slot",
 	"products.cost_per_slot",
 	"products.escrow_amount",
+	"products.created_by",
+	"products.is_censorship",
+	"products.censored_at",
 }
 
 func (m *ProductModel) query(s string) string {
@@ -96,6 +99,9 @@ func scanProduct(r scanner, o *models.Product) error {
 		&o.NumOfSlot,
 		&o.CostPerSlot,
 		&o.EscrowAmount,
+		&o.CreatedBy,
+		&o.IsCensorship,
+		&o.CensoredAt,
 	); err != nil {
 		return errors.Wrap(err, "scanProduct")
 	}
@@ -111,6 +117,54 @@ func (m *ProductModel) Find() ([]*models.Product, error) {
 		return nil, err
 	}
 	rows, err := m.DB.Query(m.Pagination.Generate(q))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	list := []*models.Product{}
+	for rows.Next() {
+		o := &models.Product{}
+		if err := scanProduct(rows, o); err != nil {
+			log.Println(err)
+		}
+		list = append(list, o)
+	}
+	return list, nil
+}
+
+func (m *ProductModel) Published() ([]*models.Product, error) {
+	q := m.query("where is_censorship != false and is_deleted = false and updated_at > '0001-01-01 00:00:00+00'::date order by id desc")
+	count := m.count("where is_censorship != false and is_deleted = false and updated_at > '0001-01-01 00:00:00+00'::date")
+
+	if err := m.Pagination.Count(count); err != nil {
+		return nil, err
+	}
+	rows, err := m.DB.Query(m.Pagination.Generate(q))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	list := []*models.Product{}
+	for rows.Next() {
+		o := &models.Product{}
+		if err := scanProduct(rows, o); err != nil {
+			log.Println(err)
+		}
+		list = append(list, o)
+	}
+	return list, nil
+}
+
+func (m *ProductModel) CreatedBy(userId int) ([]*models.Product, error) {
+	q := m.query("where created_by = $1 and is_deleted = false and updated_at > '0001-01-01 00:00:00+00'::date order by id desc")
+	count := m.count("where created_by = $1 and is_deleted = false and updated_at > '0001-01-01 00:00:00+00'::date")
+
+	if err := m.Pagination.Count(count, userId); err != nil {
+		return nil, err
+	}
+	rows, err := m.DB.Query(m.Pagination.Generate(q), userId)
 	if err != nil {
 		return nil, err
 	}
@@ -147,9 +201,9 @@ func (m *ProductModel) ID(id string) (*models.Product, error) {
 	return o, nil
 }
 
-func (m *ProductModel) Create() (*models.Product, error) {
-	q := `insert into products (title) values ('') returning id`
-	row := m.DB.QueryRow(q)
+func (m *ProductModel) Create(userId int, isCensorship bool) (*models.Product, error) {
+	q := `insert into products (title, created_by, is_censorship) values ('', $1, $2) returning id`
+	row := m.DB.QueryRow(q, userId, isCensorship)
 	o := new(models.Product)
 	if err := row.Scan(&o.ID); err != nil {
 		return nil, errors.Wrap(err, "ProductModel.Create")
@@ -273,6 +327,12 @@ func (m *ProductModel) Set(id string, key string, value string) error {
 
 func (m *ProductModel) Remove(id string) error {
 	q := `update products set is_deleted = true where id = $1`
+	_, err := m.DB.Exec(q, id)
+	return err
+}
+
+func (m *ProductModel) Approve(id string) error {
+	q := `update products set is_censorship = true, censored_at = now() where id = $1`
 	_, err := m.DB.Exec(q, id)
 	return err
 }

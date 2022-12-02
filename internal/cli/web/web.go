@@ -109,7 +109,7 @@ func (a *router) privacy(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *router) home(w http.ResponseWriter, r *http.Request) {
-	products, err := a.App.Products.Find()
+	products, err := a.App.Products.Published()
 	if err != nil {
 		log.Println(err)
 		a.render(w, r, "404.page.html", &templateData{})
