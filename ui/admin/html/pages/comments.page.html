@@ -22,12 +22,13 @@
             </div>
             <div class="ml-2">
               <div class="d-flex">
-                <strong class="color-fg-accent">{{ .Poster.FirstName}} {{ .Poster.LastName }}</strong>
+                <strong>{{ .Poster.FirstName}} {{ .Poster.LastName }}</strong>
               </div>
               <div class="text-small color-fg-subtle" style="word-wrap: break-word;max-width: 750px;margin-left: auto;margin-right: auto;">{{ .Message }}</div>
             </div>
           </div>
 
+          <a class="btn btn-xs mr-1" target="_blank" href="{{.Slug}}">Xem bài viết</a>
           <a class="btn btn-xs mr-1" href="/admin/comments/{{.ID}}/changeCensorship">Duyệt</a>
           <a class="btn btn-danger btn-xs" href="/admin/comments/{{.ID}}/remove" onclick="return confirm('chắc nghen?');">xóa</a>
         </div>
