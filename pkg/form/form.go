@@ -126,6 +126,15 @@ func (f *Form) GetInt(field string) int {
 	return num
 }
 
+func (f *Form) GetFloat(field string) float64 {
+	value := f.Get(field)
+	num, err := strconv.ParseFloat(value, 32)
+	if err != nil {
+		return 0
+	}
+	return num
+}
+
 func (f *Form) MustGetStringSlice(field string) ([]string, bool) {
 	_, ok := f.Values[field]
 	return f.GetStringSlice(field), ok

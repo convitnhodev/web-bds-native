@@ -2,6 +2,10 @@ function getInt(attr, el) {
   return parseInt(el.getAttribute(attr), 10) || 0;
 }
 
+function getFloat(attr, el) {
+  return parseFloat(el.getAttribute(attr)) || 0;
+}
+
 function getInputAsInt(el) {
   if (el instanceof HTMLInputElement) {
     return parseInt(el.value, 10) || 0;
@@ -26,7 +30,7 @@ const depositEl = document.getElementById('deposit');
 
 const slotRemainValue = getInt('data-slot-remain', slotRemainEl);
 const slotPriceValue = getInt('data-slot-price', slotPriceEl);
-const depositValue = getInt('data-deposit', depositEl);
+const depositValue = getFloat('data-deposit', depositEl);
 
 function calcTotal(_qty) {
   let qty = _qty;
@@ -50,9 +54,14 @@ function updateTotal(qty) {
   totalEl.innerHTML = formatter.format(total);
 }
 
+function updateSlotPrice() {
+  slotPriceEl.innerHTML = formatter.format(slotPriceValue);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   updateTotal();
   updateDeposit();
+  updateSlotPrice();
 });
 
 slotQtyEl.addEventListener('change', () => {
@@ -63,7 +72,7 @@ slotQtyEl.addEventListener('change', () => {
 slotSubEl.addEventListener('click', () => {
   const qty = getInputAsInt(slotQtyEl);
 
-  if (qty === 0 || qty === 1) {
+  if (qty === 0) {
     return;
   }
 
@@ -78,7 +87,7 @@ slotSubEl.addEventListener('click', () => {
 slotAddEl.addEventListener('click', () => {
   const qty = getInputAsInt(slotQtyEl);
 
-  if (qty === 0 || qty === slotRemainValue) {
+  if (qty === slotRemainValue) {
     return;
   }
 

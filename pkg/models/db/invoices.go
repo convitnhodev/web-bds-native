@@ -1,6 +1,7 @@
 package db
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
@@ -90,13 +91,15 @@ func (m *InvoiceModel) ID(id string) (*models.Invoice, error) {
 	return o, nil
 }
 
-func (m *InvoiceModel) Buy(userId int, serect string) (*models.Invoice, error) {
+func (m *InvoiceModel) Buy(tx *sql.Tx, ctx context.Context, userId int, serect string) (*models.Invoice, error) {
 	q := `
 	INSERT INTO invoices (user_id, status, invoice_serect)
-	VALUES($1, 'open'::invoice_status, $2);
+	VALUES($1, 'open'::invoice_status, $2)
 	RETURNING id`
 
-	row := m.DB.QueryRow(q,
+	row := tx.QueryRowContext(
+		ctx,
+		q,
 		userId,
 		serect,
 	)

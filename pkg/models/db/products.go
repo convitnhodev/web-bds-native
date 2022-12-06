@@ -50,10 +50,11 @@ var productColumes = []string{
 	"products.finance_plan_link",
 	"products.num_of_slot",
 	"products.cost_per_slot",
-	"products.escrow_amount",
+	"products.deposit_percent",
 	"products.created_by",
 	"products.is_censorship",
 	"products.censored_at",
+	"products.remain_of_slot",
 }
 
 func (m *ProductModel) query(s string) string {
@@ -98,10 +99,11 @@ func scanProduct(r scanner, o *models.Product) error {
 		&o.FinancePlanLink,
 		&o.NumOfSlot,
 		&o.CostPerSlot,
-		&o.EscrowAmount,
+		&o.DepositPercent,
 		&o.CreatedBy,
 		&o.IsCensorship,
 		&o.CensoredAt,
+		&o.RemainOfSlot,
 	); err != nil {
 		return errors.Wrap(err, "scanProduct")
 	}
@@ -243,7 +245,8 @@ func (m *ProductModel) Update(o *models.Product, f *form.Form) error {
 			area = $25,
 			num_of_slot = $26,
 			cost_per_slot = $27,
-			escrow_amount = $28
+			deposit_percent = $28,
+			remain_of_slot = (CASE WHEN remain_of_slot = num_of_slot THEN $29 ELSE remain_of_slot END)
 		where
 			id = $1
 	`
@@ -290,9 +293,10 @@ func (m *ProductModel) Update(o *models.Product, f *form.Form) error {
 		f.Get("Type"),
 		f.Get("Legal"),
 		f.Get("Area"),
-		f.Get("NumOfSlot"),
-		f.Get("CostPerSlot"),
-		f.Get("EscrowAmount"),
+		f.GetInt("NumOfSlot"),
+		f.GetInt("CostPerSlot"),
+		f.GetFloat("DepositPercent"),
+		f.GetInt("NumOfSlot"),
 	)
 
 	if err != nil {

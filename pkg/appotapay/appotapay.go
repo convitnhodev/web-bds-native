@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/deeincom/deeincom/pkg/files"
 	"github.com/golang-jwt/jwt/v4"
 )
 
@@ -16,18 +17,13 @@ var client = &http.Client{
 	Timeout: 30 * time.Second,
 }
 
-// https://esms.vn/eSMS.vn_TailieuAPI.pdf
-// PartnerCode: APPOTAPAY
-// ApiKey: FJcmF8uj2ISveL5FvvNk4pnp8xrhINz8
-// SecretKey: XAonJgy14YhtePEITXhyBS2unjfJLAV3
-
-var ATPHost string
+var APTPaymentHost string
 var PartnerCode string
 var ApiKey string
 var SecretKey string
 
 type ATPPayload struct {
-	Amount        int
+	Amount        int64
 	OrderId       string
 	OrderInfo     string
 	BankCode      string
@@ -118,9 +114,10 @@ func Checkout(payload *ATPPayload) (*ATPResponse, error) {
 		return nil, err
 	}
 
+	httpRequestURL := files.JoinURL(APTPaymentHost, "/api/v1/orders/payment/bank")
 	req, err := http.NewRequest(
 		"POST",
-		fmt.Sprintf("%s/api/v1/orders/payment/bank", ATPHost),
+		httpRequestURL,
 		bytes.NewBuffer([]byte(values)),
 	)
 
@@ -142,10 +139,6 @@ func Checkout(payload *ATPPayload) (*ATPResponse, error) {
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Accept", "application/json")
-	req.Header.Set("typ", "JWT")
-	req.Header.Set("alg", "HS256")
-	req.Header.Set("cty", "appotapay-api;v=1")
 	req.Header.Set("X-APPOTAPAY-AUTH", fmt.Sprintf("Bearer %s", jwtToken))
 
 	res, err := client.Do(req)

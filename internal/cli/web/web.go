@@ -8,8 +8,10 @@ import (
 	"html/template"
 	"io"
 	"log"
+	"math"
 	"math/rand"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -158,10 +160,20 @@ func (a *router) productDetail(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *router) checkoutProduct(w http.ResponseWriter, r *http.Request) {
+	userId := a.session.GetInt(r, "user")
+	user, err := a.App.Users.ID(fmt.Sprint(userId))
+
+	// check user có verified id chưa
+	if !hasRole(user, "verified_id") {
+		http.Redirect(w, r, "/upgrade-user?to=verified_id", http.StatusSeeOther)
+		return
+	}
+
 	f := form.New(nil)
 	slug := r.URL.Query().Get(":slug")
 	product, err := a.App.Products.GetBySlug(slug)
 	ok := false
+
 	if err != nil {
 		log.Println(err)
 		a.render(w, r, "404.page.html", &templateData{})
@@ -178,25 +190,13 @@ func (a *router) checkoutProduct(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	if r.Method == "POST" {
-		userId := a.session.GetInt(r, "user")
-		if userId == 0 {
-			ok = true
-			http.Redirect(w, r, "/login", http.StatusSeeOther)
-			return
-		}
-
-		user, err := a.App.Users.ID(fmt.Sprint(userId))
-
-		// check user có verified id chưa
-		if !hasRole(user, "verified_id") {
-			http.Redirect(w, r, "/upgrade-user?to=verified_id", http.StatusSeeOther)
+		if err := r.ParseForm(); err != nil {
+			f.Errors.Add("err", "err_parse_form")
 			return
 		}
 
 		f.Values = r.PostForm
 		f.Required("Quatity")
-
-		// TODO: validate BankCode, PaymentMethod
 
 		if f.GetInt("Quatity") <= 0 {
 			f.Errors.Add("err", "product_buy_quatity_less_than_zero")
@@ -208,15 +208,35 @@ func (a *router) checkoutProduct(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		invoice, err := a.App.Invoice.Buy(userId, helper.RandString(6))
+		// Get a Tx for making transaction requests.
+		ctx := r.Context()
+		tx, err := a.App.DB.BeginTx(ctx, nil)
 
 		if err != nil {
+			log.Println(err)
 			a.render(w, r, "500.page.html", &templateData{})
+			return
+		}
+
+		serectCode := helper.RandString(6)
+		invoice, err := a.App.Invoice.Buy(
+			tx,
+			ctx,
+			userId,
+			serectCode,
+		)
+
+		if err != nil {
+			log.Println("Checkout: ", err)
+			tx.Rollback()
+			f.Errors.Add("err", "checkout_err")
 			return
 		}
 
 		amount := f.GetInt("Quatity") * product.CostPerSlot
 		invoiceItem, err := a.App.InvoiceItem.Buy(
+			tx,
+			ctx,
 			invoice.ID,
 			product.ID,
 			f.GetInt("Quatity"),
@@ -225,15 +245,40 @@ func (a *router) checkoutProduct(w http.ResponseWriter, r *http.Request) {
 		)
 
 		if err != nil {
-			a.render(w, r, "500.page.html", &templateData{})
+			log.Println("Checkout: ", err)
+			tx.Rollback()
+			f.Errors.Add("err", "checkout_err")
 			return
 		}
 
+		depositAmount := int64(math.Round((float64(amount) * product.DepositPercent) / 100))
+
+		payment, err := a.App.Payment.Checkout(
+			tx,
+			ctx,
+			invoice.ID,
+			depositAmount,
+			"appotapay",
+			"deposit",
+		)
+
+		if err != nil {
+			log.Println("Checkout: ", err)
+			tx.Rollback()
+			f.Errors.Add("err", "checkout_err")
+			return
+		}
+
+		// Call appotapay for payment
+		appotapay.APTPaymentHost = a.App.Config.APTPaymentHost
+		appotapay.ApiKey = a.App.Config.APTApiKey
+		appotapay.PartnerCode = a.App.Config.APTPartnerCode
+		appotapay.SecretKey = a.App.Config.APTSecretKey
 		res, err := appotapay.Checkout(
 			&appotapay.ATPPayload{
-				Amount:        amount,
-				OrderId:       fmt.Sprint(invoice.ID),
-				OrderInfo:     fmt.Sprintf("Thanh invoice %d", invoice.ID),
+				Amount:        depositAmount,
+				OrderId:       fmt.Sprint(payment.ID),
+				OrderInfo:     fmt.Sprintf("Đặt cọc invoice %d tại payment %d", invoice.ID, payment.ID),
 				BankCode:      "",
 				PaymentMethod: "",
 				ClientIP:      a.App.Config.ServerIP,
@@ -243,20 +288,50 @@ func (a *router) checkoutProduct(w http.ResponseWriter, r *http.Request) {
 			},
 		)
 
+		if err != nil {
+			log.Println("Checkout: ", err)
+			tx.Rollback()
+			f.Errors.Add("err", "checkout_err")
+			return
+		}
+
+		if err = tx.Commit(); err != nil {
+			log.Println(err)
+			a.render(w, r, "500.page.html", &templateData{})
+			return
+		}
+
+		phone.ESMS_APIKEY = a.App.Config.ESMS_APIKEY
+		phone.ESMS_SECRET = a.App.Config.ESMS_SECRET
+		if err := phone.SendCheckoutCode(user.Phone, serectCode); err != nil {
+			log.Println(err)
+		}
+
 		ok = true
 		a.App.Log.Add(
 			fmt.Sprint(userId),
 			fmt.Sprintf(
-				"Người dùng %d đầu tư vào sản phẩm %d với hoá đơn %d với chi tiết tại %d.",
+				"Người dùng %d đầu tư vào sản phẩm %d với hoá đơn %d với chi tiết tại %d và đang thanh đặt cọc tại %d.",
 				userId,
 				product.ID,
 				invoice.ID,
 				invoiceItem.ID,
+				payment.ID,
 			),
 		)
 
 		http.Redirect(w, r, res.PaymentUrl, http.StatusSeeOther)
 	}
+}
+
+func (a *router) checkoutProductSuccessful(w http.ResponseWriter, r *http.Request) {
+	a.render(w, r, "result.checkout.page.html", &templateData{
+		IsCheckoutOK: true,
+	})
+}
+
+func (a *router) callbackIPN(w http.ResponseWriter, r *http.Request) {
+	// TODO: handle payment callback
 }
 
 func (a *router) verifyEmailResult(w http.ResponseWriter, r *http.Request) {
@@ -507,6 +582,7 @@ func (a *router) logout(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *router) login(w http.ResponseWriter, r *http.Request) {
+	redirectTo := r.URL.Query().Get("redirect_to")
 	f := form.New(nil)
 
 	var ok bool
@@ -550,7 +626,11 @@ func (a *router) login(w http.ResponseWriter, r *http.Request) {
 		ok = true
 		a.session.Put(r, "user", user.ID)
 
-		http.Redirect(w, r, r.Header.Get("Referer"), http.StatusSeeOther)
+		if redirectTo == "" {
+			redirectTo = r.Header.Get("Referer")
+		}
+
+		http.Redirect(w, r, redirectTo, http.StatusSeeOther)
 	}
 }
 
@@ -709,7 +789,7 @@ func (a *router) islogined(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		id := a.session.GetInt(r, "user")
 		if id == 0 {
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			http.Redirect(w, r, fmt.Sprintf("/login?redirect_to=%s", url.QueryEscape(r.RequestURI)), http.StatusSeeOther)
 			return
 		}
 
@@ -1074,8 +1154,10 @@ func run(c *root.Cmd) error {
 	// product detail
 	mux.Get("/real-estate/:slug", use(a.productDetail))
 
-	mux.Get("/real-estate/:slug/checkout", use(a.checkoutProduct))
-	mux.Post("/real-estate/:slug/checkout", use(a.checkoutProduct))
+	mux.Get("/real-estate/:slug/checkout", use(a.checkoutProduct, a.islogined))
+	mux.Post("/real-estate/:slug/checkout", use(a.checkoutProduct, a.islogined))
+	mux.Get("/checkout-successful", use(a.checkoutProductSuccessful, a.islogined))
+	mux.Post("/ipn", use(a.callbackIPN))
 
 	// đăng ký
 	mux.Post("/register", use(a.register))

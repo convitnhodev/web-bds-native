@@ -1,6 +1,7 @@
 package db
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
@@ -90,14 +91,24 @@ func (m *InvoiceItemModel) InvoiceID(invoiceId int) ([]*models.InvoiceItem, erro
 	return list, nil
 }
 
-func (m *InvoiceItemModel) Buy(invoiceId int, productId int, quatity int, cost int, amount int) (*models.InvoiceItem, error) {
+func (m *InvoiceItemModel) Buy(
+	tx *sql.Tx,
+	ctx context.Context,
+	invoiceId int,
+	productId int,
+	quatity int,
+	cost int,
+	amount int,
+) (*models.InvoiceItem, error) {
 	q := `
 	INSERT INTO public.invoice_items
 	(invoice_id, product_id, quatity, cost_per_slot, amount)
-	VALUES($1, $2, $3, $4, $5);
+	VALUES($1, $2, $3, $4, $5)
 	RETURNING id`
 
-	row := m.DB.QueryRow(q,
+	row := tx.QueryRowContext(
+		ctx,
+		q,
 		invoiceId,
 		productId,
 		quatity,

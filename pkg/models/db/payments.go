@@ -1,6 +1,7 @@
 package db
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
@@ -22,6 +23,7 @@ var paymentColumes = []string{
 	"payments.method",
 	"payments.pay_type",
 	"payments.tx_type",
+	"payments.status",
 	"payments.created_at",
 	"payments.updated_at",
 }
@@ -34,6 +36,7 @@ func scanPayment(r scanner, o *models.Payment) error {
 		&o.Method,
 		&o.PayType,
 		&o.TxType,
+		&o.Status,
 		&o.CreatedAt,
 		&o.UpdatedAt,
 	); err != nil {
@@ -69,4 +72,33 @@ func (m *PaymentModel) InvoiceID(invoiceId int) ([]*models.Payment, error) {
 		list = append(list, o)
 	}
 	return list, nil
+}
+
+func (m *PaymentModel) Checkout(
+	tx *sql.Tx,
+	ctx context.Context,
+	invoiceId int,
+	amount int64,
+	method string,
+	payType string,
+) (*models.Payment, error) {
+	q := `
+		INSERT INTO payments (invoice_id, amount, pay_type)
+		VALUES ($1, $2, $3)
+		RETURNING id;
+	`
+	row := tx.QueryRowContext(
+		ctx,
+		q,
+		invoiceId,
+		amount,
+		payType,
+	)
+
+	o := new(models.Payment)
+	if err := row.Scan(&o.ID); err != nil {
+		return nil, errors.Wrap(err, "PaymentModel.Checkout")
+	}
+
+	return o, nil
 }

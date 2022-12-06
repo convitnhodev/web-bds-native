@@ -34,6 +34,12 @@ func SendResetPwdPhone(phone string, token string) error {
 	return SendSMS(phone, content)
 }
 
+func SendCheckoutCode(phone string, serectCode string) error {
+	content := fmt.Sprintf("%s la ma xac minh mua tai san tai %s cua ban", serectCode, Brandname)
+
+	return SendSMS(phone, content)
+}
+
 func SendSMS(phone string, content string) error {
 	if ESMS_APIKEY == "" {
 		return errors.New("ESMS_APIKEY=?")

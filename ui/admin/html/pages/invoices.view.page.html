@@ -78,6 +78,17 @@
                         <p>
                             Loại giao dịch: <strong>{{ parse_enum "TransactionType" .TxType }}</strong>
                         </p>
+
+                        <p>
+                            Trạng thái giao dịch: 
+                            <strong
+                                {{ if eq .Status "open" }} class="color-fg-accent" {{end}}
+                                {{ if eq .Status "success" }} class="color-fg-success" {{end}}
+                                {{ if eq .Status "refund" }} class="color-fg-severe" {{end}}
+                                {{ if eq .Status "expired" }} class="color-fg-sponsors" {{end}}
+                                {{ if eq .Status "canceled" }} class="color-fg-close" {{end}}
+                            >{{ parse_enum "PaymentStatus" .Status }}</strong>
+                        </p>
                     </div>
                     <div class="float-right mr-1">
                         <p><strong>Lúc {{ tz_format .CreatedAt "2006-01-02 15:04" "Asia/Ho_Chi_Minh" }}</strong></p>

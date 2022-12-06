@@ -70,9 +70,10 @@ type Product struct {
 	FrontWidth           int
 	StreetWidth          int
 	PavementWidth        int
+	RemainOfSlot         int
 	NumOfSlot            int
 	CostPerSlot          int
-	EscrowAmount         int
+	DepositPercent       float64
 	CreatedBy            int
 	IsCensorship         bool
 	CensoredAt           *time.Time
@@ -180,6 +181,7 @@ type Payment struct {
 	ID        int
 	InvoiceId int
 	Amount    int
+	Status    string
 	Method    string
 	PayType   string
 	TxType    string
@@ -216,7 +218,7 @@ func (o *Product) Form() *form.Form {
 
 	f.Set("CostPerSlot", fmt.Sprint(o.CostPerSlot))
 	f.Set("NumOfSlot", fmt.Sprint(o.NumOfSlot))
-	f.Set("EscrowAmount", fmt.Sprint(o.EscrowAmount))
+	f.Set("DepositPercent", fmt.Sprint(o.DepositPercent))
 
 	return f
 }

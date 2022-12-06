@@ -47,6 +47,7 @@ type templateData struct {
 	IsKYCQuery        bool
 	IsPartnerQuery    bool
 	IsResetPwdByToken bool
+	IsCheckoutOK      bool
 	Config            *config.Config
 }
 
@@ -160,6 +161,9 @@ func translate(s string) string {
 
 	case "product_buy_quatity_less_than_zero":
 		return "Số lượng lô phải lớn hơn 0."
+
+	case "checkout_err":
+		return "Lỗi không thể thanh toán. quí khách có thể thử lại sau."
 	}
 	return s
 }
@@ -254,10 +258,20 @@ var PaymentMethodEnumMapping map[string]string = map[string]string{
 	"appotapay":     "AppotaPay",
 	"bank_transfer": "Chuyển khoản",
 }
-var PaymentTypeEnumMapping map[string]string = map[string]string{
-	"escrow": "Thanh toán đặt cọc",
-	"full":   "Thanh toán toàn bộ",
+var PaymentStatusEnumMapping map[string]string = map[string]string{
+	"open":     "Đang tạo thang toán",
+	"success":  "Đã thanh toán thành công",
+	"refund":   "Đã trả lại tiền",
+	"expired":  "Đã hết hạn thanh toán",
+	"canceled": "Đã huy thanh toán",
 }
+
+var PaymentTypeEnumMapping map[string]string = map[string]string{
+	"deposit": "Thanh toán đặt cọc",
+	"full":    "Thanh toán toàn bộ",
+	"partial": "Thanh toán 1 phần",
+}
+
 var TransactionTypeEnumMapping map[string]string = map[string]string{
 	"pay":    "Thanh toán",
 	"refund": "Hoàn tiền",
@@ -269,6 +283,8 @@ func parseEum(typeEnum string, value string) string {
 		return PaymentMethodEnumMapping[value]
 	case "PaymentType":
 		return PaymentTypeEnumMapping[value]
+	case "PaymentStatus":
+		return PaymentStatusEnumMapping[value]
 	case "TransactionType":
 		return TransactionTypeEnumMapping[value]
 	}
