@@ -17,6 +17,7 @@ import (
 // App represent an app
 type App struct {
 	Config           *config.Config
+	DB               *sql.DB
 	Telegram         *telegram.Telegram
 	Migration        *db.MigrationModel
 	Users            *db.UserModel
@@ -83,6 +84,7 @@ func New(c *config.Config) (*App, error) {
 		B2Scheduler: B2Scheduler,
 		LocalFile:   &lf,
 		Config:      c,
+		DB:          conn,
 		Migration: &db.MigrationModel{
 			DB: conn,
 		},
