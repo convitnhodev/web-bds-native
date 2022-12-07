@@ -39,46 +39,6 @@ func (c *Config) Default() error {
 		return errors.New("please config postgres db (config.json)")
 	}
 
-	if c.B2BucketName == "" {
-		return errors.New("please config B2BucketName backblaze(config.json)")
-	}
-
-	if c.B2AccountId == "" {
-		return errors.New("please config B2AccountId backblaze(config.json)")
-	}
-
-	if c.B2AccountKey == "" {
-		return errors.New("please config B2AccountKey backblaze(config.json)")
-	}
-
-	if c.ServerIP == "" {
-		return errors.New("please config ServerIP (config.json)")
-	}
-
-	if c.ATPNotifyUrl == "" {
-		return errors.New("please config ATPNotifyUrl (config.json)")
-	}
-
-	if c.ATPRedirectUrl == "" {
-		return errors.New("please config ATPRedirectUrl (config.json)")
-	}
-
-	if c.APTPartnerCode == "" {
-		return errors.New("please config APTPartnerCode (config.json)")
-	}
-
-	if c.APTApiKey == "" {
-		return errors.New("please config APTApiKey (config.json)")
-	}
-
-	if c.APTSecretKey == "" {
-		return errors.New("please config APTSecretKey (config.json)")
-	}
-
-	if c.APTPaymentHost == "" {
-		return errors.New("please config APTHost (config.json)")
-	}
-
 	if c.UploadToB2At == "" {
 		c.UploadToB2At = "19:00"
 	}
