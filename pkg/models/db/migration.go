@@ -43,9 +43,9 @@ func (m *MigrationModel) Migrate() error {
 	completed, err := m.Find()
 	// only allow undefined_table, all other err will result in panic
 	if err != nil {
-		if err, ok := err.(*pq.Error); !ok {
+		if e, ok := err.(*pq.Error); !ok {
 			return err
-		} else if err.Code.Name() != "undefined_table" {
+		} else if e.Code.Name() != "undefined_table" {
 			return err
 		}
 	}
