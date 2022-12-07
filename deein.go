@@ -64,21 +64,24 @@ func New(c *config.Config) (*App, error) {
 		Files:                  &Files,
 	}
 
-	B2Scheduler, err := files.NewB2Scheduler(
-		c.B2AccountId,
-		c.B2AccountKey,
-		c.B2BucketName,
-		c.UploadToB2At,
-		c.B2Prefix,
-		c.MappingUploadLocalLink,
-		&Files,
-	)
+	var B2Scheduler *files.LocalToB2 = nil
+	if c.B2AccountId != "" {
+		B2Scheduler, err := files.NewB2Scheduler(
+			c.B2AccountId,
+			c.B2AccountKey,
+			c.B2BucketName,
+			c.UploadToB2At,
+			c.B2Prefix,
+			c.MappingUploadLocalLink,
+			&Files,
+		)
 
-	if err != nil {
-		return nil, errors.Wrap(err, "Backblaze scheduler")
+		if err != nil {
+			return nil, errors.Wrap(err, "Backblaze scheduler")
+		}
+
+		B2Scheduler.StartScheduler()
 	}
-
-	B2Scheduler.StartScheduler()
 
 	app := &App{
 		B2Scheduler: B2Scheduler,

@@ -270,29 +270,34 @@ func (a *router) checkoutProduct(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Call appotapay for payment
-		appotapay.APTPaymentHost = a.App.Config.APTPaymentHost
-		appotapay.ApiKey = a.App.Config.APTApiKey
-		appotapay.PartnerCode = a.App.Config.APTPartnerCode
-		appotapay.SecretKey = a.App.Config.APTSecretKey
-		res, err := appotapay.Checkout(
-			&appotapay.ATPPayload{
-				Amount:        depositAmount,
-				OrderId:       fmt.Sprint(payment.ID),
-				OrderInfo:     fmt.Sprintf("Đặt cọc invoice %d tại payment %d", invoice.ID, payment.ID),
-				BankCode:      "",
-				PaymentMethod: "",
-				ClientIP:      a.App.Config.ServerIP,
-				ExtraData:     "",
-				NotifyUrl:     a.App.Config.ATPNotifyUrl,
-				RedirectUrl:   a.App.Config.ATPRedirectUrl,
-			},
-		)
+		paymentRedirectURL := fmt.Sprintf("/real-estate/%s/payment", slug)
+		if a.App.Config.APTApiKey != "" {
+			appotapay.APTPaymentHost = a.App.Config.APTPaymentHost
+			appotapay.ApiKey = a.App.Config.APTApiKey
+			appotapay.PartnerCode = a.App.Config.APTPartnerCode
+			appotapay.SecretKey = a.App.Config.APTSecretKey
+			res, err := appotapay.Checkout(
+				&appotapay.ATPPayload{
+					Amount:        depositAmount,
+					OrderId:       fmt.Sprint(payment.ID),
+					OrderInfo:     fmt.Sprintf("Đặt cọc invoice %d tại payment %d", invoice.ID, payment.ID),
+					BankCode:      "",
+					PaymentMethod: "",
+					ClientIP:      a.App.Config.ServerIP,
+					ExtraData:     "",
+					NotifyUrl:     a.App.Config.ATPNotifyUrl,
+					RedirectUrl:   a.App.Config.ATPRedirectUrl,
+				},
+			)
 
-		if err != nil {
-			log.Println("Checkout: ", err)
-			tx.Rollback()
-			f.Errors.Add("err", "checkout_err")
-			return
+			if err != nil {
+				log.Println("Checkout: ", err)
+				tx.Rollback()
+				f.Errors.Add("err", "checkout_err")
+				return
+			}
+
+			paymentRedirectURL = res.PaymentUrl
 		}
 
 		if err = tx.Commit(); err != nil {
@@ -320,8 +325,12 @@ func (a *router) checkoutProduct(w http.ResponseWriter, r *http.Request) {
 			),
 		)
 
-		http.Redirect(w, r, res.PaymentUrl, http.StatusSeeOther)
+		http.Redirect(w, r, paymentRedirectURL, http.StatusSeeOther)
 	}
+}
+
+func (a *router) checkoutProductNoPayment(w http.ResponseWriter, r *http.Request) {
+	a.render(w, r, "nopayment.page.html", &templateData{})
 }
 
 func (a *router) checkoutProductSuccessful(w http.ResponseWriter, r *http.Request) {
@@ -1156,6 +1165,7 @@ func run(c *root.Cmd) error {
 
 	mux.Get("/real-estate/:slug/checkout", use(a.checkoutProduct, a.islogined))
 	mux.Post("/real-estate/:slug/checkout", use(a.checkoutProduct, a.islogined))
+	mux.Get("/real-estate/:slug/payment", use(a.checkoutProductNoPayment, a.islogined))
 	mux.Get("/checkout-successful", use(a.checkoutProductSuccessful, a.islogined))
 	mux.Post("/ipn", use(a.callbackIPN))
 
