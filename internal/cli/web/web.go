@@ -190,6 +190,11 @@ func (a *router) checkoutProduct(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	if r.Method == "POST" {
+		if !product.IsSelling {
+			f.Errors.Add("err", "product_is_pending_selling")
+			return
+		}
+
 		if err := r.ParseForm(); err != nil {
 			f.Errors.Add("err", "err_parse_form")
 			return

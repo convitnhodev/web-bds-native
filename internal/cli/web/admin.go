@@ -732,6 +732,33 @@ func (a *router) adminUpdateProduct(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (a *router) adminEnableSellingProduct(w http.ResponseWriter, r *http.Request) {
+	userId := a.session.GetInt(r, "user")
+	productId := r.URL.Query().Get(":id")
+
+	product, err := a.App.Products.ID(productId)
+	if err != nil {
+		log.Println(err)
+		http.Redirect(w, r, "/admin/products", http.StatusSeeOther)
+		return
+	}
+
+	err = a.App.Products.EnableSelling(productId)
+	if err != nil {
+		log.Println(err)
+		http.Redirect(w, r, "/admin/products", http.StatusSeeOther)
+		return
+	}
+
+	log := fmt.Sprintf("Người dùng %d mở mua bán cho sản phẩm %d.", userId, product.ID)
+	if product.IsSelling {
+		log = fmt.Sprintf("Người dùng %d tắt mua bán cho sản phẩm %d.", userId, product.ID)
+	}
+
+	a.App.Log.Add(fmt.Sprint(userId), log)
+	http.Redirect(w, r, "/admin/products", http.StatusSeeOther)
+}
+
 func (a *router) adminUpdateProductMedia(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	productId := query.Get(":id")
@@ -1080,7 +1107,6 @@ func (a *router) adminViewInvoice(w http.ResponseWriter, r *http.Request) {
 		Payments:     payments,
 		InvoiceItems: invoiceItems,
 	})
-
 }
 
 func registerAdminRoute(mux *pat.PatternServeMux, a *router) {
@@ -1091,6 +1117,7 @@ func registerAdminRoute(mux *pat.PatternServeMux, a *router) {
 	mux.Post("/admin/products/:id/update", use(a.adminUpdateProduct, a.ispartner))
 	mux.Get("/admin/products/:id/update", use(a.adminUpdateProduct, a.ispartner))
 	mux.Get("/admin/products/create", use(a.adminCreateProduct, a.ispartner))
+	mux.Get("/admin/products/:id/enableSelling", use(a.adminEnableSellingProduct, a.ispartner))
 
 	mux.Get("/admin/products/:id/attachments", use(a.adminAttachments, a.ispartner))
 	mux.Get("/admin/products/:id/attachments/:attachmentId/updateMedia", use(a.adminUpdateProductMedia, a.ispartner))

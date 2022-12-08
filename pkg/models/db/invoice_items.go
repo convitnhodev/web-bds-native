@@ -101,7 +101,7 @@ func (m *InvoiceItemModel) Buy(
 	amount int,
 ) (*models.InvoiceItem, error) {
 	q := `
-	INSERT INTO public.invoice_items
+	INSERT INTO invoice_items
 	(invoice_id, product_id, quatity, cost_per_slot, amount)
 	VALUES($1, $2, $3, $4, $5)
 	RETURNING id`

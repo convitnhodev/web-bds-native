@@ -76,6 +76,7 @@ type Product struct {
 	DepositPercent       float64
 	CreatedBy            int
 	IsCensorship         bool
+	IsSelling            bool
 	CensoredAt           *time.Time
 	CreatedAt            time.Time
 	UpdatedAt            time.Time

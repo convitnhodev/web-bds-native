@@ -164,6 +164,9 @@ func translate(s string) string {
 
 	case "checkout_err":
 		return "Lỗi không thể thanh toán. quí khách có thể thử lại sau."
+
+	case "product_is_pending_selling":
+		return "Hiện tại tài sản đang tạm dừng bán."
 	}
 	return s
 }

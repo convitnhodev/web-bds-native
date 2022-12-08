@@ -53,6 +53,7 @@ var productColumes = []string{
 	"products.deposit_percent",
 	"products.created_by",
 	"products.is_censorship",
+	"products.is_selling",
 	"products.censored_at",
 	"products.remain_of_slot",
 }
@@ -102,6 +103,7 @@ func scanProduct(r scanner, o *models.Product) error {
 		&o.DepositPercent,
 		&o.CreatedBy,
 		&o.IsCensorship,
+		&o.IsSelling,
 		&o.CensoredAt,
 		&o.RemainOfSlot,
 	); err != nil {
@@ -320,6 +322,7 @@ func (m *ProductModel) Set(id string, key string, value string) error {
 		UPDATE
 			products
 		SET
+			updated_at = now(),
 			%s = $2
 		WHERE id = $1
 	`, key)
@@ -330,13 +333,19 @@ func (m *ProductModel) Set(id string, key string, value string) error {
 }
 
 func (m *ProductModel) Remove(id string) error {
-	q := `update products set is_deleted = true where id = $1`
+	q := `update products set is_deleted = true, updated_at = now() where id = $1`
 	_, err := m.DB.Exec(q, id)
 	return err
 }
 
 func (m *ProductModel) Approve(id string) error {
-	q := `update products set is_censorship = true, censored_at = now() where id = $1`
+	q := `update products set is_censorship = true, censored_at = now(), updated_at = now() where id = $1`
+	_, err := m.DB.Exec(q, id)
+	return err
+}
+
+func (m *ProductModel) EnableSelling(id string) error {
+	q := `update products set is_selling = not(is_selling), updated_at = now() where id = $1`
 	_, err := m.DB.Exec(q, id)
 	return err
 }

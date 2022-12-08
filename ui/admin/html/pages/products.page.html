@@ -46,6 +46,18 @@
           <a class="btn btn-xs mr-2" href="/admin/products/{{.ID}}/invoices">Danh sách đầu tư</a>
           {{end}}
 
+          {{if (has_role $.User "admin") }}
+            {{if .IsSelling}}
+            <a class="btn btn-xs mr-2 color-fg-closed" href="/admin/products/{{.ID}}/enableSelling" onclick="return confirm('chắc nghen?');">
+              Tắt đầu tư
+            </a>
+            {{else}}
+            <a class="btn btn-xs mr-2 color-fg-success" href="/admin/products/{{.ID}}/enableSelling" onclick="return confirm('chắc nghen?');">
+              Mở đầu tư
+            </a>
+            {{end}}
+          {{end}}
+
           {{if and (has_role $.User "admin") (eq .IsCensorship false) }}
           <a class="btn btn-xs mr-2" href="/admin/products/{{.ID}}/approve" onclick="return confirm('chắc nghen?');">Duyệt tài sản</a>
           {{end}}
@@ -53,6 +65,7 @@
           {{if or (has_role $.User "admin") (has_role $.User "deein_partner")}}
           <a class="btn btn-xs mr-2" href="/admin/products/{{.ID}}/attachments">files</a>
           {{end}}
+
           {{if or (has_role $.User "admin") (has_role $.User "deein_partner")}}
           <a class="btn btn-xs mr-2" href="/admin/products/{{.ID}}/update">sửa</a>
           {{end}}

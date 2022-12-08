@@ -77,7 +77,7 @@ func (m *FileModel) Remove(localPath string) error {
 }
 
 func (m *FileModel) UploadCloudLink(localPath string, cloudLink string) error {
-	q := "UPDATE files SET cloud_link = $2, status = 'sync' WHERE files.local_path = $1"
+	q := "UPDATE files SET cloud_link = $2, status = 'sync', updated_at = now() WHERE files.local_path = $1"
 	_, err := m.DB.Exec(q, localPath, cloudLink)
 	return err
 }
