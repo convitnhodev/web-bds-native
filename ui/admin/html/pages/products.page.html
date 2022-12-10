@@ -39,6 +39,11 @@
               Đã duyệt  {{tz_format .CensoredAt "2006-01-02 15:04" "Asia/Ho_Chi_Minh"}}
             </div>
             {{end}}
+
+            {{if (has_role $.User "admin") }}
+            <span class="Label ml-1 Label--open">Đã bán: {{int_operator "subtraction" .NumOfSlot .RemainOfSlot}}</span>
+            <span class="Label ml-1 Label--primary">Số lô: {{.NumOfSlot}}</span>
+            {{end}}
           </div>
           <div class="flex-auto">
           </div>

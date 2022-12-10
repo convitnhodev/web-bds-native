@@ -67,6 +67,7 @@ var functions = template.FuncMap{
 	"filterPost":      filterPost,
 	"parse_enum":      parseEum,
 	"to_cdn_url":      toCdnUrl,
+	"int_operator":    intOperator,
 }
 
 // sureFind always find an element in list l
@@ -96,6 +97,24 @@ func sureFind(l []string, s string) string {
 
 func html(s string) template.HTML {
 	return template.HTML(s)
+}
+
+func intOperator(operator string, a int, b int) int {
+	switch operator {
+	case "subtraction":
+		return a - b
+	case "summation":
+		return a + b
+	case "multiplication":
+		return a * b
+	case "division":
+		if b == 0 {
+			return 0
+		}
+
+		return a / b
+	}
+	return 0
 }
 
 func buildPagination(url string, page int) string {
