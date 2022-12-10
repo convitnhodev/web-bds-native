@@ -20,7 +20,13 @@
         <div class="Box-row Box-row--hover-gray d-flex flex-items-center">
           <span class="mr-3">Đơn {{.ID}}</span>
           <div class="flex-auto">
-              <span class="Label Label--accent">{{.Status}}</span>
+            <span 
+            {{ if eq .Status "open" }} class="Label Label--accent" {{end}}
+            {{ if eq .Status "deposit" }} class="Label Label--success" {{end}}
+            {{ if eq .Status "paid" }} class="Label Label--done" {{end}}
+            {{ if eq .Status "refund" }} class="Label Label--severe" {{end}}
+            {{ if eq .Status "canceled" }} class="Label Label--close" {{end}}
+            >{{.Status}}</span>
           </div>
           <a class="btn btn-xs mr-1" href="/admin/products/{{$.Product.ID}}/invoices/{{.ID}}/view">Thông tin chi tiết</a>
         </div>

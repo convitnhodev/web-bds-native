@@ -85,8 +85,7 @@
                                 {{ if eq .Status "open" }} class="color-fg-accent" {{end}}
                                 {{ if eq .Status "success" }} class="color-fg-success" {{end}}
                                 {{ if eq .Status "refund" }} class="color-fg-severe" {{end}}
-                                {{ if eq .Status "expired" }} class="color-fg-sponsors" {{end}}
-                                {{ if eq .Status "canceled" }} class="color-fg-close" {{end}}
+                                {{ if eq .Status "failed" }} class="color-fg-close" {{end}}
                             >{{ parse_enum "PaymentStatus" .Status }}</strong>
                         </p>
                     </div>

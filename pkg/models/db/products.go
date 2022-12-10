@@ -1,6 +1,7 @@
 package db
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
@@ -347,5 +348,33 @@ func (m *ProductModel) Approve(id string) error {
 func (m *ProductModel) EnableSelling(id string) error {
 	q := `update products set is_selling = not(is_selling), updated_at = now() where id = $1`
 	_, err := m.DB.Exec(q, id)
+	return err
+}
+
+func (m *ProductModel) UpdatePaymentCallback(
+	tx *sql.Tx,
+	ctx context.Context,
+	ProductId int,
+	isSuccess bool,
+	quatity int,
+) error {
+	slot := "remain_of_slot"
+	if isSuccess {
+		slot = fmt.Sprintf("remain_of_slot - %d", quatity)
+	}
+
+	q := fmt.Sprintf(`
+		UPDATE products
+		SET updated_at = now(),
+			remain_of_slot = %s
+		WHERE id = $1
+	`, slot)
+
+	_, err := tx.ExecContext(
+		ctx,
+		q,
+		ProductId,
+	)
+
 	return err
 }

@@ -281,11 +281,10 @@ var PaymentMethodEnumMapping map[string]string = map[string]string{
 	"bank_transfer": "Chuyển khoản",
 }
 var PaymentStatusEnumMapping map[string]string = map[string]string{
-	"open":     "Đang tạo thang toán",
-	"success":  "Đã thanh toán thành công",
-	"refund":   "Đã trả lại tiền",
-	"expired":  "Đã hết hạn thanh toán",
-	"canceled": "Đã huy thanh toán",
+	"open":    "Đang tạo thang toán",
+	"success": "Đã thanh toán thành công",
+	"refund":  "Đã trả lại tiền",
+	"failed":  "Thanh toán thất bại",
 }
 
 var PaymentTypeEnumMapping map[string]string = map[string]string{

@@ -3,10 +3,12 @@ package web
 import (
 	"bytes"
 	"crypto/md5"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"html/template"
 	"io"
+	"io/ioutil"
 	"log"
 	"math"
 	"math/rand"
@@ -281,19 +283,18 @@ func (a *router) checkoutProduct(w http.ResponseWriter, r *http.Request) {
 			appotapay.ApiKey = a.App.Config.APTApiKey
 			appotapay.PartnerCode = a.App.Config.APTPartnerCode
 			appotapay.SecretKey = a.App.Config.APTSecretKey
-			res, err := appotapay.Checkout(
-				&appotapay.ATPPayload{
-					Amount:        depositAmount,
-					OrderId:       fmt.Sprint(payment.ID),
-					OrderInfo:     fmt.Sprintf("Đặt cọc invoice %d tại payment %d", invoice.ID, payment.ID),
-					BankCode:      "",
-					PaymentMethod: "",
-					ClientIP:      a.App.Config.ServerIP,
-					ExtraData:     "",
-					NotifyUrl:     a.App.Config.ATPNotifyUrl,
-					RedirectUrl:   a.App.Config.ATPRedirectUrl,
-				},
-			)
+			paymentPostData := &appotapay.ATPPayload{
+				Amount:        depositAmount,
+				OrderId:       payment.OrderId(appotapay.APTPaymentHost),
+				OrderInfo:     fmt.Sprintf("Đặt cọc invoice %d tại payment %d", invoice.ID, payment.ID),
+				BankCode:      "",
+				PaymentMethod: "ALL",
+				ClientIP:      a.App.Config.ServerIP,
+				ExtraData:     "",
+				NotifyUrl:     a.App.Config.ATPNotifyUrl,
+				RedirectUrl:   a.App.Config.ATPRedirectUrl,
+			}
+			res, err := appotapay.Checkout(paymentPostData)
 
 			if err != nil {
 				log.Println("Checkout: ", err)
@@ -303,6 +304,18 @@ func (a *router) checkoutProduct(w http.ResponseWriter, r *http.Request) {
 			}
 
 			paymentRedirectURL = res.PaymentUrl
+
+			// Update post data
+			paymentPostDataStr, err := json.Marshal(paymentPostData)
+			if err == nil {
+				a.App.Payment.UpdatePostData(
+					tx,
+					ctx,
+					payment.ID,
+					string(paymentPostDataStr),
+				)
+			}
+
 		}
 
 		if err = tx.Commit(); err != nil {
@@ -345,7 +358,88 @@ func (a *router) checkoutProductSuccessful(w http.ResponseWriter, r *http.Reques
 }
 
 func (a *router) callbackIPN(w http.ResponseWriter, r *http.Request) {
-	// TODO: handle payment callback
+	defer func() {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{"status": "ok"}`))
+	}()
+
+	if r.Method == "POST" {
+		reqBody, err := ioutil.ReadAll(r.Body)
+
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		var paymentData appotapay.PaymentRecipition
+		err = json.Unmarshal(reqBody, &paymentData)
+
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		// Verify signature
+		appotapay.SecretKey = a.App.Config.APTSecretKey
+		paymentDataStr, err := appotapay.VerifyIPNCallback(paymentData)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		isSuccess := paymentData.ErrorCode == 0
+
+		payment, err := a.App.Payment.ID(paymentData.ParseOrderId(a.App.Config.APTPaymentHost))
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		ctx := r.Context()
+		tx, err := a.App.DB.BeginTx(ctx, nil)
+
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		// Update payment: status
+		err = a.App.Payment.UpdatePaymentCallback(tx, ctx, payment.ID, isSuccess, paymentDataStr)
+		if err != nil {
+			log.Println(err)
+			tx.Rollback()
+			return
+		}
+
+		// Update Invoice: update invoice_synced_at và status
+		if isSuccess {
+			err = a.App.Invoice.UpdatePaymentCallback(tx, ctx, payment.InvoiceId, paymentData.TransactionTs)
+			if err != nil {
+				log.Println(err)
+				tx.Rollback()
+				return
+			}
+
+			// Update Product: số slot còn lại
+			invoiceItems, err := a.App.InvoiceItem.InvoiceID(payment.InvoiceId)
+			if err != nil {
+				log.Println(err)
+				tx.Rollback()
+				return
+			}
+
+			for _, it := range invoiceItems {
+				err = a.App.Products.UpdatePaymentCallback(tx, ctx, it.ProductId, isSuccess, it.Quatity)
+				if err != nil {
+					log.Println(err)
+					tx.Rollback()
+					return
+				}
+			}
+		}
+
+		tx.Commit()
+	}
 }
 
 func (a *router) verifyEmailResult(w http.ResponseWriter, r *http.Request) {

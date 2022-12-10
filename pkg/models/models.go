@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/deeincom/deeincom/pkg/form"
+	"github.com/deeincom/deeincom/pkg/helper"
 )
 
 type User struct {
@@ -188,6 +189,14 @@ type Payment struct {
 	TxType    string
 	CreatedAt time.Time
 	UpdatedAt time.Time
+}
+
+func (o *Payment) OrderId(APTPaymentHost string) string {
+	if strings.Contains(APTPaymentHost, "payment.dev.appotapay.com") {
+		serectCode := helper.RandString(6)
+		return fmt.Sprintf("%s-%d", serectCode, o.ID)
+	}
+	return fmt.Sprint(o.ID)
 }
 
 func (o *Product) Form() *form.Form {

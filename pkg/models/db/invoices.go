@@ -157,3 +157,27 @@ func (m *InvoiceModel) Find(productId int) ([]*models.Invoice, error) {
 	}
 	return list, nil
 }
+
+func (m *InvoiceModel) UpdatePaymentCallback(
+	tx *sql.Tx,
+	ctx context.Context,
+	invoiceId int,
+	transactionTs int,
+) error {
+	q := `
+		UPDATE invoices
+		SET updated_at = now(),
+			invoice_synced_at = to_timestamp($2),
+			status = 'deposit'
+		WHERE id = $1
+	`
+
+	_, err := tx.ExecContext(
+		ctx,
+		q,
+		invoiceId,
+		transactionTs,
+	)
+
+	return err
+}
