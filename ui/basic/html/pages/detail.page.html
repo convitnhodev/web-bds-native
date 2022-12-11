@@ -29,7 +29,7 @@
 <main>
   <div class="bg-white">
     <div
-      class="mx-auto max-w-2xl py-16 px-4 sm:py-24 sm:px-6 lg:max-w-7xl lg:px-8"
+      class="mx-auto max-w-2xl py-16 px-4 sm:pt-24 sm:pb-8 sm:px-6 lg:max-w-7xl lg:px-8"
     >
       <div>
         <div class="flex items-center gap-4">
@@ -55,21 +55,29 @@
               <div class="embla__viewport">
                 <div class="embla__container">
                   {{range .Attachments}}
-                    {{if or (eq .ContentType `image`) (eq .ContentType `video`)}}
-                    <div class="embla__slide">
-                      <div class="embla__slide__inner">
-                        {{if eq .ContentType `image`}}
-                        <img class="embla__slide__img" src="{{to_cdn_url .Link}}" />
-                        {{end}}
-                        <!---->
-                        {{if eq .ContentType `video`}}
-                        <video controls class="w-full h-full object-cover">
-                          <source src="{{to_cdn_url .Link}}" type="{{.MineType}}" />
-                        </video>
-                        {{end}}
-                      </div>
+                  <!---->
+                  {{if or (eq .ContentType `image`) (eq .ContentType `video`)}}
+                  <div class="embla__slide">
+                    <div class="embla__slide__inner">
+                      {{if eq .ContentType `image`}}
+                      <img
+                        class="embla__slide__img"
+                        src="{{to_cdn_url .Link}}"
+                      />
+                      {{end}}
+                      <!---->
+                      {{if eq .ContentType `video`}}
+                      <video controls class="w-full h-full object-cover">
+                        <source
+                          src="{{to_cdn_url .Link}}"
+                          type="{{.MineType}}"
+                        />
+                      </video>
+                      {{end}}
                     </div>
-                    {{end}}
+                  </div>
+                  {{end}}
+                  <!---->
                   {{end}}
                 </div>
               </div>
@@ -78,44 +86,49 @@
               <div class="embla__viewport">
                 <div class="embla__container embla__container--thumb">
                   {{range .Attachments}}
-                    {{if or (eq .ContentType `image`) (eq .ContentType `video`)}}
-                    <div class="embla__slide embla__slide--thumb">
-                      <button
-                        class="embla__slide__inner embla__slide__inner--thumb"
-                        type="button"
+                  <!---->
+                  {{if or (eq .ContentType `image`) (eq .ContentType `video`)}}
+                  <div class="embla__slide embla__slide--thumb">
+                    <button
+                      class="embla__slide__inner embla__slide__inner--thumb"
+                      type="button"
+                    >
+                      {{if eq .ContentType `image`}}
+                      <img
+                        class="embla__slide__thumbnail"
+                        src="{{to_cdn_url .Link}}"
+                      />
+                      {{end}}
+                      <!---->
+                      {{if eq .ContentType `video`}}
+                      <div
+                        class="w-full h-full bg-gray-100 inline-flex items-center justify-center"
                       >
-                        {{if eq .ContentType `image`}}
-                        <img class="embla__slide__thumbnail" src="{{to_cdn_url .Link}}" />
-                        {{end}}
-                        <!---->
-                        {{if eq .ContentType `video`}}
-                        <div
-                          class="w-full h-full bg-gray-100 inline-flex items-center justify-center"
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke-width="1.5"
+                          stroke="currentColor"
+                          class="w-10 h-10"
                         >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke-width="1.5"
-                            stroke="currentColor"
-                            class="w-10 h-10"
-                          >
-                            <path
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                            />
-                            <path
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              d="M15.91 11.672a.375.375 0 010 .656l-5.603 3.113a.375.375 0 01-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112z"
-                            />
-                          </svg>
-                        </div>
-                        {{end}}
-                      </button>
-                    </div>
-                    {{end}}
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M15.91 11.672a.375.375 0 010 .656l-5.603 3.113a.375.375 0 01-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112z"
+                          />
+                        </svg>
+                      </div>
+                      {{end}}
+                    </button>
+                  </div>
+                  {{end}}
+                  <!---->
                   {{end}}
                 </div>
               </div>
@@ -228,7 +241,11 @@
           >
             <div class="flex justify-between space-x-3">
               <div class="min-w-0 flex-1">
-                <a href="{{.Product.HouseCertificateLink}}" class="block focus:outline-none" target="_blank">
+                <a
+                  href="{{.Product.HouseCertificateLink}}"
+                  class="block focus:outline-none"
+                  target="_blank"
+                >
                   <span class="absolute inset-0" aria-hidden="true"></span>
                   <p class="truncate font-bold text-gray-900">Sổ đỏ</p>
                 </a>
@@ -250,16 +267,22 @@
             </div>
           </li>
           {{end}}
-
+          <!---->
           {{if .Product.FinancePlanLink}}
           <li
             class="relative bg-white py-5 px-4 focus-within:ring-2 focus-within:ring-inset focus-within:ring-sky-600 hover:bg-gray-50"
           >
             <div class="flex justify-between space-x-3">
               <div class="min-w-0 flex-1">
-                <a href="{{.Product.FinancePlanLink}}" class="block focus:outline-none" target="_blank">
+                <a
+                  href="{{.Product.FinancePlanLink}}"
+                  class="block focus:outline-none"
+                  target="_blank"
+                >
                   <span class="absolute inset-0" aria-hidden="true"></span>
-                  <p class="truncate font-bold text-gray-900">Kế hoạch tài chính</p>
+                  <p class="truncate font-bold text-gray-900">
+                    Kế hoạch tài chính
+                  </p>
                 </a>
               </div>
               <svg
@@ -284,12 +307,8 @@
       <div
         class="py-10 lg:col-span-2 lg:col-start-1 lg:border-r lg:border-gray-200 lg:pt-6 lg:pb-16 lg:pr-8"
       >
-        <div>
-          <div class="space-y-6">
-            <p class="text-base text-gray-900">
-              {{.Product.FullContent | html}}
-            </p>
-          </div>
+        <div class="prose space-y-6">
+          <p class="text-base text-gray-900">{{.Product.FullContent | html}}</p>
         </div>
         <div class="border-b border-gray-200">
           <div
