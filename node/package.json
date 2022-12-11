@@ -10,10 +10,10 @@
     "build": "unocss \"../ui/**/*.html\" --config uno.config.js --out-file \"../ui/basic/static/css/style.css\""
   },
   "devDependencies": {
-    "@unocss/cli": "^0.47.3",
-    "@unocss/preset-typography": "^0.47.3",
-    "@unocss/preset-uno": "^0.47.3",
-    "@unocss/preset-web-fonts": "^0.47.3",
+    "@unocss/cli": "^0.47.5",
+    "@unocss/preset-typography": "^0.47.5",
+    "@unocss/preset-uno": "^0.47.5",
+    "@unocss/preset-web-fonts": "^0.47.5",
     "mini-svg-data-uri": "^1.4.4"
   }
 }

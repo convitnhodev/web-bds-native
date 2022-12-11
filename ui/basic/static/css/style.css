@@ -476,8 +476,10 @@ line-height: inherit; }
 .sm\:px-6{padding-left:1.5rem;padding-right:1.5rem;}
 .sm\:py-20{padding-top:5rem;padding-bottom:5rem;}
 .sm\:py-24{padding-top:6rem;padding-bottom:6rem;}
+.sm\:pb-8{padding-bottom:2rem;}
 .sm\:pl-6{padding-left:1.5rem;}
 .sm\:pt-16{padding-top:4rem;}
+.sm\:pt-24{padding-top:6rem;}
 .sm\:text-center{text-align:center;}
 .sm\:text-2xl{font-size:1.5rem;line-height:2rem;}
 .sm\:text-3xl{font-size:1.875rem;line-height:2.25rem;}
