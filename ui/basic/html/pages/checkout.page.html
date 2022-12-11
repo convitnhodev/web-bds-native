@@ -29,87 +29,94 @@
         </p>
       </div>
       <div class="mt-10 border-t border-gray-200">
-          <div class="flex space-x-6 border-b border-gray-200 py-10">
-            <img
-              src="{{ to_cdn_url .Product.PosterLink }}"
-              alt=""
-              class="h-20 w-20 flex-none rounded-lg bg-gray-100 object-cover object-center sm:h-40 sm:w-40"
-            />
-            <div class="flex flex-auto flex-col">
-              <div class="text-lg font-bold text-red-500">
-                Số slot còn lại:
-                <span id="slot-remain" data-slot-remain="{{.Product.RemainOfSlot}}">{{.Product.RemainOfSlot}}</span>
-              </div>
-              <div class="mt-6 flex items-center">
-                <dl
-                  class="flex space-x-4 divide-x divide-gray-200 text-sm sm:space-x-6"
+        <div class="flex space-x-6 border-b border-gray-200 py-10">
+          <img
+            src="{{ to_cdn_url .Product.PosterLink }}"
+            alt=""
+            class="h-20 w-20 flex-none rounded-lg bg-gray-100 object-cover object-center sm:h-40 sm:w-40"
+          />
+          <div class="flex flex-auto flex-col">
+            <div class="text-lg font-bold text-red-500">
+              Số slot còn lại:
+              <span
+                id="slot-remain"
+                data-slot-remain="{{.Product.RemainOfSlot}}"
+                >{{.Product.RemainOfSlot}}</span
+              >
+            </div>
+            <div class="mt-6 flex items-center">
+              <dl
+                class="flex space-x-4 divide-x divide-gray-200 text-sm sm:space-x-6"
+              >
+                <div class="flex items-center">
+                  <dt class="font-bold text-gray-900">Số slot</dt>
+                  <input
+                    id="slot-qty"
+                    type="number"
+                    name="Quatity"
+                    class="ml-2 rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
+                    value="0"
+                    min="0"
+                    max="{{.Product.RemainOfSlot}}"
+                  />
+                </div>
+                <div class="flex pl-4 sm:pl-6 items-center">
+                  <dt class="font-bold text-gray-900">Giá slot</dt>
+                  <dd
+                    id="slot-price"
+                    class="ml-2 text-gray-700"
+                    data-slot-price="{{.Product.CostPerSlot}}"
+                  >
+                    {{.Product.CostPerSlot}} VND
+                  </dd>
+                </div>
+              </dl>
+            </div>
+            <div class="mt-6">
+              <span class="isolate inline-flex rounded-md shadow-sm">
+                <button
+                  id="slot-sub"
+                  type="button"
+                  class="relative inline-flex items-center rounded-l-md border border-gray-300 bg-white px-6 py-2 text-sm text-gray-500 hover:bg-gray-50 focus:z-10 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
                 >
-                  <div class="flex items-center">
-                    <dt class="font-bold text-gray-900">Số slot</dt>
-                    <input
-                      id="slot-qty"
-                      type="number"
-                      name="Quatity"
-                      class="ml-2 rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
-                      value="0"
-                      min="0"
-                      max="{{.Product.RemainOfSlot}}"
-                    />
-                  </div>
-                  <div class="flex pl-4 sm:pl-6 items-center">
-                    <dt class="font-bold text-gray-900">Giá slot</dt>
-                    <dd
-                      id="slot-price"
-                      class="ml-2 text-gray-700"
-                      data-slot-price="{{.Product.CostPerSlot}}"
-                    >
-                      {{.Product.CostPerSlot}} VND
-                    </dd>
-                  </div>
-                </dl>
-              </div>
-              <div class="mt-6">
-                <span class="isolate inline-flex rounded-md shadow-sm">
-                  <button
-                    id="slot-sub"
-                    type="button"
-                    class="relative inline-flex items-center rounded-l-md border border-gray-300 bg-white px-6 py-2 text-sm text-gray-500 hover:bg-gray-50 focus:z-10 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-                  >
-                    -
-                  </button>
-                  <button
-                    id="slot-add"
-                    type="button"
-                    class="relative -ml-px inline-flex items-center rounded-r-md border border-gray-300 bg-white px-6 py-2 text-sm text-gray-500 hover:bg-gray-50 focus:z-10 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-                  >
-                    +
-                  </button>
-                </span>
-              </div>
+                  -
+                </button>
+                <button
+                  id="slot-add"
+                  type="button"
+                  class="relative -ml-px inline-flex items-center rounded-r-md border border-gray-300 bg-white px-6 py-2 text-sm text-gray-500 hover:bg-gray-50 focus:z-10 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+                >
+                  +
+                </button>
+              </span>
             </div>
           </div>
-          <div class="sm:ml-40 sm:pl-6">
-            <dl class="space-y-6 border-t border-gray-200 pt-10 text-sm">
-              <div class="flex justify-between">
-                <dt class="font-bold text-gray-900">Tổng giá trị</dt>
-                <dd class="text-gray-700"><span id="total">0</span></dd>
-              </div>
-              <div class="flex justify-between">
-                <dt class="flex font-bold text-gray-900">Đặt cọc</dt>
-                <dd class="text-gray-700">
-                  <span id="deposit" data-deposit="{{ .Product.DepositPercent }}">0</span> ({{.Product.DepositPercent}}% tổng giá trị)
-                </dd>
-              </div>
-            </dl>
-          </div>
-          <div class="mt-6 flex justify-end">
-            <button
-              type="submit"
-              class="inline-flex items-center rounded-md border border-transparent bg-sky-600 px-4 py-2 text-base font-bold text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2"
-            >
-              Thanh Toán
-            </button>
-          </div>
+        </div>
+        <div class="sm:ml-40 sm:pl-6">
+          <dl class="space-y-6 border-t border-gray-200 pt-10 text-sm">
+            <div class="flex justify-between">
+              <dt class="font-bold text-gray-900">Tổng giá trị</dt>
+              <dd class="text-gray-700"><span id="total">0</span></dd>
+            </div>
+            <div class="flex justify-between">
+              <dt class="flex font-bold text-gray-900">Đặt cọc</dt>
+              <dd class="text-gray-700">
+                <span id="deposit" data-deposit="{{ .Product.DepositPercent }}"
+                  >0</span
+                >
+                ({{.Product.DepositPercent}}% tổng giá trị)
+              </dd>
+            </div>
+          </dl>
+        </div>
+        <div class="mt-6 flex justify-end">
+          <button
+            type="submit"
+            class="inline-flex items-center rounded-md border border-transparent bg-sky-600 px-4 py-2 text-base font-bold text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2"
+          >
+            Thanh Toán
+          </button>
+        </div>
       </div>
     </div>
   </div>
