@@ -36,7 +36,6 @@ type App struct {
 	InvoiceItem      *db.InvoiceItemModel
 	Payment          *db.PaymentModel
 	LocalFile        *files.LocalFile
-	B2Scheduler      *files.LocalToB2
 }
 
 // New return an app instance
@@ -64,30 +63,10 @@ func New(c *config.Config) (*App, error) {
 		Files:                  &Files,
 	}
 
-	var B2Scheduler *files.LocalToB2 = nil
-	if c.B2AccountId != "" {
-		B2Scheduler, err := files.NewB2Scheduler(
-			c.B2AccountId,
-			c.B2AccountKey,
-			c.B2BucketName,
-			c.UploadToB2At,
-			c.B2Prefix,
-			c.MappingUploadLocalLink,
-			&Files,
-		)
-
-		if err != nil {
-			return nil, errors.Wrap(err, "Backblaze scheduler")
-		}
-
-		B2Scheduler.StartScheduler()
-	}
-
 	app := &App{
-		B2Scheduler: B2Scheduler,
-		LocalFile:   &lf,
-		Config:      c,
-		DB:          conn,
+		LocalFile: &lf,
+		Config:    c,
+		DB:        conn,
 		Migration: &db.MigrationModel{
 			DB: conn,
 		},

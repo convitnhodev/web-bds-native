@@ -22,7 +22,6 @@ type Config struct {
 	B2BucketName           string
 	B2AccountId            string
 	B2AccountKey           string
-	UploadToB2At           string
 	ServerIP               string
 	ATPNotifyUrl           string
 	ATPRedirectUrl         string
@@ -37,10 +36,6 @@ type Config struct {
 func (c *Config) Default() error {
 	if c.DB == "" {
 		return errors.New("please config postgres db (config.json)")
-	}
-
-	if c.UploadToB2At == "" {
-		c.UploadToB2At = "19:00"
 	}
 
 	if c.B2Prefix == "" {

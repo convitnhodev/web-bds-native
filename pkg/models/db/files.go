@@ -82,10 +82,10 @@ func (m *FileModel) UploadCloudLink(localPath string, cloudLink string) error {
 	return err
 }
 
-func (m *FileModel) NotUpload() ([]*models.File, error) {
-	q := m.query(`WHERE files.cloud_link = ''`)
+func (m *FileModel) NotUpload(limit int) ([]*models.File, error) {
+	q := m.query(`WHERE files.cloud_link = '' LIMIT $1`)
 
-	rows, err := m.DB.Query(q)
+	rows, err := m.DB.Query(q, limit)
 
 	if err != nil {
 		return nil, err

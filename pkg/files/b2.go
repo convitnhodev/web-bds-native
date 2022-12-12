@@ -14,12 +14,13 @@ import (
 	"github.com/kurin/blazer/b2"
 )
 
+var maxLimitFile int = 10
+
 type LocalToB2 struct {
 	Files                  *db.FileModel
 	BucketName             string
 	AccountId              string
 	AccountKey             string
-	UploadToB2At           string
 	B2Prefix               string
 	MappingUploadLocalLink string
 	Bucket                 *b2.Bucket
@@ -30,7 +31,6 @@ func NewB2Scheduler(
 	accountId string,
 	accountKey string,
 	bucketName string,
-	uploadToB2At string,
 	b2Prefix string,
 	mappingUploadLocalLink string,
 	files *db.FileModel,
@@ -53,7 +53,6 @@ func NewB2Scheduler(
 		bucketName,
 		accountId,
 		accountKey,
-		uploadToB2At,
 		b2Prefix,
 		mappingUploadLocalLink,
 		bucket,
@@ -63,12 +62,12 @@ func NewB2Scheduler(
 	return lb2, nil
 }
 
-func (l *LocalToB2) StartScheduler() {
+func (l *LocalToB2) StartScheduler(limit int, sleep int, idle int) {
 	s := gocron.NewScheduler(time.UTC)
 
-	s.Every(1).Day().At(l.UploadToB2At).Do(l.UploadLocalToB2Task)
+	s.Every(idle).Second().Do(l.UploadLocalToB2Task, limit, sleep)
 
-	s.StartAsync()
+	s.StartBlocking()
 }
 
 func (l *LocalToB2) UploadLocalToB2(localPath string) (*string, error) {
@@ -97,21 +96,32 @@ func (l *LocalToB2) UploadLocalToB2(localPath string) (*string, error) {
 	return &url, nil
 }
 
-func (l *LocalToB2) UploadLocalToB2Task() error {
+func (l *LocalToB2) UploadLocalToB2Task(limit int, sleep int) error {
 	log.Println("UploadLocalToB2Task: RUNING")
 
-	files, err := l.Files.NotUpload()
+	fileLimit := maxLimitFile
+	if limit > 0 && limit < maxLimitFile {
+		fileLimit = limit
+	}
 
+loop:
+	files, err := l.Files.NotUpload(fileLimit)
 	if err != nil {
-		log.Println("UploadLocalToB2Task:", err)
 		return err
 	}
 
 	for _, file := range files {
+		log.Printf("Upload %s", file.LocalPath)
 		cloudLink, err := l.UploadLocalToB2(file.LocalPath)
 		if err == nil {
 			l.Files.UploadCloudLink(file.LocalPath, *cloudLink)
 		}
+
+		time.Sleep(time.Duration(sleep))
+	}
+
+	if len(files) >= fileLimit {
+		goto loop
 	}
 
 	return nil
