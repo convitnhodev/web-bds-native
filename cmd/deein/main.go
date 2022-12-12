@@ -12,6 +12,7 @@ import (
 
 	// commands
 	_ "github.com/deeincom/deeincom/internal/cli/api"
+	_ "github.com/deeincom/deeincom/internal/cli/version"
 	_ "github.com/deeincom/deeincom/internal/cli/web"
 )
 
