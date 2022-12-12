@@ -186,6 +186,9 @@ func translate(s string) string {
 
 	case "product_is_pending_selling":
 		return "Hiện tại tài sản đang tạm dừng bán."
+
+	case "err_token_invalid":
+		return "Mã xác thực không đúng"
 	}
 	return s
 }

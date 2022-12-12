@@ -545,12 +545,14 @@ func (a *router) verifyEmail(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Println(err)
 			f.Errors.Add("err", "err_token_invalid")
+			return
 		}
 
 		// update user đã verify email
 		if err := a.App.Users.AddRole(user, "verified_email"); err != nil {
 			log.Println(err)
 			f.Errors.Add("err", "err_could_not_verified_email")
+			return
 		}
 
 		ok = true
@@ -601,15 +603,17 @@ func (a *router) verifyPhone(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Println(err)
 			f.Errors.Add("err", "err_token_invalid")
+			return
 		}
 
 		// update user đã verify phone
 		if err := a.App.Users.AddRole(user, "verified_phone"); err != nil {
 			log.Println(err)
 			f.Errors.Add("err", "err_could_not_verified_phone")
+			return
 		}
 
-		a.App.Log.Add(fmt.Sprint(user.ID), fmt.Sprintf("Người dùng %d xác nhận số điện thoại thành công.", user.ID))
+		a.App.Log.Add(fmt.Sprint(user.ID), fmt.Sprintf("Người dùng %s xác nhận số điện thoại thành công.", user.Phone))
 
 		ok = true
 		http.Redirect(w, r, "/verify/phone", http.StatusSeeOther)
