@@ -13,3 +13,11 @@ postgresql 12 hoặc mới hơn
 ```
 go run cmd/deein/main.com web
 ```
+
+# Sử dụng docker để run app thì:
++ Install docker
+
+```
+cd ./project
+docker compose up
+```
