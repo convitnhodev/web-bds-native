@@ -19,28 +19,39 @@ export default {
       getCSS: () => '.preload *{transition-property: none;}',
     },
     {
-      getCSS: ({ theme }) => `.dee-ol1 {
+      getCSS: ({ theme }) => `.dee-ol {
   padding-left: 4.75rem;
 }
-.dee-ol1 li {
+.dee-ol li {
   position: relative;
+  min-height: 4rem;
 }
-.dee-ol1 li:where(:not(:first-child)) {
+.dee-ol li:where(:not(:first-child)) {
   margin-top: 2rem;
 }
-.dee-ol1 li::before {
+.dee-ol li::before {
   left: -4.75rem;
   position: absolute;
   font-weight: bold;
   content: counter(list-item);
-  background-color: ${theme.colors.sky['600']};
-  color: white;
   width: 4rem;
   height: 4rem;
-  font-size: 2rem;
   display: inline-flex;
-  border-radius: ${theme.borderRadius.md};
   justify-content: center;
+  align-items: center;
+}
+.dee-ol1 li::before {
+  background-color: ${theme.colors.sky['600']};
+  border-radius: ${theme.borderRadius.md};
+  color: #fff;
+  font-size: 2rem;
+  justify-content: center;
+  align-items: center;
+}
+.dee-ol2 li::before {
+  color: ${theme.colors.sky['600']};;
+  font-size: 3rem;
+  justify-content: end;
   align-items: center;
 }
 `,
