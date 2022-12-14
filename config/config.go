@@ -23,8 +23,8 @@ type Config struct {
 	B2AccountId            string
 	B2AccountKey           string
 	ServerIP               string
-	ATPNotifyUrl           string
-	ATPRedirectUrl         string
+	APTPaymentNotifyUrl    string
+	APTPaymentRedirectUrl  string
 	APTPartnerCode         string
 	APTApiKey              string
 	APTSecretKey           string

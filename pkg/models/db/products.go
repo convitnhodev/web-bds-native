@@ -378,3 +378,18 @@ func (m *ProductModel) UpdatePaymentCallback(
 
 	return err
 }
+
+func (m *ProductModel) AddRemain(
+	id int,
+	quatity int,
+) error {
+	q := `
+		UPDATE products
+		SET updated_at = now(),
+			remain_of_slot = remain_of_slot + $2
+		WHERE id = $1`
+
+	_, err := m.DB.Exec(q, id, quatity)
+
+	return err
+}

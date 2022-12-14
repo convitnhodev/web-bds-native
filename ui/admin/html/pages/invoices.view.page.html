@@ -21,8 +21,30 @@
             <p>Nhận tiền lúc: <strong>{{ tz_format .Invoice.InvoiceSyncedAt "2006-01-02 15:04" "Asia/Ho_Chi_Minh" }}</strong></p>
         </div>
         
+        {{if eq .Invoice.Status "deposit"}}
+        <div class="mt-4">
+            <a class="btn btn-xs mr-1" 
+                href="/admin/products/{{$.ProductId}}/invoices/{{.Invoice.ID}}/collectMoney">
+                Thu tiền
+            </a>
+        </div>
+        {{end}}
+        
+        {{if eq .Invoice.Status "collecting"}}
+        <div class="mt-4">
+            <a class="btn btn-xs mr-1"
+                href="/admin/products/{{$.ProductId}}/invoices/{{.Invoice.ID}}/closeInvoice?isCustomerReject=true">
+                Khách không trả
+            </a>
+            <a class="btn btn-xs mr-1" 
+                href="/admin/products/{{$.ProductId}}/invoices/{{.Invoice.ID}}/closeInvoice?isCustomerReject=false">
+                Đã thu tiền
+            </a>
+        </div>
+        {{end}}
+
         <!-- InvoiceItems -->
-        <div class="Subhead">
+        <div class="Subhead mt-4">
             <h2 class="Subhead-heading">Danh sách đầu tư</h2>
         </div>
 
@@ -88,6 +110,12 @@
                                 {{ if eq .Status "failed" }} class="color-fg-close" {{end}}
                             >{{ parse_enum "PaymentStatus" .Status }}</strong>
                         </p>
+                        {{if and (eq $.Invoice.Status "deposit") (eq .Status "success")}}
+                        <a class="btn btn-xs mt-2" onclick="return confirm('chắc nghen?');" 
+                            href="/admin/products/{{$.ProductId}}/invoices/{{.InvoiceId}}/refund/{{.ID}}">
+                            Huỷ, hoàn tiền cọc cho khách
+                        </a>
+                        {{end}}
                     </div>
                     <div class="float-right mr-1">
                         <p><strong>Lúc {{ tz_format .CreatedAt "2006-01-02 15:04" "Asia/Ho_Chi_Minh" }}</strong></p>

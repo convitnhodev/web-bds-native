@@ -3,6 +3,7 @@ package web
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -10,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/bmizerany/pat"
+	"github.com/deeincom/deeincom/pkg/appotapay"
 	"github.com/deeincom/deeincom/pkg/files"
 	"github.com/deeincom/deeincom/pkg/form"
 	"github.com/deeincom/deeincom/pkg/models"
@@ -1075,6 +1077,7 @@ func (a *router) adminInvoices(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *router) adminViewInvoice(w http.ResponseWriter, r *http.Request) {
+	productId := r.URL.Query().Get(":id")
 	invoice, err := a.App.Invoice.ID(r.URL.Query().Get(":invoiceId"))
 	if err != nil {
 		log.Println(err)
@@ -1106,7 +1109,110 @@ func (a *router) adminViewInvoice(w http.ResponseWriter, r *http.Request) {
 		Invoice:      invoice,
 		Payments:     payments,
 		InvoiceItems: invoiceItems,
+		ProductId:    productId,
 	})
+}
+
+func (a *router) adminRefundInvoice(w http.ResponseWriter, r *http.Request) {
+	ProductId := r.URL.Query().Get(":id")
+	invoiceId := r.URL.Query().Get(":invoiceId")
+	payemntId := r.URL.Query().Get(":paymentId")
+
+	invoice, err := a.App.Invoice.ID(invoiceId)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "bad request", 400)
+		return
+	}
+
+	payment, err := a.App.Payment.ID(payemntId)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "bad request", 400)
+		return
+	}
+
+	// Kiểm tra status trước khi refund
+	if invoice.Status == "deposit" && payment.Status == "success" {
+		appotapay.APTPaymentHost = a.App.Config.APTPaymentHost
+		appotapay.ApiKey = a.App.Config.APTApiKey
+		appotapay.PartnerCode = a.App.Config.APTPartnerCode
+		appotapay.SecretKey = a.App.Config.APTSecretKey
+
+		refundPostData := appotapay.APTRefundPayload{
+			Amount:           payment.Amount,
+			RefundId:         fmt.Sprintf("refund-%d", payment.ID),
+			AppotapayTransId: payment.AppotapayTransId,
+			Reason:           fmt.Sprintf("Hoàn tiền cho hoá đơn %d", invoice.ID),
+		}
+		refundRes, err := appotapay.Refund(refundPostData)
+
+		if err != nil {
+			log.Println(err)
+			http.Error(w, "bad request", 400)
+			return
+		}
+
+		refundDataStr, err := json.Marshal(refundRes)
+
+		if err != nil {
+			log.Println(err)
+			http.Error(w, "bad request", 400)
+			return
+		}
+
+		// Update thông tin refund và status
+		err = a.App.Payment.Refund(
+			payment.ID,
+			string(refundDataStr),
+			refundRes.Data.RefundId,
+			refundRes.Data.TransactionTs,
+		)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, "bad request", 400)
+			return
+		}
+
+		err = a.App.Invoice.Refund(invoice.ID)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, "bad request", 400)
+			return
+		}
+
+		// Update Product: số slot còn lại tăng lên
+		invoiceItems, err := a.App.InvoiceItem.InvoiceID(invoice.ID)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, "bad request", 400)
+			return
+		}
+
+		for _, it := range invoiceItems {
+			err = a.App.Products.AddRemain(it.ProductId, it.Quatity)
+			if err != nil {
+				log.Println(err)
+				http.Error(w, "bad request", 400)
+				return
+			}
+		}
+	}
+
+	http.Redirect(
+		w,
+		r,
+		fmt.Sprintf("/admin/products/%s/invoices/%s/view", ProductId, invoiceId),
+		http.StatusSeeOther,
+	)
+}
+
+func (a *router) adminCollectMoneyInvoice(w http.ResponseWriter, r *http.Request) {
+	// TODO: refund
+}
+
+func (a *router) adminCloseInvoice(w http.ResponseWriter, r *http.Request) {
+	// TODO: refund
 }
 
 func registerAdminRoute(mux *pat.PatternServeMux, a *router) {
@@ -1128,6 +1234,10 @@ func registerAdminRoute(mux *pat.PatternServeMux, a *router) {
 	mux.Get("/admin/products/:id/approve", use(a.adminApproveProduct, a.isadmin))
 	mux.Get("/admin/products/:id/invoices", use(a.adminInvoices, a.isadmin))
 	mux.Get("/admin/products/:id/invoices/:invoiceId/view", use(a.adminViewInvoice, a.isadmin))
+
+	mux.Get("/admin/products/:id/invoices/:invoiceId/refund/:paymentId", use(a.adminRefundInvoice, a.isadmin))
+	mux.Get("/admin/products/:id/invoices/:invoiceId/collectMoney", use(a.adminCollectMoneyInvoice, a.isadmin))
+	mux.Get("/admin/products/:id/invoices/:invoiceId/closeInvoice", use(a.adminCloseInvoice, a.isadmin))
 
 	mux.Get("/admin/posts", use(a.adminPosts, a.isadmin))
 	mux.Get("/admin/posts/create", use(a.adminCreatePost, a.isadmin))

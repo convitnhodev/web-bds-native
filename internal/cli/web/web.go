@@ -265,7 +265,7 @@ func (a *router) checkoutProduct(w http.ResponseWriter, r *http.Request) {
 			ctx,
 			invoice.ID,
 			depositAmount,
-			"appotapay",
+			"appotapay_payment",
 			"deposit",
 		)
 
@@ -283,7 +283,7 @@ func (a *router) checkoutProduct(w http.ResponseWriter, r *http.Request) {
 			appotapay.ApiKey = a.App.Config.APTApiKey
 			appotapay.PartnerCode = a.App.Config.APTPartnerCode
 			appotapay.SecretKey = a.App.Config.APTSecretKey
-			paymentPostData := &appotapay.ATPPayload{
+			paymentPostData := &appotapay.APTPaymentPayload{
 				Amount:        depositAmount,
 				OrderId:       payment.OrderId(appotapay.APTPaymentHost),
 				OrderInfo:     fmt.Sprintf("Đặt cọc invoice %d tại payment %d", invoice.ID, payment.ID),
@@ -291,8 +291,8 @@ func (a *router) checkoutProduct(w http.ResponseWriter, r *http.Request) {
 				PaymentMethod: "ALL",
 				ClientIP:      a.App.Config.ServerIP,
 				ExtraData:     "",
-				NotifyUrl:     a.App.Config.ATPNotifyUrl,
-				RedirectUrl:   a.App.Config.ATPRedirectUrl,
+				NotifyUrl:     a.App.Config.APTPaymentNotifyUrl,
+				RedirectUrl:   a.App.Config.APTPaymentRedirectUrl,
 			}
 			res, err := appotapay.Checkout(paymentPostData)
 
@@ -352,12 +352,13 @@ func (a *router) checkoutProductNoPayment(w http.ResponseWriter, r *http.Request
 }
 
 func (a *router) checkoutProductSuccessful(w http.ResponseWriter, r *http.Request) {
+	errorCode := r.URL.Query().Get("errorCode")
 	a.render(w, r, "result.checkout.page.html", &templateData{
-		IsCheckoutOK: true,
+		IsCheckoutOK: errorCode == "0",
 	})
 }
 
-func (a *router) callbackIPN(w http.ResponseWriter, r *http.Request) {
+func (a *router) callbackPaymentIPN(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(`{"status": "ok"}`))
@@ -371,7 +372,7 @@ func (a *router) callbackIPN(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		var paymentData appotapay.PaymentRecipition
+		var paymentData appotapay.APTPaymentRecipition
 		err = json.Unmarshal(reqBody, &paymentData)
 
 		if err != nil {
@@ -381,7 +382,7 @@ func (a *router) callbackIPN(w http.ResponseWriter, r *http.Request) {
 
 		// Verify signature
 		appotapay.SecretKey = a.App.Config.APTSecretKey
-		paymentDataStr, err := appotapay.VerifyIPNCallback(paymentData)
+		paymentDataStr, err := appotapay.VerifyIPNPaymentCallback(paymentData)
 		if err != nil {
 			log.Println(err)
 			return
@@ -403,8 +404,16 @@ func (a *router) callbackIPN(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// Update payment: status
-		err = a.App.Payment.UpdatePaymentCallback(tx, ctx, payment.ID, isSuccess, paymentDataStr)
+		// Update payment status của payment được tạo trước đó
+		err = a.App.Payment.UpdatePaymentCallback(
+			tx,
+			ctx,
+			payment.ID,
+			isSuccess,
+			paymentDataStr,
+			paymentData.AppotapayTransId,
+			paymentData.TransactionTs,
+		)
 		if err != nil {
 			log.Println(err)
 			tx.Rollback()
@@ -412,14 +421,16 @@ func (a *router) callbackIPN(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Update Invoice: update invoice_synced_at và status
-		if isSuccess {
-			err = a.App.Invoice.UpdatePaymentCallback(tx, ctx, payment.InvoiceId, paymentData.TransactionTs)
-			if err != nil {
-				log.Println(err)
-				tx.Rollback()
-				return
-			}
+		// Nếu cọc thành công thì chuyển thành status deposit
+		// Nếu không cọc thì chuyển thành canceled và update slot_canceled_by thành user tạo đơn
+		err = a.App.Invoice.UpdatePaymentCallback(tx, ctx, payment.InvoiceId, paymentData.TransactionTs, isSuccess)
+		if err != nil {
+			log.Println(err)
+			tx.Rollback()
+			return
+		}
 
+		if isSuccess {
 			// Update Product: số slot còn lại
 			invoiceItems, err := a.App.InvoiceItem.InvoiceID(payment.InvoiceId)
 			if err != nil {
@@ -1269,8 +1280,8 @@ func run(c *root.Cmd) error {
 	mux.Get("/real-estate/:slug/checkout", use(a.checkoutProduct, a.islogined))
 	mux.Post("/real-estate/:slug/checkout", use(a.checkoutProduct, a.islogined))
 	mux.Get("/real-estate/:slug/payment", use(a.checkoutProductNoPayment, a.islogined))
-	mux.Get("/checkout-successful", use(a.checkoutProductSuccessful, a.islogined))
-	mux.Post("/ipn", use(a.callbackIPN))
+	mux.Get("/checkout-result", use(a.checkoutProductSuccessful, a.islogined))
+	mux.Post("/ipn", use(a.callbackPaymentIPN))
 
 	// đăng ký
 	mux.Post("/register", use(a.register))

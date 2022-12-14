@@ -180,15 +180,20 @@ type InvoiceItem struct {
 }
 
 type Payment struct {
-	ID        int
-	InvoiceId int
-	Amount    int
-	Status    string
-	Method    string
-	PayType   string
-	TxType    string
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID               int
+	InvoiceId        int
+	Amount           int
+	Status           string
+	Method           string
+	PayType          string
+	TxType           string
+	AppotapayTransId string
+	RefundId         string
+	RefundResponse   string
+	TransactionAt    *time.Time
+	RefundAt         *time.Time
+	CreatedAt        time.Time
+	UpdatedAt        time.Time
 }
 
 func (o *Payment) OrderId(APTPaymentHost string) string {

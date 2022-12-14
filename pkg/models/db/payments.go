@@ -24,6 +24,11 @@ var paymentColumes = []string{
 	"payments.pay_type",
 	"payments.tx_type",
 	"payments.status",
+	"payments.appotapay_trans_id",
+	"payments.refund_id",
+	"payments.refund_response",
+	"payments.transaction_at",
+	"payments.refund_at",
 	"payments.created_at",
 	"payments.updated_at",
 }
@@ -37,6 +42,11 @@ func scanPayment(r scanner, o *models.Payment) error {
 		&o.PayType,
 		&o.TxType,
 		&o.Status,
+		&o.AppotapayTransId,
+		&o.RefundId,
+		&o.RefundResponse,
+		&o.TransactionAt,
+		&o.RefundAt,
 		&o.CreatedAt,
 		&o.UpdatedAt,
 	); err != nil {
@@ -144,12 +154,16 @@ func (m *PaymentModel) UpdatePaymentCallback(
 	paymentId int,
 	isSuccess bool,
 	paymentData string,
+	apptotapayTransId string,
+	transactionAt int,
 ) error {
 	q := `
 		UPDATE payments
 		SET updated_at = now(),
 			status = $2,
-			recipition_data = $3
+			recipition_data = $3,
+			appotapay_trans_id = $4,
+			transaction_at = to_timestamp($5)
 		WHERE id = $1
 	`
 
@@ -164,7 +178,36 @@ func (m *PaymentModel) UpdatePaymentCallback(
 		paymentId,
 		status,
 		paymentData,
+		apptotapayTransId,
+		transactionAt,
 	)
 
 	return err
+}
+
+func (m *PaymentModel) Refund(
+	id int,
+	refundResponse string,
+	refundId string,
+	refundAt int,
+) error {
+	q := `
+		UPDATE payments
+		SET updated_at = now(),
+			status = $2,
+			refund_response = $3,
+			refund_id = $4,
+			refund_at = to_timestamp($5)
+		WHERE id = $1`
+
+	_, err := m.DB.Exec(q,
+		id,
+		"refund",
+		refundResponse,
+		refundId,
+		refundAt,
+	)
+
+	return err
+
 }

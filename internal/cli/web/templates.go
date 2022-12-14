@@ -44,6 +44,7 @@ type templateData struct {
 	KYCList           []*models.KYC
 	PartnerList       []*models.Partner
 	SumAmount         int
+	ProductId         string
 	IsKYCQuery        bool
 	IsPartnerQuery    bool
 	IsResetPwdByToken bool
