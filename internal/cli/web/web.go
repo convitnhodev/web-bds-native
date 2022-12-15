@@ -971,6 +971,12 @@ func (a *router) uploadKYC(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	userKycList, err := a.App.KYC.User(fmt.Sprint(userId))
+	if err != nil {
+		a.render(w, r, "500.page.html", &templateData{})
+		return
+	}
+
 	// check user có verified phone chưa
 	if !hasRole(user, "verified_phone") {
 		http.Redirect(w, r, "/upgrade-user?to=verified_id", http.StatusSeeOther)
@@ -980,7 +986,8 @@ func (a *router) uploadKYC(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if !ok {
 			a.render(w, r, "kyc.page.html", &templateData{
-				Form: f,
+				Form:    f,
+				KYCList: userKycList,
 			})
 		}
 	}()
