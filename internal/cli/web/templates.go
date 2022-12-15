@@ -286,7 +286,7 @@ func relatedPosts(p []*models.Post, t int) []*models.Post {
 	var posts []*models.Post
 
 	for _, post := range p {
-		if post.ID != t && len(posts) <= 3 {
+		if post.ID != t && len(posts) < 3 {
 			posts = append(posts, post)
 		}
 
