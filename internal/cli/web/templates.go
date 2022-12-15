@@ -58,6 +58,7 @@ var functions = template.FuncMap{
 	"upper":           strings.ToUpper,
 	"lower":           strings.ToLower,
 	"title":           strings.Title,
+	"join":            strings.Join,
 	"split":           strings.Split,
 	"contains":        strings.Contains,
 	"has_role":        hasRole,
@@ -67,6 +68,7 @@ var functions = template.FuncMap{
 	"find_post_tags":  findPostByTags,
 	"tz_format":       formatDatetime,
 	"filterPost":      filterPost,
+	"related_posts":   relatedPosts,
 	"parse_enum":      parseEum,
 	"to_cdn_url":      toCdnUrl,
 	"int_operator":    intOperator,
@@ -235,7 +237,6 @@ func parseHTML(dir string) (map[string]*template.Template, error) {
 
 func findPostByTags(s string) []*models.Post {
 	tags := []string{}
-
 	for _, t := range strings.Split(s, ",") {
 		tags = append(tags, strings.TrimSpace(t))
 	}
@@ -276,6 +277,19 @@ func filterPost(p []*models.Post, t string) []*models.Post {
 		if post.PostType == t {
 			posts = append(posts, post)
 		}
+	}
+
+	return posts
+}
+
+func relatedPosts(p []*models.Post, t int) []*models.Post {
+	var posts []*models.Post
+
+	for _, post := range p {
+		if post.ID != t && len(posts) <= 3 {
+			posts = append(posts, post)
+		}
+
 	}
 
 	return posts
