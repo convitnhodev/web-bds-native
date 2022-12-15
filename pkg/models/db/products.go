@@ -309,7 +309,7 @@ func (m *ProductModel) Update(o *models.Product, f *form.Form) error {
 	if slug != o.Slug {
 		prefix := "/real-estate"
 		_, err = m.DB.Exec(
-			"UPDATE comments SET slug = $2 WHERE slug = $1;",
+			"UPDATE comments SET updated_at = now(), slug = $2 WHERE slug = $1;",
 			fmt.Sprintf("%s/%s", prefix, o.Slug),
 			fmt.Sprintf("%s/%s", prefix, slug),
 		)
@@ -375,6 +375,21 @@ func (m *ProductModel) UpdatePaymentCallback(
 		q,
 		ProductId,
 	)
+
+	return err
+}
+
+func (m *ProductModel) AddRemain(
+	id int,
+	quatity int,
+) error {
+	q := `
+		UPDATE products
+		SET updated_at = now(),
+			remain_of_slot = remain_of_slot + $2
+		WHERE id = $1`
+
+	_, err := m.DB.Exec(q, id, quatity)
 
 	return err
 }

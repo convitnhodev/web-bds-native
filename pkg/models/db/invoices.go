@@ -163,20 +163,49 @@ func (m *InvoiceModel) UpdatePaymentCallback(
 	ctx context.Context,
 	invoiceId int,
 	transactionTs int,
+	isSuccess bool,
 ) error {
 	q := `
 		UPDATE invoices
 		SET updated_at = now(),
 			invoice_synced_at = to_timestamp($2),
-			status = 'deposit'
+			status = $3`
+
+	status := "slot_canceled"
+	if isSuccess {
+		status = "deposit"
+		q += `
+		WHERE id = $1`
+	} else {
+		q += `,
+			slot_canceled_by = user_id
 		WHERE id = $1
-	`
+		`
+	}
 
 	_, err := tx.ExecContext(
 		ctx,
 		q,
 		invoiceId,
 		transactionTs,
+		status,
+	)
+
+	return err
+}
+
+func (m *InvoiceModel) Refund(
+	id int,
+) error {
+	q := `
+	UPDATE invoices
+	SET updated_at = now(),
+		status = $2
+	WHERE id = $1`
+
+	_, err := m.DB.Exec(q,
+		id,
+		"refund",
 	)
 
 	return err

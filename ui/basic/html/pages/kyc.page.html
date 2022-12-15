@@ -28,6 +28,23 @@
         </div>
       </div>
       {{end}}
+
+      {{if .KYCList}}
+        {{range .KYCList}}
+          {{if eq .Status "submited_kyc"}}
+          <div class="rounded-md bg-green-50 p-4 mb-4">
+            <div class="flex">
+              <div class="ml-3">
+                <h3 class="text-sm font-bold text-green-600">
+                  Bạn đã có yêu cầu KYC đang đợi duyệt, nếu bạn upload lại thì hình cũ sẽ bị thay thế.
+                </h3>
+              </div>
+            </div>
+          </div>
+          {{end}}
+        {{end}}
+      {{end}}
+
       <form class="space-y-6" method="POST" enctype="multipart/form-data">
         <div>
           <label

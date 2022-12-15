@@ -126,6 +126,19 @@ func (f *Form) GetInt(field string) int {
 	return num
 }
 
+func (f *Form) GetBool(field string) bool {
+	value := f.Get(field)
+	if value == "" {
+		return false
+	}
+
+	boolValue, err := strconv.ParseBool(value)
+	if err != nil {
+		return false
+	}
+	return boolValue
+}
+
 func (f *Form) GetFloat(field string) float64 {
 	value := f.Get(field)
 	num, err := strconv.ParseFloat(value, 32)

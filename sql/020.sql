@@ -1,0 +1,1 @@
+ALTER TYPE user_kyc_status ADD VALUE 'rejected_kyc_forever';

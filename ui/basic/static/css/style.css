@@ -9,28 +9,39 @@
 }
 
 .preload *{transition-property: none;}
-.dee-ol1 {
+.dee-ol {
   padding-left: 4.75rem;
 }
-.dee-ol1 li {
+.dee-ol li {
   position: relative;
+  min-height: 4rem;
 }
-.dee-ol1 li:where(:not(:first-child)) {
+.dee-ol li:where(:not(:first-child)) {
   margin-top: 2rem;
 }
-.dee-ol1 li::before {
+.dee-ol li::before {
   left: -4.75rem;
   position: absolute;
   font-weight: bold;
   content: counter(list-item);
-  background-color: #0284c7;
-  color: white;
   width: 4rem;
   height: 4rem;
-  font-size: 2rem;
   display: inline-flex;
-  border-radius: 0.375rem;
   justify-content: center;
+  align-items: center;
+}
+.dee-ol1 li::before {
+  background-color: #0284c7;
+  border-radius: 0.375rem;
+  color: #fff;
+  font-size: 2rem;
+  justify-content: center;
+  align-items: center;
+}
+.dee-ol2 li::before {
+  color: #0284c7;;
+  font-size: 3rem;
+  justify-content: end;
   align-items: center;
 }
 
@@ -262,6 +273,7 @@ line-height: inherit; }
 .space-x-6>:not([hidden])~:not([hidden]){--un-space-x-reverse:0;margin-left:calc(1.5rem * calc(1 - var(--un-space-x-reverse)));margin-right:calc(1.5rem * var(--un-space-x-reverse));}
 .space-x-8>:not([hidden])~:not([hidden]){--un-space-x-reverse:0;margin-left:calc(2rem * calc(1 - var(--un-space-x-reverse)));margin-right:calc(2rem * var(--un-space-x-reverse));}
 .space-y-10>:not([hidden])~:not([hidden]){--un-space-y-reverse:0;margin-top:calc(2.5rem * calc(1 - var(--un-space-y-reverse)));margin-bottom:calc(2.5rem * var(--un-space-y-reverse));}
+.space-y-16>:not([hidden])~:not([hidden]){--un-space-y-reverse:0;margin-top:calc(4rem * calc(1 - var(--un-space-y-reverse)));margin-bottom:calc(4rem * var(--un-space-y-reverse));}
 .space-y-2>:not([hidden])~:not([hidden]){--un-space-y-reverse:0;margin-top:calc(0.5rem * calc(1 - var(--un-space-y-reverse)));margin-bottom:calc(0.5rem * var(--un-space-y-reverse));}
 .space-y-4>:not([hidden])~:not([hidden]){--un-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--un-space-y-reverse)));margin-bottom:calc(1rem * var(--un-space-y-reverse));}
 .space-y-6>:not([hidden])~:not([hidden]){--un-space-y-reverse:0;margin-top:calc(1.5rem * calc(1 - var(--un-space-y-reverse)));margin-bottom:calc(1.5rem * var(--un-space-y-reverse));}
