@@ -225,12 +225,16 @@ func (a *router) checkoutProduct(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		// Xử lí đơn hàng có 1 product * quantity
 		serectCode := helper.RandString(6)
+		totalAmount := f.GetInt("Quatity") * product.CostPerSlot
+
 		invoice, err := a.App.Invoice.Buy(
 			tx,
 			ctx,
 			userId,
 			serectCode,
+			totalAmount,
 		)
 
 		if err != nil {
@@ -240,7 +244,6 @@ func (a *router) checkoutProduct(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		amount := f.GetInt("Quatity") * product.CostPerSlot
 		invoiceItem, err := a.App.InvoiceItem.Buy(
 			tx,
 			ctx,
@@ -248,7 +251,7 @@ func (a *router) checkoutProduct(w http.ResponseWriter, r *http.Request) {
 			product.ID,
 			f.GetInt("Quatity"),
 			product.CostPerSlot,
-			amount,
+			totalAmount,
 		)
 
 		if err != nil {
@@ -258,8 +261,7 @@ func (a *router) checkoutProduct(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		depositAmount := int64(math.Round((float64(amount) * product.DepositPercent) / 100))
-
+		depositAmount := int(math.Round((float64(totalAmount) * product.DepositPercent) / 100))
 		payment, err := a.App.Payment.Checkout(
 			tx,
 			ctx,
@@ -303,19 +305,26 @@ func (a *router) checkoutProduct(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			paymentRedirectURL = res.PaymentUrl
-
-			// Update post data
 			paymentPostDataStr, err := json.Marshal(paymentPostData)
-			if err == nil {
-				a.App.Payment.UpdatePostData(
-					tx,
-					ctx,
-					payment.ID,
-					string(paymentPostDataStr),
-				)
+			if err != nil {
+				paymentPostDataStr = []byte("{}")
 			}
 
+			resPaymentDataStr, err := json.Marshal(res)
+			if err != nil {
+				resPaymentDataStr = []byte("{}")
+			}
+
+			// Update post data
+			a.App.Payment.UpdatePostData(
+				tx,
+				ctx,
+				payment.ID,
+				string(paymentPostDataStr),
+				string(resPaymentDataStr),
+			)
+
+			paymentRedirectURL = res.PaymentUrl
 		}
 
 		if err = tx.Commit(); err != nil {
@@ -389,7 +398,6 @@ func (a *router) callbackPaymentIPN(w http.ResponseWriter, r *http.Request) {
 		}
 
 		isSuccess := paymentData.ErrorCode == 0
-
 		payment, err := a.App.Payment.ID(paymentData.ParseOrderId(a.App.Config.APTPaymentHost))
 		if err != nil {
 			log.Println(err)
@@ -450,6 +458,19 @@ func (a *router) callbackPaymentIPN(w http.ResponseWriter, r *http.Request) {
 		}
 
 		tx.Commit()
+	}
+}
+
+func (a *router) callbackBillIPN(w http.ResponseWriter, r *http.Request) {
+	defer func() {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{"status": "ok"}`))
+	}()
+
+	if r.Method == "POST" {
+		// reqBody, err := ioutil.ReadAll(r.Body)
+
+		// TODO
 	}
 }
 
@@ -1302,6 +1323,7 @@ func run(c *root.Cmd) error {
 	mux.Get("/real-estate/:slug/payment", use(a.checkoutProductNoPayment, a.islogined))
 	mux.Get("/checkout-result", use(a.checkoutProductSuccessful, a.islogined))
 	mux.Post("/ipn", use(a.callbackPaymentIPN))
+	mux.Post("/bill-ipn", use(a.callbackBillIPN))
 
 	// đăng ký
 	mux.Post("/register", use(a.register))

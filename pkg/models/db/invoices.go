@@ -24,6 +24,7 @@ var invoiceColumes = []string{
 	"invoices.invoice_serect",
 	"invoices.created_at",
 	"invoices.updated_at",
+	"invoices.total_amount",
 	"users.id",
 	"users.first_name",
 	"users.last_name",
@@ -42,6 +43,7 @@ func scanInvoice(r scanner, o *models.Invoice, includeUser bool) error {
 			&o.InvoiceSerect,
 			&o.CreatedAt,
 			&o.UpdatedAt,
+			&o.TotalAmount,
 			&o.User.ID,
 			&o.User.FirstName,
 			&o.User.LastName,
@@ -59,6 +61,7 @@ func scanInvoice(r scanner, o *models.Invoice, includeUser bool) error {
 			&o.InvoiceSerect,
 			&o.CreatedAt,
 			&o.UpdatedAt,
+			&o.TotalAmount,
 		); err != nil {
 			return errors.Wrap(err, "scanInvoice")
 		}
@@ -68,11 +71,14 @@ func scanInvoice(r scanner, o *models.Invoice, includeUser bool) error {
 }
 
 func (m *InvoiceModel) query(s string, includeUser bool) string {
+	userJoinSql := ""
+	columes := invoiceColumes[0:8]
 	if includeUser {
-		return fmt.Sprintf(`SELECT %s FROM invoices JOIN users ON invoices.user_id = users.id %s`, strings.Join(invoiceColumes, ","), s)
-	} else {
-		return fmt.Sprintf(`SELECT %s FROM invoices %s`, strings.Join(invoiceColumes, ","), s)
+		columes = invoiceColumes
+		userJoinSql = "LEFT JOIN users ON invoices.user_id = users.id"
 	}
+
+	return fmt.Sprintf(`SELECT %s FROM invoices %s %s`, strings.Join(columes, ","), userJoinSql, s)
 }
 
 func (m *InvoiceModel) count(s string) string {
@@ -91,10 +97,10 @@ func (m *InvoiceModel) ID(id string) (*models.Invoice, error) {
 	return o, nil
 }
 
-func (m *InvoiceModel) Buy(tx *sql.Tx, ctx context.Context, userId int, serect string) (*models.Invoice, error) {
+func (m *InvoiceModel) Buy(tx *sql.Tx, ctx context.Context, userId int, serect string, totalAmount int) (*models.Invoice, error) {
 	q := `
-	INSERT INTO invoices (user_id, status, invoice_serect)
-	VALUES($1, 'open'::invoice_status, $2)
+	INSERT INTO invoices (user_id, status, invoice_serect, total_amount)
+	VALUES($1, 'open'::invoice_status, $2, $3)
 	RETURNING id`
 
 	row := tx.QueryRowContext(
@@ -102,6 +108,7 @@ func (m *InvoiceModel) Buy(tx *sql.Tx, ctx context.Context, userId int, serect s
 		q,
 		userId,
 		serect,
+		totalAmount,
 	)
 
 	o := new(models.Invoice)
@@ -113,29 +120,23 @@ func (m *InvoiceModel) Buy(tx *sql.Tx, ctx context.Context, userId int, serect s
 }
 
 func (m *InvoiceModel) Find(productId int) ([]*models.Invoice, error) {
-	q := fmt.Sprintf(`
-		SELECT
-			%s
-		FROM invoices
+	q := m.query(`
 		WHERE invoices.id IN (
 			SELECT
 				DISTINCT invoice_id
 			FROM invoice_items
 			WHERE invoice_items.product_id = $1
 		)
-	`, strings.Join(invoiceColumes[0:7], ","))
+	`, false)
 
-	count := `
-		SELECT
-			count(*)
-		FROM invoices
+	count := m.count(`
 		WHERE invoices.id IN (
 			SELECT
 				DISTINCT invoice_id
 			FROM invoice_items
 			WHERE invoice_items.product_id = $1
 		)
-	`
+	`)
 
 	if err := m.Pagination.Count(count, productId); err != nil {
 		return nil, err
@@ -196,6 +197,27 @@ func (m *InvoiceModel) UpdatePaymentCallback(
 
 func (m *InvoiceModel) Refund(
 	id int,
+	userId int,
+) error {
+	q := `
+	UPDATE invoices
+	SET updated_at = now(),
+		status = $2,
+		slot_canceled_by = $3
+	WHERE id = $1`
+
+	_, err := m.DB.Exec(q,
+		id,
+		"refund",
+		userId,
+	)
+
+	return err
+}
+
+func (m *InvoiceModel) UpdateStatus(
+	id int,
+	status string,
 ) error {
 	q := `
 	UPDATE invoices
@@ -205,7 +227,28 @@ func (m *InvoiceModel) Refund(
 
 	_, err := m.DB.Exec(q,
 		id,
-		"refund",
+		status,
+	)
+
+	return err
+}
+
+func (m *InvoiceModel) CollectMoney(
+	tx *sql.Tx,
+	ctx context.Context,
+	invoiceId int,
+) error {
+	q := `
+		UPDATE invoices
+		SET updated_at = now(),
+			status = $2
+		WHERE id = $1`
+
+	_, err := tx.ExecContext(
+		ctx,
+		q,
+		invoiceId,
+		"collecting",
 	)
 
 	return err

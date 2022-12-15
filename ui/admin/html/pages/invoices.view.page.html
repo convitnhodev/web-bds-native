@@ -19,24 +19,36 @@
             <p>Email: <strong>{{ .Invoice.User.Email }}</strong></p>
             <p>Mã bí mật để liên lạc xác nhận với nhà đầu tư: <strong>{{ .Invoice.InvoiceSerect }}</strong></p>
             <p>Nhận tiền lúc: <strong>{{ tz_format .Invoice.InvoiceSyncedAt "2006-01-02 15:04" "Asia/Ho_Chi_Minh" }}</strong></p>
+            <div class="flex-auto"><p>Trạng thái hoá đơn:
+                <span 
+                {{ if eq .Invoice.Status "open" }} class="Label Label--accent" {{end}}
+                {{ if eq .Invoice.Status "deposit" }} class="Label Label--success" {{end}}
+                {{ if eq .Invoice.Status "collecting" }} class="Label Label--success" {{end}}
+                {{ if eq .Invoice.Status "collect_completed" }} class="Label Label--done" {{end}}
+                {{ if eq .Invoice.Status "refund" }} class="Label Label--severe" {{end}}
+                {{ if eq .Invoice.Status "slot_canceled" }} class="Label Label--close" {{end}}
+                {{ if eq .Invoice.Status "collect_canceled" }} class="Label Label--close" {{end}}
+                >{{.Invoice.Status}}</span>
+                </p>
+            </div>
         </div>
         
         {{if eq .Invoice.Status "deposit"}}
         <div class="mt-4">
-            <a class="btn btn-xs mr-1" 
+            <a class="btn btn-xs mr-1" onclick="return confirm('chắc nghen?');" 
                 href="/admin/products/{{$.ProductId}}/invoices/{{.Invoice.ID}}/collectMoney">
-                Thu tiền
+                Hối tiền
             </a>
         </div>
         {{end}}
         
         {{if eq .Invoice.Status "collecting"}}
         <div class="mt-4">
-            <a class="btn btn-xs mr-1"
+            <a class="btn btn-xs mr-1" onclick="return confirm('chắc nghen?');" 
                 href="/admin/products/{{$.ProductId}}/invoices/{{.Invoice.ID}}/closeInvoice?isCustomerReject=true">
                 Khách không trả
             </a>
-            <a class="btn btn-xs mr-1" 
+            <a class="btn btn-xs mr-1" onclick="return confirm('chắc nghen?');" 
                 href="/admin/products/{{$.ProductId}}/invoices/{{.Invoice.ID}}/closeInvoice?isCustomerReject=false">
                 Đã thu tiền
             </a>
@@ -61,18 +73,18 @@
                                     <strong>{{ .Product.Title }}</strong>
                                 </a>
                             </p>
-                            <p>Giá 1 lô: <strong>{{ .CostPerSlot }} vnd</strong></p>
+                            <p>Giá 1 lô: <strong>{{ number_comma .CostPerSlot }} VND</strong></p>
                             <p>Số lô mua: <strong>{{ .Quatity }}</strong></p>
                         </div>
                         <div class="float-right mr-1">
-                            <p>Tổng: <strong>{{ .Amount }} vnd</strong></p>
+                            <p>Tổng: <strong>{{ number_comma .Amount }} VND</strong></p>
                         </div>
                     </div>
                 {{end}}
                 </div>
             </div>
             <div>
-                <h4 class="float-right">Tổng tiền: {{ .SumAmount }} vnd</h4>
+                <h4 class="float-right">Tổng tiền: {{ number_comma .Invoice.TotalAmount }} VND</h4>
             </div>
         </div>
         {{ end }}
@@ -83,47 +95,65 @@
             <h2 class="Subhead-heading">Lịch sử thanh toán</h2>
         </div>
         {{ if .Payments }}
+        {{range .Payments}}
         <div class="Box mb-3">
-            <div>
-            {{range .Payments}}
-                <div class="Box-row Box-row--hover-gray d-flex flex-justify-between">
-                    <div class="float-left">
-                        <p>
-                            Số tiền thanh toán: <strong>{{ .Amount }} vnd</strong>
-                        </p>
-                        <p>
-                            Thanh toán qua kênh: <strong>{{ parse_enum "PaymentMethod" .Method }}</strong>
-                        </p>
-                        <p>
-                            Loại thanh toán: <strong>{{ parse_enum "PaymentType" .PayType }}</strong>
-                        </p>
-                        <p>
-                            Loại giao dịch: <strong>{{ parse_enum "TransactionType" .TxType }}</strong>
-                        </p>
+            <div class="Box-row Box-row--hover-gray d-flex flex-justify-between">
+                <div class="float-left">
+                    <p>
+                        Số tiền thanh toán: <strong>{{ number_comma .Amount }} VND</strong>
+                    </p>
+                    <p>
+                        Thanh toán qua kênh: <strong>{{ parse_enum "PaymentMethod" .Method }}</strong>
+                    </p>
+                    <p>
+                        Loại thanh toán: <strong>{{ parse_enum "PaymentType" .PayType }}</strong>
+                    </p>
+                    <p>
+                        Loại giao dịch: <strong>{{ parse_enum "TransactionType" .TxType }}</strong>
+                    </p>
 
-                        <p>
-                            Trạng thái giao dịch: 
-                            <strong
-                                {{ if eq .Status "open" }} class="color-fg-accent" {{end}}
-                                {{ if eq .Status "success" }} class="color-fg-success" {{end}}
-                                {{ if eq .Status "refund" }} class="color-fg-severe" {{end}}
-                                {{ if eq .Status "failed" }} class="color-fg-close" {{end}}
-                            >{{ parse_enum "PaymentStatus" .Status }}</strong>
-                        </p>
-                        {{if and (eq $.Invoice.Status "deposit") (eq .Status "success")}}
-                        <a class="btn btn-xs mt-2" onclick="return confirm('chắc nghen?');" 
-                            href="/admin/products/{{$.ProductId}}/invoices/{{.InvoiceId}}/refund/{{.ID}}">
-                            Huỷ, hoàn tiền cọc cho khách
-                        </a>
-                        {{end}}
-                    </div>
-                    <div class="float-right mr-1">
-                        <p><strong>Lúc {{ tz_format .CreatedAt "2006-01-02 15:04" "Asia/Ho_Chi_Minh" }}</strong></p>
-                    </div>
+                    <p>
+                        Trạng thái giao dịch: 
+                        <strong
+                            {{ if eq .Status "open" }} class="color-fg-accent" {{end}}
+                            {{ if eq .Status "success" }} class="color-fg-success" {{end}}
+                            {{ if eq .Status "refund" }} class="color-fg-severe" {{end}}
+                            {{ if eq .Status "failed" }} class="color-fg-close" {{end}}
+                        >{{ parse_enum "PaymentStatus" .Status }}</strong>
+                    </p>
+
+                    {{if (eq .Method "appotapay_bill")}}
+                    <div class="Subhead"></div>
+                    <p>
+                        Số tài khoản nhận tiền: <strong>{{ .AppotapayAccountNo }}</strong>
+                    </p>
+                    <p>
+                        Tên tài khoản nhận tiền: <strong>{{ .AppotapayAccountName }}</strong>
+                    </p>
+                    <p>
+                        Mã ngân hàng: <strong>{{ .AppotapayBankCode }}</strong>
+                    </p>
+                    <p>
+                        Tên ngân hàng: <strong>{{ .AppotapayBankName }}</strong>
+                    </p>
+                    <p>
+                        Chi nhánh ngân hàng: <strong>{{ .AppotapayBankBranch }}</strong>
+                    </p>
+                    {{end}}
+
+                    {{if and (or (eq $.Invoice.Status "collecting") (eq $.Invoice.Status "deposit")) (eq .Status "success") (eq .Method "appotapay_payment") }}
+                    <a class="btn btn-xs mt-2" onclick="return confirm('chắc nghen?');" 
+                        href="/admin/products/{{$.ProductId}}/invoices/{{.InvoiceId}}/refund/{{.ID}}">
+                        Huỷ, hoàn tiền cọc cho khách
+                    </a>
+                    {{end}}
                 </div>
-              {{end}}
+                <div class="float-right mr-1">
+                    <p><strong>Lúc {{ tz_format .CreatedAt "2006-01-02 15:04" "Asia/Ho_Chi_Minh" }}</strong></p>
+                </div>
             </div>
         </div>
+        {{end}}
         {{ else }}
         <div class="blankslate">
             <img referrerpolicy="no-referrer"

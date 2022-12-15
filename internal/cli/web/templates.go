@@ -14,6 +14,7 @@ import (
 	"github.com/deeincom/deeincom/pkg/form"
 	"github.com/deeincom/deeincom/pkg/models"
 	"github.com/deeincom/deeincom/pkg/models/db"
+	"github.com/dustin/go-humanize"
 	"github.com/microcosm-cc/bluemonday"
 )
 
@@ -43,7 +44,6 @@ type templateData struct {
 	Invoice           *models.Invoice
 	KYCList           []*models.KYC
 	PartnerList       []*models.Partner
-	SumAmount         int
 	ProductId         string
 	TagsString        string
 	IsKYCQuery        bool
@@ -70,6 +70,7 @@ var functions = template.FuncMap{
 	"parse_enum":      parseEum,
 	"to_cdn_url":      toCdnUrl,
 	"int_operator":    intOperator,
+	"number_comma":    intComma,
 }
 
 // sureFind always find an element in list l
@@ -191,6 +192,12 @@ func translate(s string) string {
 
 	case "err_token_invalid":
 		return "Mã xác thực không đúng"
+
+	case "err_product_min_cost_slot":
+		return "Giá lô phải là bội của 10.000.000"
+
+	case "err_product_deposit_percent":
+		return "Giá lô phải là bội của phải lớn hơn 1 và nhỏ 50 phần trăm."
 	}
 	return s
 }
@@ -282,11 +289,11 @@ func filterPost(p []*models.Post, t string) []*models.Post {
 }
 
 var PaymentMethodEnumMapping map[string]string = map[string]string{
-	"appotapay":     "AppotaPay",
-	"bank_transfer": "Chuyển khoản",
+	"appotapay_payment": "AppotaPay thanh toán",
+	"appotapay_bill":    "AppotaPay thu hộ",
 }
 var PaymentStatusEnumMapping map[string]string = map[string]string{
-	"open":    "Đang tạo thang toán",
+	"open":    "Đang thanh toán",
 	"success": "Đã thanh toán thành công",
 	"refund":  "Đã trả lại tiền",
 	"failed":  "Thanh toán thất bại",
@@ -315,4 +322,8 @@ func parseEum(typeEnum string, value string) string {
 		return TransactionTypeEnumMapping[value]
 	}
 	return ""
+}
+
+func intComma(v int) string {
+	return strings.ReplaceAll(humanize.Comma(int64(v)), ",", ".")
 }

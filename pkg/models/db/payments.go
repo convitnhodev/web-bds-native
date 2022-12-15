@@ -29,6 +29,11 @@ var paymentColumes = []string{
 	"payments.refund_response",
 	"payments.transaction_at",
 	"payments.refund_at",
+	"payments.appotapay_account_no",
+	"payments.appotapay_account_name",
+	"payments.appotapay_bank_code",
+	"payments.appotapay_bank_name",
+	"payments.appotapay_bank_branch",
 	"payments.created_at",
 	"payments.updated_at",
 }
@@ -47,6 +52,11 @@ func scanPayment(r scanner, o *models.Payment) error {
 		&o.RefundResponse,
 		&o.TransactionAt,
 		&o.RefundAt,
+		&o.AppotapayAccountNo,
+		&o.AppotapayAccountName,
+		&o.AppotapayBankCode,
+		&o.AppotapayBankName,
+		&o.AppotapayBankBranch,
 		&o.CreatedAt,
 		&o.UpdatedAt,
 	); err != nil {
@@ -100,13 +110,13 @@ func (m *PaymentModel) Checkout(
 	tx *sql.Tx,
 	ctx context.Context,
 	invoiceId int,
-	amount int64,
+	amount int,
 	method string,
 	payType string,
 ) (*models.Payment, error) {
 	q := `
-		INSERT INTO payments (invoice_id, amount, pay_type)
-		VALUES ($1, $2, $3)
+		INSERT INTO payments (invoice_id, amount, method, pay_type)
+		VALUES ($1, $2, $3, $4)
 		RETURNING id;
 	`
 	row := tx.QueryRowContext(
@@ -114,6 +124,7 @@ func (m *PaymentModel) Checkout(
 		q,
 		invoiceId,
 		amount,
+		method,
 		payType,
 	)
 
@@ -130,11 +141,13 @@ func (m *PaymentModel) UpdatePostData(
 	ctx context.Context,
 	paymentId int,
 	postData string,
+	resData string,
 ) error {
 	q := `
 		UPDATE payments
 		SET updated_at = now(),
-			post_data = $2
+			post_data = $2,
+			response_data = $3
 		WHERE id = $1
 	`
 
@@ -143,6 +156,7 @@ func (m *PaymentModel) UpdatePostData(
 		q,
 		paymentId,
 		postData,
+		resData,
 	)
 
 	return err
@@ -209,5 +223,48 @@ func (m *PaymentModel) Refund(
 	)
 
 	return err
+}
 
+func (m *PaymentModel) UpdateBankAcount(
+	tx *sql.Tx,
+	ctx context.Context,
+	paymentId int,
+	billCode string,
+	accountName string,
+	accountNo string,
+	bankBranch string,
+	bankCode string,
+	bankName string,
+	billPayload string,
+	billRes string,
+) error {
+	q := `
+		UPDATE payments
+		SET updated_at = now(),
+			appotapay_bill_code = $2,
+			appotapay_account_no = $3,
+			appotapay_account_name = $4,
+			appotapay_bank_code = $5,
+			appotapay_bank_name = $6,
+			appotapay_bank_branch = $7,
+			post_data = $8,
+			response_data = $9
+		WHERE id = $1
+	`
+
+	_, err := tx.ExecContext(
+		ctx,
+		q,
+		paymentId,
+		billCode,
+		accountNo,
+		accountName,
+		bankCode,
+		bankName,
+		bankBranch,
+		billPayload,
+		billRes,
+	)
+
+	return err
 }

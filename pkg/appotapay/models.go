@@ -1,13 +1,14 @@
 package appotapay
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 )
 
 // Payment
 type APTPaymentPayload struct {
-	Amount        int64  `json:"amount"`
+	Amount        int    `json:"amount"`
 	OrderId       string `json:"orderId"`
 	OrderInfo     string `json:"orderInfo"`
 	BankCode      string `json:"bankCode"`
@@ -109,7 +110,7 @@ type APTPaymentRecipition struct {
 	Message          string `json:"message"`
 	PartnerCode      string `json:"partnerCode"`
 	ApiKey           string `json:"apiKey"`
-	Amount           int64  `json:"amount"`
+	Amount           int    `json:"amount"`
 	Currency         string `json:"currency"`
 	OrderId          string `json:"orderId"`
 	BankCode         string `json:"bankCode"`
@@ -147,5 +148,65 @@ func (m *APTPaymentRecipition) GetPayloadUrl() string {
 		m.PaymentMethod,
 		m.PaymentType,
 		m.TransactionTs,
+	)
+}
+
+type APTBillPayload struct {
+	BillCode         string `json:"billCode"`
+	BillInfo         string `json:"billInfo"`
+	BillExpiryTime   int64  `json:"billExpiryTime"`
+	CustomerName     string `json:"customerName"`
+	ServiceCode      string `json:"serviceCode"`
+	Amount           int    `json:"amount"`
+	PaymentCondition string `json:"paymentCondition"`
+	BankCode         string `json:"bankCode"`
+	NotifyUrl        string `json:"notifyUrl"`
+	ExtraData        string `json:"extraData"`
+	Signature        string `json:"signature"`
+}
+
+func (m *APTBillPayload) GetPayloadUrl() string {
+	return fmt.Sprintf(
+		"amount=%d&bankCode=%s&billCode=%s&billExpiryTime=%d&billInfo=%s&customerName=%s&extraData=%s&notifyUrl=%s&paymentCondition=%s&serviceCode=%s",
+		m.Amount,
+		m.BankCode,
+		m.BillCode,
+		m.BillExpiryTime,
+		m.BillInfo,
+		m.CustomerName,
+		m.ExtraData,
+		m.NotifyUrl,
+		m.PaymentCondition,
+		m.ServiceCode,
+	)
+}
+
+type APTBillAccountBank struct {
+	BankCode    string `json:"bankCode"`
+	BankName    string `json:"bankName"`
+	AccountNo   string `json:"accountNo"`
+	AccountName string `json:"accountName"`
+	BankBranch  string `json:"bankBranch"`
+}
+
+type APTBillPayment struct {
+	BankAccounts []APTBillAccountBank `json:"bankAccounts"`
+}
+
+type APTBillResponse struct {
+	ErrorCode int            `json:"errorCode"`
+	Message   string         `json:"message"`
+	BillCode  string         `json:"billCode"`
+	Payment   APTBillPayment `json:"payment"`
+	Signature string         `json:"signature"`
+}
+
+func (m *APTBillResponse) GetPayloadUrl() string {
+	paymentJson, _ := json.Marshal(m.Payment)
+	return fmt.Sprintf(
+		"billCode=%s&errorCode=%d&payment=%s",
+		m.BillCode,
+		m.ErrorCode,
+		string(paymentJson),
 	)
 }

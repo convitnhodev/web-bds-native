@@ -163,6 +163,7 @@ type Invoice struct {
 	User            User
 	Status          string
 	InvoiceSerect   string
+	TotalAmount     int
 	InvoiceSyncedAt *time.Time
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
@@ -181,24 +182,29 @@ type InvoiceItem struct {
 }
 
 type Payment struct {
-	ID               int
-	InvoiceId        int
-	Amount           int
-	Status           string
-	Method           string
-	PayType          string
-	TxType           string
-	AppotapayTransId string
-	RefundId         string
-	RefundResponse   string
-	TransactionAt    *time.Time
-	RefundAt         *time.Time
-	CreatedAt        time.Time
-	UpdatedAt        time.Time
+	ID                   int
+	InvoiceId            int
+	Amount               int
+	Status               string
+	Method               string
+	PayType              string
+	TxType               string
+	AppotapayTransId     string
+	RefundId             string
+	RefundResponse       string
+	AppotapayAccountNo   string
+	AppotapayAccountName string
+	AppotapayBankCode    string
+	AppotapayBankName    string
+	AppotapayBankBranch  string
+	TransactionAt        *time.Time
+	RefundAt             *time.Time
+	CreatedAt            time.Time
+	UpdatedAt            time.Time
 }
 
 func (o *Payment) OrderId(APTPaymentHost string) string {
-	if strings.Contains(APTPaymentHost, "payment.dev.appotapay.com") {
+	if strings.Contains(APTPaymentHost, ".dev.") {
 		serectCode := helper.RandString(6)
 		return fmt.Sprintf("%s-%d", serectCode, o.ID)
 	}

@@ -8,7 +8,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"regexp"
 	"strings"
+	"time"
 
 	"github.com/bmizerany/pat"
 	"github.com/deeincom/deeincom/pkg/appotapay"
@@ -720,6 +722,20 @@ func (a *router) adminUpdateProduct(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		// Kiểm tra giá có bội là minCostPerSlot là lớn hơn minCostPerSlot
+		costPerSlot := f.GetInt("CostPerSlot")
+		minCostPerSlot := a.App.Config.MinCostPerSlot
+		if !(costPerSlot%minCostPerSlot == 0 && costPerSlot/minCostPerSlot >= 1) {
+			f.Errors.Add("CostPerSlot", "err_product_min_cost_slot")
+			return
+		}
+
+		depositPercent := f.GetFloat("DepositPercent")
+		if !(1 <= depositPercent && depositPercent <= 50) {
+			f.Errors.Add("DepositPercent", "err_product_deposit_percent")
+			return
+		}
+
 		if !f.Valid() {
 			log.Println("form invalid", f.Errors)
 			// f.Errors.Add("err", "err_invalid_form")
@@ -1104,13 +1120,7 @@ func (a *router) adminViewInvoice(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sumAmount := 0
-	for _, it := range invoiceItems {
-		sumAmount += it.Amount
-	}
-
 	a.adminrender(w, r, "invoices.view.page.html", &templateData{
-		SumAmount:    sumAmount,
 		Invoice:      invoice,
 		Payments:     payments,
 		InvoiceItems: invoiceItems,
@@ -1119,6 +1129,7 @@ func (a *router) adminViewInvoice(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *router) adminRefundInvoice(w http.ResponseWriter, r *http.Request) {
+	userId := a.session.GetInt(r, "user")
 	ProductId := r.URL.Query().Get(":id")
 	invoiceId := r.URL.Query().Get(":invoiceId")
 	payemntId := r.URL.Query().Get(":paymentId")
@@ -1179,7 +1190,7 @@ func (a *router) adminRefundInvoice(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		err = a.App.Invoice.Refund(invoice.ID)
+		err = a.App.Invoice.Refund(invoice.ID, userId)
 		if err != nil {
 			log.Println(err)
 			http.Error(w, "bad request", 400)
@@ -1213,11 +1224,198 @@ func (a *router) adminRefundInvoice(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *router) adminCollectMoneyInvoice(w http.ResponseWriter, r *http.Request) {
-	// TODO: refund
+	ProductId := r.URL.Query().Get(":id")
+	invoiceId := r.URL.Query().Get(":invoiceId")
+
+	invoice, err := a.App.Invoice.ID(invoiceId)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "bad request", 400)
+		return
+	}
+
+	payments, err := a.App.Payment.InvoiceID(invoice.ID)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "bad request", 400)
+		return
+	}
+
+	depositAmount := 0
+	for _, pa := range payments {
+		if pa.Status == "success" {
+			depositAmount += pa.Amount
+		}
+	}
+	billAmount := invoice.TotalAmount - depositAmount
+
+	// Kiểm tra status trước khi hối tiền
+	if invoice.Status == "open" || invoice.Status == "deposit" {
+		ctx := r.Context()
+		tx, err := a.App.DB.BeginTx(ctx, nil)
+
+		payment, err := a.App.Payment.Checkout(
+			tx,
+			ctx,
+			invoice.ID,
+			billAmount,
+			"appotapay_bill",
+			"full",
+		)
+
+		if err != nil {
+			log.Println(err)
+			tx.Rollback()
+			http.Error(w, "bad request", 400)
+			return
+		}
+
+		fullName := strings.Join([]string{
+			invoice.User.FirstName,
+			invoice.User.LastName,
+		}, " ")
+		fullName = regexp.MustCompile(`[^a-zA-Z0-9 ]+`).ReplaceAllString(fullName, "")
+		billExpiryTime := time.Now().Add(100 * 24 * time.Hour)
+
+		appotapay.PartnerCode = a.App.Config.APTPartnerCode
+		appotapay.APTEbillHost = a.App.Config.APTEbillHost
+		appotapay.ApiKey = a.App.Config.APTApiKey
+		appotapay.SecretKey = a.App.Config.APTSecretKey
+
+		billPayload := appotapay.APTBillPayload{
+			BillCode:         payment.OrderId(appotapay.APTEbillHost),
+			BillInfo:         fmt.Sprintf("Thanh toán hoá đơn %d", invoice.ID),
+			BillExpiryTime:   billExpiryTime.Unix(),
+			CustomerName:     fullName,
+			ServiceCode:      "DEEIN",
+			Amount:           billAmount,
+			PaymentCondition: "EQ",
+			BankCode:         "VIETCAPITALBANK",
+			NotifyUrl:        a.App.Config.APTEbillNotifyUrl,
+			ExtraData:        "",
+		}
+		billRes, err := appotapay.CreateBill(billPayload)
+
+		if err != nil {
+			log.Println(err)
+			tx.Rollback()
+			http.Error(w, "bad request", 400)
+			return
+		}
+
+		bankInfo := appotapay.APTBillAccountBank{
+			BankCode:    "",
+			BankName:    "",
+			BankBranch:  "",
+			AccountNo:   "",
+			AccountName: "",
+		}
+		if len(billRes.Payment.BankAccounts) > 0 {
+			bankInfo = billRes.Payment.BankAccounts[0]
+		}
+
+		billPayloadStr, err := json.Marshal(billPayload)
+		if err != nil {
+			billPayloadStr = []byte("{}")
+		}
+
+		billResStr, err := json.Marshal(billRes)
+		if err != nil {
+			billResStr = []byte("{}")
+		}
+
+		err = a.App.Payment.UpdateBankAcount(
+			tx,
+			ctx,
+			payment.ID,
+			billRes.BillCode,
+			bankInfo.AccountName,
+			bankInfo.AccountNo,
+			bankInfo.BankBranch,
+			bankInfo.BankCode,
+			bankInfo.BankName,
+			string(billPayloadStr),
+			string(billResStr),
+		)
+
+		if err != nil {
+			log.Println(err)
+			tx.Rollback()
+			http.Error(w, "bad request", 400)
+			return
+		}
+
+		err = a.App.Invoice.CollectMoney(
+			tx,
+			ctx,
+			invoice.ID,
+		)
+
+		if err != nil {
+			log.Println(err)
+			tx.Rollback()
+			http.Error(w, "bad request", 400)
+			return
+		}
+
+		tx.Commit()
+	}
+
+	http.Redirect(
+		w,
+		r,
+		fmt.Sprintf("/admin/products/%s/invoices/%s/view", ProductId, invoiceId),
+		http.StatusSeeOther,
+	)
 }
 
 func (a *router) adminCloseInvoice(w http.ResponseWriter, r *http.Request) {
-	// TODO: refund
+	userId := a.session.GetInt(r, "user")
+	ProductId := r.URL.Query().Get(":id")
+	invoiceId := r.URL.Query().Get(":invoiceId")
+
+	isCustomerReject := r.URL.Query().Get("isCustomerReject")
+
+	invoice, err := a.App.Invoice.ID(invoiceId)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "bad request", 400)
+		return
+	}
+
+	isFinalStatus := false
+	for _, sts := range []string{"collect_completed", "refund", "slot_canceled", "collect_canceled"} {
+		if sts == invoice.Status {
+			isFinalStatus = true
+		}
+	}
+
+	if !isFinalStatus {
+		status := "collect_canceled"
+		if isCustomerReject == "false" {
+			status = "collect_completed"
+		}
+		a.App.Invoice.UpdateStatus(invoice.ID, status)
+
+		a.App.Log.Add(
+			fmt.Sprint(userId),
+			fmt.Sprintf(
+				"Người dùng %d update status của hoá đơn %d từ %s sang %s .",
+				userId,
+				invoice.ID,
+				invoice.Status,
+				status,
+			),
+		)
+	}
+
+	http.Redirect(
+		w,
+		r,
+		fmt.Sprintf("/admin/products/%s/invoices/%s/view", ProductId, invoiceId),
+		http.StatusSeeOther,
+	)
+
 }
 
 func registerAdminRoute(mux *pat.PatternServeMux, a *router) {

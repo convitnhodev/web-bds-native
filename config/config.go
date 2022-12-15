@@ -29,7 +29,10 @@ type Config struct {
 	APTApiKey              string
 	APTSecretKey           string
 	APTPaymentHost         string
+	APTEbillHost           string
+	APTEbillNotifyUrl      string
 	CDNUrl                 string
+	MinCostPerSlot         int
 }
 
 // Default config
@@ -48,6 +51,10 @@ func (c *Config) Default() error {
 
 	if c.CDNUrl == "" {
 		c.CDNUrl = "https://cdn.deein.com"
+	}
+
+	if c.MinCostPerSlot == 0 {
+		c.MinCostPerSlot = 10000000
 	}
 
 	if len(c.ProductTypes) == 0 {

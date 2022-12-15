@@ -339,7 +339,7 @@
                         value="{{.Get `CostPerSlot`}}">
                 </div>
                 {{with .Errors.Get `CostPerSlot`}}
-                <p class="note error">{{.}}</p>
+                <p class="note error">{{ __ .}}</p>
                 {{else}}
                 <p class="note">Vd: 100000000</p>
                 {{end}}
@@ -358,7 +358,7 @@
                     >
                 </div>
                 {{with .Errors.Get `DepositPercent`}}
-                <p class="note error">{{.}}</p>
+                <p class="note error">{{ __ .}}</p>
                 {{else}}
                 <p class="note">Vd: 10% giá lô</p>
                 {{end}}

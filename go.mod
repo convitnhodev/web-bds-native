@@ -5,6 +5,7 @@ go 1.16
 require (
 	github.com/Machiel/slugify v1.0.1
 	github.com/bmizerany/pat v0.0.0-20210406213842-e4b6760bdd6f
+	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/go-co-op/gocron v1.18.0
 	github.com/golang-jwt/jwt/v4 v4.4.2
 	github.com/golangcollege/sessions v1.2.0

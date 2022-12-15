@@ -21,6 +21,7 @@ var client = &http.Client{
 }
 
 var APTPaymentHost string
+var APTEbillHost string
 var PartnerCode string
 var ApiKey string
 var SecretKey string
@@ -49,7 +50,19 @@ func signJWT(payload map[string]interface{}) (string, error) {
 }
 
 func getAuth() (string, error) {
-	t := time.Now().Add(15 * time.Minute)
+	if PartnerCode == "" {
+		return "", errors.New("PartnerCode=?")
+	}
+
+	if ApiKey == "" {
+		return "", errors.New("ApiKey=?")
+	}
+
+	if SecretKey == "" {
+		return "", errors.New("SecretKey=?")
+	}
+
+	t := time.Now().Add(5 * time.Minute)
 	jwtPayload := map[string]interface{}{
 		"iss":     PartnerCode,
 		"jti":     fmt.Sprintf("%s-%d", ApiKey, t.Unix()),
@@ -79,16 +92,9 @@ func VerifyIPNPaymentCallback(paymentData APTPaymentRecipition) (string, error) 
 
 // Checkout menthod
 func Checkout(payload *APTPaymentPayload) (*APTPaymentResponse, error) {
-	if PartnerCode == "" {
-		return nil, errors.New("PartnerCode=?")
-	}
-
-	if ApiKey == "" {
-		return nil, errors.New("ApiKey=?")
-	}
-
-	if SecretKey == "" {
-		return nil, errors.New("SecretKey=?")
+	jwtToken, err := getAuth()
+	if err != nil {
+		return nil, err
 	}
 
 	payload.Signature = signSingature(payload.GetPayloadUrl())
@@ -105,11 +111,6 @@ func Checkout(payload *APTPaymentPayload) (*APTPaymentResponse, error) {
 		bytes.NewBuffer([]byte(values)),
 	)
 
-	if err != nil {
-		return nil, err
-	}
-
-	jwtToken, err := getAuth()
 	if err != nil {
 		return nil, err
 	}
@@ -153,12 +154,9 @@ func Checkout(payload *APTPaymentPayload) (*APTPaymentResponse, error) {
 
 // Refund menthod
 func Refund(payload APTRefundPayload) (*APTRefundResponse, error) {
-	if ApiKey == "" {
-		return nil, errors.New("ApiKey=?")
-	}
-
-	if SecretKey == "" {
-		return nil, errors.New("SecretKey=?")
+	jwtToken, err := getAuth()
+	if err != nil {
+		return nil, err
 	}
 
 	payload.Signature = signSingature(payload.GetPayloadUrl())
@@ -175,11 +173,6 @@ func Refund(payload APTRefundPayload) (*APTRefundResponse, error) {
 		bytes.NewBuffer([]byte(values)),
 	)
 
-	if err != nil {
-		return nil, err
-	}
-
-	jwtToken, err := getAuth()
 	if err != nil {
 		return nil, err
 	}
@@ -221,6 +214,63 @@ func Refund(payload APTRefundPayload) (*APTRefundResponse, error) {
 	return &result, nil
 }
 
-func CreateBill() {
+func CreateBill(payload APTBillPayload) (*APTBillResponse, error) {
+	jwtToken, err := getAuth()
+	if err != nil {
+		return nil, err
+	}
 
+	payload.Signature = signSingature(payload.GetPayloadUrl())
+	values, err := json.Marshal(payload)
+
+	if err != nil {
+		return nil, err
+	}
+
+	httpRequestURL := files.JoinURL(APTEbillHost, "/api/v1/service/ebill/create")
+	req, err := http.NewRequest(
+		"POST",
+		httpRequestURL,
+		bytes.NewBuffer([]byte(values)),
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("X-APPOTAPAY-AUTH", fmt.Sprintf("Bearer %s", jwtToken))
+
+	res, err := client.Do(req)
+
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	body, err := ioutil.ReadAll(res.Body)
+
+	if res.StatusCode != 200 {
+		return nil, errors.New(res.Status)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	var result APTBillResponse
+	if err := json.Unmarshal(body, &result); err != nil {
+		return nil, err
+	}
+
+	signature := signSingature(result.GetPayloadUrl())
+	if signature != result.Signature {
+		return nil, errors.New("Response Appotapay Refund Error")
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &result, nil
 }
