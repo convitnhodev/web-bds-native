@@ -81,9 +81,10 @@
         </div>
 
         <!-- Code here -->
-        <div class="mt-6 border-t grid gap-16 pt-6 lg:grid-cols-2">
+        <div class="my-4 border-t grid gap-8 pt-6 lg:grid-cols-2">
           {{$tags := join .Post.Tags ", "}} {{$relatedPosts := find_post_tags
-          $tags}} {{range $index, $post := $relatedPosts}}
+          $tags}} {{range $index, $post := related_posts $relatedPosts
+          .Post.ID}}
           <div class="flex-1">
             <img
               class="h-48 w-full object-cover rounded mt-4"
@@ -94,7 +95,7 @@
               <p class="text-xl font-bold text-gray-900">{{$post.Title}}</p>
               <p class="mt-3 text-base text-gray-500">{{$post.Short}}</p>
             </a>
-            <div class="mt-6 flex items-center">
+            <div class="mt-3 flex items-center">
               <div>
                 <p class="text-sm font-bold text-gray-900">
                   <a href="#">
