@@ -1235,7 +1235,7 @@ func (a *router) blog(w http.ResponseWriter, r *http.Request) {
 
 func (a *router) searchBlogs(w http.ResponseWriter, r *http.Request) {
 	tags := r.URL.Query().Get("tags")
-	a.render(w, r, "search.page.html", &templateData{
+	a.render(w, r, "blog.search.page.html", &templateData{
 		TagsString: tags,
 	})
 }

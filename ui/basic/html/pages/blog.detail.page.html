@@ -16,7 +16,7 @@
       <div>
         <h2 class="text-lg font-bold text-sky-600">
           {{range .Post.Tags}}
-          <a href="#">{{.}}</a>
+          <a href="/search?tags={{.}}">{{.}}</a>
           {{end}}
         </h2>
         <h3
