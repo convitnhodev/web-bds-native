@@ -100,6 +100,9 @@
                         <textarea class="form-control" name="Feedback"></textarea>
                       </div>
                     </div>
+                    <div class="form-group">
+                      <label><input type="checkbox" name="IsForever" value="true"/>  Từ chối vĩnh viễn</label>
+                    </div>
                     <button class="btn btn-primary mr-1" type="submit" onclick="return confirm('chắc nghen?');">Xác nhận</button>
                   </form>
                 </div>
@@ -256,7 +259,7 @@
                   <form action="/admin/users/{{$.UserInfo.ID}}/partner/{{.ID}}/reject" method="post">
                     <div class="form-group">
                       <div class="form-group-header">
-                        <label for="example-textarea">Nội dung phản hồi</label>
+                        <label for="example-textarea">Nội dung phản hồi:</label>
                       </div>
                       <div class="form-group-body">
                         <textarea class="form-control" name="Feedback"></textarea>

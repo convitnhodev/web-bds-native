@@ -45,6 +45,7 @@ type templateData struct {
 	PartnerList       []*models.Partner
 	SumAmount         int
 	ProductId         string
+	TagsString        string
 	IsKYCQuery        bool
 	IsPartnerQuery    bool
 	IsResetPwdByToken bool

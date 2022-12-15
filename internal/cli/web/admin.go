@@ -322,9 +322,14 @@ func (a *router) adminRejectKYC(w http.ResponseWriter, r *http.Request) {
 	}
 
 	f.Values = r.PostForm
+	isForever := f.GetBool("IsForever")
 
 	// Update KYC status
 	status := "rejected_kyc"
+	if isForever {
+		status = "rejected_kyc_forever"
+	}
+
 	err := a.App.KYC.FeedbackKYC(
 		kycId,
 		fmt.Sprint(rejectedBy),

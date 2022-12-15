@@ -971,15 +971,20 @@ func (a *router) uploadKYC(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userKycList, err := a.App.KYC.User(fmt.Sprint(userId))
-	if err != nil {
-		a.render(w, r, "500.page.html", &templateData{})
+	if user.LastKYCStatus == "approved_kyc" || user.LastKYCStatus == "rejected_kyc_forever" {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
 
 	// check user có verified phone chưa
 	if !hasRole(user, "verified_phone") {
 		http.Redirect(w, r, "/upgrade-user?to=verified_id", http.StatusSeeOther)
+		return
+	}
+
+	userKycList, err := a.App.KYC.User(fmt.Sprint(userId))
+	if err != nil {
+		a.render(w, r, "500.page.html", &templateData{})
 		return
 	}
 
@@ -1219,7 +1224,7 @@ func (a *router) blog(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		log.Println(err)
-		http.Error(w, "bad request", 400)
+		a.render(w, r, "500.page.html", &templateData{})
 		return
 	}
 
@@ -1227,6 +1232,14 @@ func (a *router) blog(w http.ResponseWriter, r *http.Request) {
 		Posts: posts,
 	})
 }
+
+func (a *router) searchBlogs(w http.ResponseWriter, r *http.Request) {
+	tags := r.URL.Query().Get("tags")
+	a.render(w, r, "search.page.html", &templateData{
+		TagsString: tags,
+	})
+}
+
 func (a *router) blogDetail(w http.ResponseWriter, r *http.Request) {
 	slug := r.URL.Query().Get(":slug")
 	post, err := a.App.Posts.GetBySlug(slug)
@@ -1328,6 +1341,7 @@ func run(c *root.Cmd) error {
 	// blog
 	mux.Get("/blog", use(a.blog))
 	mux.Get("/blog/:slug", use(a.blogDetail))
+	mux.Get("/search", use(a.searchBlogs))
 
 	// kyc
 	mux.Get("/kyc", use(a.uploadKYC, a.islogined))

@@ -20,6 +20,7 @@ type User struct {
 	EmailToken          string
 	PhoneToken          string
 	PartnerStatus       string
+	LastKYCStatus       string
 	CreatedAt           time.Time
 	UpdatedAt           time.Time
 	SendVerifiedEmailAt time.Time

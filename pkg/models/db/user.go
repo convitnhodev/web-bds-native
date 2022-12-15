@@ -35,6 +35,7 @@ var userColumes = []string{
 	"users.reset_pwd_token",
 	"users.rpt_expired_at",
 	"users.partner_status",
+	"users.last_kyc_status",
 }
 
 func (m *UserModel) HashPassword(s string) (string, error) {
@@ -71,6 +72,7 @@ func scanUser(r scanner, o *models.User) error {
 		&o.ResetPasswordToken,
 		&o.RPTExpiredAt,
 		&o.PartnerStatus,
+		&o.LastKYCStatus,
 	); err != nil {
 		return errors.Wrap(err, "scanUser")
 	}
