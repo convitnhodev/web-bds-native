@@ -56,6 +56,7 @@ var functions = template.FuncMap{
 	"upper":           strings.ToUpper,
 	"lower":           strings.ToLower,
 	"title":           strings.Title,
+	"join":            strings.Join,
 	"split":           strings.Split,
 	"contains":        strings.Contains,
 	"has_role":        hasRole,
@@ -233,7 +234,6 @@ func parseHTML(dir string) (map[string]*template.Template, error) {
 
 func findPostByTags(s string) []*models.Post {
 	tags := []string{}
-
 	for _, t := range strings.Split(s, ",") {
 		tags = append(tags, strings.TrimSpace(t))
 	}
