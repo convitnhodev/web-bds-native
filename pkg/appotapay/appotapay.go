@@ -90,6 +90,23 @@ func VerifyIPNPaymentCallback(paymentData APTPaymentRecipition) (string, error) 
 	return jsonStr, errors.New("Signature không hợp lệ")
 }
 
+// Verfiy IPN Ebill
+func VerifyIPNEbillCallback(ebillData APTBillRecipition) (string, error) {
+	jsonStr := ""
+	jsonByte, err := json.Marshal(ebillData)
+	if err != nil {
+		jsonStr = "{}"
+	}
+	jsonStr = string(jsonByte)
+
+	signature := signSingature(ebillData.GetPayloadUrl())
+	if signature == ebillData.Signature {
+		return jsonStr, nil
+	}
+
+	return jsonStr, errors.New("Signature không hợp lệ")
+}
+
 // Checkout menthod
 func Checkout(payload *APTPaymentPayload) (*APTPaymentResponse, error) {
 	jwtToken, err := getAuth()

@@ -421,6 +421,7 @@ func (a *router) callbackPaymentIPN(w http.ResponseWriter, r *http.Request) {
 			paymentDataStr,
 			paymentData.AppotapayTransId,
 			paymentData.TransactionTs,
+			paymentData.Amount,
 		)
 		if err != nil {
 			log.Println(err)
@@ -468,9 +469,58 @@ func (a *router) callbackBillIPN(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	if r.Method == "POST" {
-		// reqBody, err := ioutil.ReadAll(r.Body)
+		reqBody, err := ioutil.ReadAll(r.Body)
 
-		// TODO
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		var billData appotapay.APTBillRecipition
+		err = json.Unmarshal(reqBody, &billData)
+
+		appotapay.SecretKey = a.App.Config.APTSecretKey
+		paymentDataStr, err := appotapay.VerifyIPNEbillCallback(billData)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		payment, err := a.App.Payment.ID(billData.ParseOrderId(a.App.Config.APTPaymentHost))
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		ctx := r.Context()
+		tx, err := a.App.DB.BeginTx(ctx, nil)
+
+		// Update payment status của ebill được tạo trước đó
+		err = a.App.Payment.UpdateBillCallback(
+			tx,
+			ctx,
+			payment.ID,
+			paymentDataStr,
+			billData.TransactionId,
+			billData.TransactionTime,
+			billData.Amount,
+		)
+
+		if err != nil {
+			log.Println(err)
+			tx.Rollback()
+			return
+		}
+
+		// Update Invoice: Đã chuyển tiền thành công thì chuyển invoice status thành collect_completed
+		err = a.App.Invoice.UpdateBillCallback(tx, ctx, payment.InvoiceId)
+		if err != nil {
+			log.Println(err)
+			tx.Rollback()
+			return
+		}
+
+		tx.Commit()
 	}
 }
 

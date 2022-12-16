@@ -265,3 +265,22 @@ func (m *InvoiceModel) CollectMoney(
 
 	return err
 }
+
+func (m *InvoiceModel) UpdateBillCallback(
+	tx *sql.Tx,
+	ctx context.Context,
+	invoiceId int,
+) error {
+	q := `
+		UPDATE invoices
+		SET updated_at = now(),
+			status = 'collect_completed'`
+
+	_, err := tx.ExecContext(
+		ctx,
+		q,
+		invoiceId,
+	)
+
+	return err
+}

@@ -100,7 +100,10 @@
             <div class="Box-row Box-row--hover-gray d-flex flex-justify-between">
                 <div class="float-left">
                     <p>
-                        Số tiền thanh toán: <strong>{{ number_comma .Amount }} VND</strong>
+                        Số tiền cần thanh toán: <strong>{{ number_comma .Amount }} VND</strong>
+                    </p>
+                    <p>
+                        Số tiền đã nhận: <strong>{{ number_comma .ActuallyAmount }} VND</strong>
                     </p>
                     <p>
                         Thanh toán qua kênh: <strong>{{ parse_enum "PaymentMethod" .Method }}</strong>

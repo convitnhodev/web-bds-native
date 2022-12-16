@@ -122,10 +122,10 @@ type APTPaymentRecipition struct {
 	Signature        string `json:"signature"`
 }
 
-func (o *APTPaymentRecipition) ParseOrderId(APTPaymentHost string) string {
+func (o *APTPaymentRecipition) ParseOrderId(aptPaymentHost string) string {
 	strSlice := strings.Split(o.OrderId, "-")
 
-	if strings.Contains(APTPaymentHost, "payment.dev.appotapay.com") && len(strSlice) > 1 {
+	if strings.Contains(aptPaymentHost, "payment.dev.appotapay.com") && len(strSlice) > 1 {
 		return strSlice[1]
 	}
 	return o.OrderId
@@ -209,4 +209,49 @@ func (m *APTBillResponse) GetPayloadUrl() string {
 		m.ErrorCode,
 		string(paymentJson),
 	)
+}
+
+type APTBillRecipition struct {
+	BillCode          string `json:"message"`
+	PartnerCode       string `json:"partnerCode"`
+	ApiKey            string `json:"apiKey"`
+	Amount            int    `json:"amount"`
+	BankAccountNumber string `json:"bankAccountNumber"`
+	BankAccountName   string `json:"bankAccountName"`
+	BankCode          string `json:"bankCode"`
+	RequestTime       int    `json:"requestTime"`
+	TransactionTime   int    `json:"transactionTime"`
+	TransactionId     string `json:"appotapayTransId"`
+	Version           string `json:"version"`
+	Memo              string `json:"memo"`
+	ExtraData         string `json:"extraData"`
+	Signature         string `json:"signature"`
+}
+
+func (m *APTBillRecipition) GetPayloadUrl() string {
+	return fmt.Sprintf(
+		"amount=%d&apiKey=%s&bankAccountName=%s&bankAccountNumber=%s&bankCode=%s&billCode=%s&extraData=%s&memo=%s&partnerCode=%s&requestTime=%d&transactionId=%s&transactionTime=%d&version=%s",
+		m.Amount,
+		m.ApiKey,
+		m.BankAccountName,
+		m.BankAccountNumber,
+		m.BankCode,
+		m.BillCode,
+		m.ExtraData,
+		m.Memo,
+		m.PartnerCode,
+		m.RequestTime,
+		m.TransactionId,
+		m.TransactionTime,
+		m.Version,
+	)
+}
+
+func (m *APTBillRecipition) ParseOrderId(aptEbillHost string) string {
+	strSlice := strings.Split(m.BillCode, "-")
+
+	if strings.Contains(aptEbillHost, "payment.dev.appotapay.com") && len(strSlice) > 1 {
+		return strSlice[1]
+	}
+	return m.BillCode
 }

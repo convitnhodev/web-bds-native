@@ -20,6 +20,7 @@ var paymentColumes = []string{
 	"payments.id",
 	"payments.invoice_id",
 	"payments.amount",
+	"payments.actually_amount",
 	"payments.method",
 	"payments.pay_type",
 	"payments.tx_type",
@@ -43,6 +44,7 @@ func scanPayment(r scanner, o *models.Payment) error {
 		&o.ID,
 		&o.InvoiceId,
 		&o.Amount,
+		&o.ActuallyAmount,
 		&o.Method,
 		&o.PayType,
 		&o.TxType,
@@ -170,6 +172,7 @@ func (m *PaymentModel) UpdatePaymentCallback(
 	paymentData string,
 	apptotapayTransId string,
 	transactionAt int,
+	amount int,
 ) error {
 	q := `
 		UPDATE payments
@@ -177,9 +180,9 @@ func (m *PaymentModel) UpdatePaymentCallback(
 			status = $2,
 			recipition_data = $3,
 			appotapay_trans_id = $4,
-			transaction_at = to_timestamp($5)
-		WHERE id = $1
-	`
+			transaction_at = to_timestamp($5),
+			actually_amount = $6
+		WHERE id = $1`
 
 	status := "failed"
 	if isSuccess {
@@ -194,6 +197,7 @@ func (m *PaymentModel) UpdatePaymentCallback(
 		paymentData,
 		apptotapayTransId,
 		transactionAt,
+		amount,
 	)
 
 	return err
@@ -264,6 +268,41 @@ func (m *PaymentModel) UpdateBankAcount(
 		bankBranch,
 		billPayload,
 		billRes,
+	)
+
+	return err
+}
+
+func (m *PaymentModel) UpdateBillCallback(
+	tx *sql.Tx,
+	ctx context.Context,
+	paymentId int,
+	billData string,
+	transactionId string,
+	transactionTime int,
+	amount int,
+) error {
+	q := `
+		UPDATE payments
+		SET updated_at = now(),
+			status = $2,
+			recipition_data = $3,
+			appotapay_trans_id = $4,
+			transaction_at = to_timestamp($5),
+			actually_amount = $6,
+		WHERE id = $1
+	`
+
+	status := "success"
+	_, err := tx.ExecContext(
+		ctx,
+		q,
+		paymentId,
+		status,
+		billData,
+		transactionId,
+		transactionTime,
+		amount,
 	)
 
 	return err

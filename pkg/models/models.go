@@ -185,6 +185,7 @@ type Payment struct {
 	ID                   int
 	InvoiceId            int
 	Amount               int
+	ActuallyAmount       int
 	Status               string
 	Method               string
 	PayType              string
