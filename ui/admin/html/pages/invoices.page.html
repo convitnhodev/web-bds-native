@@ -13,6 +13,15 @@
       </h1>
     </div>
 
+    <div class="d-flex flex-items-center">
+      <div class="BtnGroup d-block mb-2">
+        <a href="/admin/products/{{.Product.ID}}/invoices?status=open" class="BtnGroup-item btn" type="button">Mới tạo</a>
+        <a href="/admin/products/{{.Product.ID}}/invoices?status=deposit" class="BtnGroup-item btn" type="button">Đã cọc</a>
+        <a href="/admin/products/{{.Product.ID}}/invoices?status=collecting" class="BtnGroup-item btn" type="button">Đang hối tiền</a>
+        <a href="/admin/products/{{.Product.ID}}/invoices?status=done" class="BtnGroup-item btn" type="button">Hoàn thành</a>
+      </div>
+    </div>
+
     {{if .Invoices}}
     <div class="Box">
       <div>

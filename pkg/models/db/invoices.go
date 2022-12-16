@@ -119,24 +119,36 @@ func (m *InvoiceModel) Buy(tx *sql.Tx, ctx context.Context, userId int, serect s
 	return o, nil
 }
 
-func (m *InvoiceModel) Find(productId int) ([]*models.Invoice, error) {
-	q := m.query(`
-		WHERE invoices.id IN (
-			SELECT
-				DISTINCT invoice_id
-			FROM invoice_items
-			WHERE invoice_items.product_id = $1
-		)
-	`, false)
+func (m *InvoiceModel) Find(productId int, statusList []string) ([]*models.Invoice, error) {
+	statusParams := []string{}
+	for _, st := range statusList {
+		statusParams = append(statusParams, fmt.Sprintf(`'%s'`, st))
+	}
+	statusCondition := fmt.Sprintf("AND status IN (%s)", strings.Join(statusParams, ","))
 
-	count := m.count(`
-		WHERE invoices.id IN (
+	q := m.query(
+		fmt.Sprintf(`WHERE invoices.id IN (
 			SELECT
 				DISTINCT invoice_id
 			FROM invoice_items
-			WHERE invoice_items.product_id = $1
-		)
-	`)
+			WHERE invoice_items.product_id = $1)
+			%s
+			ORDER BY updated_at DESC`,
+			statusCondition,
+		),
+		false,
+	)
+
+	count := m.count(
+		fmt.Sprintf(`WHERE invoices.id IN (
+			SELECT
+				DISTINCT invoice_id
+			FROM invoice_items
+			WHERE invoice_items.product_id = $1)
+			%s`,
+			statusCondition,
+		),
+	)
 
 	if err := m.Pagination.Count(count, productId); err != nil {
 		return nil, err

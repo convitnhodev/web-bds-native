@@ -42,7 +42,7 @@
         </div>
         {{end}}
         
-        {{if eq .Invoice.Status "collecting"}}
+        {{if or (eq .Invoice.Status "collecting") (eq .Invoice.Status "deposit")}}
         <div class="mt-4">
             <a class="btn btn-xs mr-1" onclick="return confirm('chắc nghen?');" 
                 href="/admin/products/{{$.ProductId}}/invoices/{{.Invoice.ID}}/closeInvoice?isCustomerReject=true">

@@ -1074,6 +1074,7 @@ func (a *router) adminLogs(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *router) adminInvoices(w http.ResponseWriter, r *http.Request) {
+	statusQuery := r.URL.Query().Get("status")
 	p := a.App.Invoice.Pagination.Query(r.URL)
 
 	product, err := a.App.Products.ID(r.URL.Query().Get(":id"))
@@ -1083,7 +1084,19 @@ func (a *router) adminInvoices(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	invoices, err := a.App.Invoice.Find(product.ID)
+	statusList := []string{"open"}
+	switch statusQuery {
+	case "open":
+		statusList = []string{"open"}
+	case "deposit":
+		statusList = []string{"deposit"}
+	case "collecting":
+		statusList = []string{"collecting"}
+	case "done":
+		statusList = []string{"collect_completed", "refund", "slot_canceled", "collect_canceled"}
+	}
+
+	invoices, err := a.App.Invoice.Find(product.ID, statusList)
 	if err != nil {
 		log.Println(err)
 		http.Error(w, "bad request", 400)
