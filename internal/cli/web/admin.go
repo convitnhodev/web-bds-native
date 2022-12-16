@@ -725,7 +725,7 @@ func (a *router) adminUpdateProduct(w http.ResponseWriter, r *http.Request) {
 		// Kiểm tra giá có bội là minCostPerSlot là lớn hơn minCostPerSlot
 		costPerSlot := f.GetInt("CostPerSlot")
 		minCostPerSlot := a.App.Config.MinCostPerSlot
-		if !(costPerSlot%minCostPerSlot == 0 && costPerSlot/minCostPerSlot >= 1) {
+		if !(costPerSlot%minCostPerSlot == 0 && costPerSlot > 0) {
 			f.Errors.Add("CostPerSlot", "err_product_min_cost_slot")
 			return
 		}
