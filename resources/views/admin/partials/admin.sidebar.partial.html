@@ -1,0 +1,50 @@
+{{define "admin.partials.sidebar" -}}
+    <div class="sidebar-content">
+        <!-- Main navigation -->
+        <div class="sidebar-section">
+            <ul class="nav nav-sidebar" data-nav-type="accordion">
+
+                <!-- Main -->
+                <li class="nav-item-header">
+                    <div class="text-uppercase font-size-xs line-height-xs">Main</div>
+                    <i class="icon-menu" title="Main"></i></li>
+                <li class="nav-item">
+                    <a href="/admin" class="nav-link">
+                        <i class="icon-home4"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <!-- /main -->
+
+                <!-- Layout -->
+                <li class="nav-item-header">
+                    <div class="text-uppercase font-size-xs line-height-xs">Management</div>
+                    <i class="icon-menu" title="Layout options"></i></li>
+                <li class="nav-item nav-item-submenu {{- if (currentPathPrefixMatch .Context "/admin/users")}} nav-item-open {{ end -}}">
+                    <a href="#" class="nav-link"><i class="icon-stack2"></i> <span>Users</span></a>
+                    <ul class="nav nav-group-sub"
+                        data-submenu-title="Page layouts" {{- if (currentPathPrefixMatch .Context "/admin/users")}} style="display: block;" {{ end -}}>
+                        <li class="nav-item"><a href="/admin/users"
+                                                class="nav-link {{- if (currentPathMatch .Context "/admin/users")}} active {{ end -}}">List</a>
+                        </li>
+                        <li class="nav-item"><a href="/admin/users/create" class="nav-link">Create</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item nav-item-submenu {{- if (currentPathPrefixMatch .Context "/admin/products")}} nav-item-open {{ end -}}">
+                    <a href="#" class="nav-link"><i class="icon-stack2"></i> <span>Products</span></a>
+                    <ul class="nav nav-group-sub"
+                        data-submenu-title="Page layouts" {{- if (currentPathPrefixMatch .Context "/admin/products")}} style="display: block;" {{ end -}}>
+                        <li class="nav-item"><a href="/admin/products"
+                                                class="nav-link {{- if (currentPathMatch .Context "/admin/products")}} active {{ end -}}">List</a>
+                        </li>
+                        <li class="nav-item"><a href="/admin/products/create" class="nav-link">Create</a></li>
+                    </ul>
+                </li>
+                <!-- /layout -->
+
+            </ul>
+        </div>
+        <!-- /main navigation -->
+
+    </div>
+{{- end}}

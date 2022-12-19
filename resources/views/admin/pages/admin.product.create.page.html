@@ -1,0 +1,352 @@
+{{ template "admin" .}}
+
+{{ define "js-before-app" -}}
+    <script src="/assets/admin/global_assets/js/plugins/extensions/jquery_ui/interactions.min.js"></script>
+    <script src="/assets/admin/global_assets/js/plugins/forms/selects/select2.min.js"></script>
+    <script src="/assets/admin/global_assets/js/plugins/uploaders/plupload/plupload.full.min.js"></script>
+    <script src="/assets/admin/global_assets/js/plugins/uploaders/plupload/plupload.queue.min.js"></script>
+    <script src="/assets/admin/global_assets/js/plugins/forms/inputs/touchspin.min.js"></script>
+
+{{- end}}
+{{ define "js-after-app" -}}
+    <script src="/assets/admin/assets/js/product-create.js"></script>
+{{- end}}
+{{ define "page-header" -}}
+    <div class="page-header-content header-elements-lg-inline container">
+        <div class="page-title d-flex">
+            <h4><i class="icon-arrow-left52 mr-2"></i> <span class="font-weight-semibold">Product</span> - Create</h4>
+            <a href="#" class="header-elements-toggle text-body d-lg-none"><i class="icon-more"></i></a>
+        </div>
+
+        <div class="header-elements d-none">
+        </div>
+    </div>
+    <div class="breadcrumb-line breadcrumb-line-light px-0">
+        <div class="page-header-content container header-elements-lg-inline">
+            <div class="d-flex">
+                <div class="breadcrumb">
+                    <a href="/admin" class="breadcrumb-item"><i class="icon-home2 mr-2"></i> Home</a>
+                    <a href="/admin/products" class="breadcrumb-item"> Products</a>
+                    <span class="breadcrumb-item active">Create</span>
+                </div>
+
+                <a href="#" class="header-elements-toggle text-body d-lg-none"><i class="icon-more"></i></a>
+            </div>
+
+            <div class="header-elements d-none">
+            </div>
+        </div>
+    </div>
+{{- end }}
+
+{{define "content" -}}
+    <div class="row">
+        <form action="/admin/products" method="POST">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">Thông tin cơ bản</h5>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label>Loại hình bất động sản:</label>
+                            <select class="form-control select" name="category_id">
+                                <option value="1" selected>Căn hộ chung cư</option>
+                                <option value="2" selected>Nhà riêng</option>
+                                <option value="3" selected>Nhà biệt thự, liền kề</option>
+                                <option value="4" selected>Nhà mặt phố</option>
+                                <option value="5" selected>Shop house, nhà phố thương mại</option>
+                                <option value="6" selected>Đất nền dự án</option>
+                                <option value="7" selected>Đất</option>
+                                <option value="8" selected>Trang trại, khu nghỉ dưỡng</option>
+                                <option value="9" selected>Condotel</option>
+                                <option value="10" selected>Kho, nhà xưởng</option>
+                                <option value="99" selected>Các loại hình bất động sản khác</option>
+                            </select>
+                        </div>
+                        <legend class="text-uppercase font-size-sm font-weight-bold">Địa chỉ</legend>
+                        <div class="row">
+                            <div class="col-lg-4">
+                                <div class="form-group">
+                                    <label>Tỉnh, thành phố:</label>
+                                    <select class="form-control provinces-select-remote" name="province_id">
+                                        <option></option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="form-group">
+                                    <label>Quận, huyện:</label>
+                                    <select class="form-control cities-select-remote" name="district_id">
+                                        <option></option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="form-group">
+                                    <label>Phường, xã:</label>
+                                    <select class="form-control wards-select-remote" name="ward_id">
+                                        <option></option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-2">
+                                <div class="form-group">
+                                    <label>Số nhà ngõ:</label>
+                                    <input type="text" name="address_number" class="form-control" placeholder="99"/>
+                                </div>
+                            </div>
+                            <div class="col-lg-10">
+                                <div class="form-group">
+                                    <label>Đường, phố:</label>
+                                    <input type="text" name="street" class="form-control" placeholder="Mai Chí Thọ"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">Thông tin bài viết</h5>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label>Tiêu đề:</label>
+                            <input type="text" name="title" class="form-control"/>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Mô tả:</label>
+                            <textarea name="description" rows="3" cols="3" class="form-control"
+                                      placeholder="Nhập mô tả chung về bất động sản của bạn. Ví dụ: Khu nhà có vị trí thuận lợi, gần công viên, gần trường học ... ">
+                            </textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">Thông tin bất động sản</h5>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label>Diện tích:</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="area" placeholder="100">
+                                <span class="input-group-append">
+                                            <span class="input-group-text">m<sup>2</sup></span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-4">
+                                <div class="form-group">
+                                    <label>Giấy tờ pháp lý:</label>
+                                    <select class="form-control select" name="document_type">
+                                        <option value="1" selected>Sổ đỏ, sổ hồng</option>
+                                        <option value="2" selected>Hợp đồng mua bán</option>
+                                        <option value="3" selected>Đang chờ sổ</option>
+                                        <option value="4" selected>Khác</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="form-group">
+                                    <label>Thêm:</label>
+                                    <input type="text" name="title" class="form-control"/>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="form-group">
+                                    <label>Minh chứng pháp lý:</label>
+                                    <div class="custom-file">
+                                        <input type="file" class="custom-file-input" id="customFile">
+                                        <label class="custom-file-label" for="customFile">Tải lên</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <legend></legend>
+                        <div class="form-group row">
+                            <label class="col-lg-8 col-form-label">Số phòng ngủ:</label>
+                            <div class="col-lg-4">
+                                <input type="text" name="bedroom" value="1" class="form-control touchspin-step">
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-lg-8 col-form-label">Số toilet:</label>
+                            <div class="col-lg-4">
+                                <input type="text" name="toilet" value="1" class="form-control touchspin-step">
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-lg-8 col-form-label">Số tầng:</label>
+                            <div class="col-lg-4">
+                                <input type="text" name="floor" value="1" class="form-control touchspin-step">
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-lg-8 col-form-label">Số hầm:</label>
+                            <div class="col-lg-4">
+                                <input type="text" name="basement" value="0" class="form-control touchspin-step">
+                            </div>
+                        </div>
+                        <legend class="text-uppercase font-size-sm font-weight-bold">Mô tả bổ sung</legend>
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Hướng nhà:</label>
+                                    <select class="form-control select" name="house_direction">
+                                        <option value="1" selected>Bắc</option>
+                                        <option value="2" selected>Nam</option>
+                                        <option value="3" selected>Đông</option>
+                                        <option value="4" selected>Tây</option>
+                                        <option value="5" selected>Đông Bắc</option>
+                                        <option value="6" selected>Đông Nam</option>
+                                        <option value="7" selected>Tây Bắc</option>
+                                        <option value="8" selected>Tây Nam</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Hướng ban công:</label>
+                                    <select class="form-control select" name="balcony_direction">
+                                        <option value="1" selected>Bắc</option>
+                                        <option value="2" selected>Nam</option>
+                                        <option value="3" selected>Đông</option>
+                                        <option value="4" selected>Tây</option>
+                                        <option value="5" selected>Đông Bắc</option>
+                                        <option value="6" selected>Đông Nam</option>
+                                        <option value="7" selected>Tây Bắc</option>
+                                        <option value="8" selected>Tây Nam</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Đường vào:</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" name="street_width" placeholder="32">
+                                        <span class="input-group-append">
+                                            <span class="input-group-text">m</span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Mặt tiền:</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" name="front_width" placeholder="5">
+                                        <span class="input-group-append">
+                                            <span class="input-group-text">m</span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Độ rộng vỉa hè:</label>
+                                    <div class="input-group">
+                                        <input type="text" name="pavement_width" class="form-control" placeholder="3">
+                                        <span class="input-group-append">
+                                            <span class="input-group-text">m</span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Nội thất:</label>
+                                    <div class="input-group">
+                                        <select class="form-control select" name="furniture">
+                                            {{range  .Furniture}}
+                                                <option value="{{.ID}}">{{.Value}}</option>
+                                            {{end}}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Lợi thế kinh doanh:</label>
+                                    <div class="input-group">
+                                        <input type="text" name="business_advantage" class="form-control" placeholder="Văn phòng, Karaoke...">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label>Kế hoạch tài chính:</label>
+                                    <div class="input-group">
+                                        <input type="text" name="financial_plan" class="form-control" placeholder="mức dự kiến dòng tiền">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="d-block">Điều khoản mua chung:</label>
+                            <label class="custom-control custom-radio custom-control-inline">
+                                <input type="radio" class="custom-control-input" name="general_purchase_terms_select"
+                                       checked=""
+                                       data-enpassusermodified="yes" value="url">
+                                <span class="custom-control-label">Nhập đường dẫn</span>
+                            </label>
+
+                            <label class="custom-control custom-radio custom-control-inline">
+                                <input type="radio" class="custom-control-input" name="general_purchase_terms_select"
+                                       value="upload_file">
+                                <span class="custom-control-label">Tải file lên</span>
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <div class="input-group general_purchase_terms">
+                                <input type="text" name="general_purchase_terms" class="form-control"
+                                       placeholder="đường dẫn file">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">Hình ảnh & Video</h5>
+                    </div>
+
+                    <div class="card-body">
+                        <p class="mb-3">Hãy dùng ảnh thật, không trùng, không chèn số điện thoại. Mỗi ảnh kích thước tối
+                            thiểu100x100, tối đa 15 MB. Số lượng ảnh tối đa tuỳ theo loại tin.</p>
+                        <p class="font-weight-semibold">Tải lên:</p>
+                        <div class="html5-uploader"><span>Your browser doesn't support native upload.</span></div>
+                    </div>
+
+                    <div class="card-footer">
+                        <div class="text-right">
+                            <button type="submit" class="btn btn-primary" id="submit">Create <i
+                                        class="icon-paperplane ml-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </form>
+    </div>
+{{- end}}

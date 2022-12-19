@@ -1,0 +1,65 @@
+{{define "web.header" -}}
+<header class="flex items-center h-16 px-8 bg-slate-50">
+  <div class="text-3xl font-bold">
+    <a href="/">
+      <img
+        class="h-8 w-auto sm:h-10"
+        src="/assets/web/images/logo.svg"
+        alt="deeincom"
+      />
+    </a>
+  </div>
+  <!-- Nav -->
+  <div class="md:flex hidden flex-1 ml-8 h-full">
+    <!-- Nav start block -->
+    <div class="flex flex-1 gap-x-6"></div>
+    <!-- Nav end block -->
+    <div class="flex gap-x-6">
+      <!-- Nav item -->
+      <div
+        class="flex items-center h-full text-lg transition-all hover:text-sky-500"
+      >
+        <a href="/login">Đăng nhập</a>
+      </div>
+      <!-- Nav item -->
+      <div class="flex items-center h-full text-lg">
+        <div
+          class="px-4 py-2 rounded transition-all bg-sky-500 text-white hover:bg-sky-600"
+        >
+          <a href="/register">Đăng ký</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Nav mobile -->
+  <div class="md:hidden flex flex-1 justify-end z-50">
+    <button id="mobile-menu-toggler">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="1.5"
+        stroke="currentColor"
+        class="w-6 h-6"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+        />
+      </svg>
+    </button>
+    <div
+      id="mobile-menu"
+      class="[&.dee--open]:block hidden fixed inset-0 top-16 bg-slate-50"
+    >
+      <a href="/login">
+        <div class="px-6 py-3 text-gray-500 text-lg">Đăng nhập</div>
+      </a>
+      <a href="/register">
+        <div class="px-6 py-3 text-gray-500 text-lg">Đăng ký</div>
+      </a>
+    </div>
+  </div>
+</header>
+{{- end}}

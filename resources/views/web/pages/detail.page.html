@@ -1,0 +1,350 @@
+{{ template "web" .}}
+<!-- web.header.css-after -->
+{{define "web.header.css-after" -}}
+<link rel="stylesheet" href="/assets/web/css/carousel.css" />
+{{- end}}
+<!-- web.header.scripts-before -->
+{{define "web.header.scripts-before" -}}
+<script
+  src="https://unpkg.com/embla-carousel/embla-carousel.umd.js"
+  defer
+></script>
+{{- end}}
+<!-- web.header.scripts-after -->
+{{define "web.header.scripts-after" -}}
+<script src="/assets/web/js/carousel.js" defer></script>
+{{- end}}
+<!-- web.content -->
+{{define "web.content" -}}
+<main>
+  <div class="bg-white">
+    <div
+      class="mx-auto max-w-2xl py-16 px-4 sm:py-24 sm:px-6 lg:max-w-7xl lg:px-8"
+    >
+      <div>
+        <div class="flex items-center gap-4">
+          <!-- <img
+            class="rounded border w-10 h-10"
+            src="https://uploads.republic.com/p/offerings/logos/small_2x/000/001/368/1368-1643713542-e4a0d3ced8d8f7a2714f8664ade321aeb8d57aa4.png"
+            alt=""
+          /> -->
+          <div class="text-5xl font-bold">{{ .Product.Title }}</div>
+        </div>
+        <div class="mt-4 text-2xl text-gray-500">
+          {{ .Product.AddressNumber }} {{ .Product.Street }}, {{ .Product.Ward
+          }}, {{ .Product.District }}, {{ .Product.City }}
+        </div>
+        <div class="mt-4 space-x-1 text-sm">
+          <span class="px-2 py-1 bg-blue-100 text-blue-500 uppercase rounded">
+            Diện tích: {{ .Product.Area }}m<sup>2</sup>
+          </span>
+          <span class="px-2 py-1 bg-green-100 text-green-500 uppercase rounded">
+            Hướng: {{ .Product.HouseDirection }}
+          </span>
+        </div>
+      </div>
+      <div class="mt-10 lg:grid lg:grid-cols-3 lg:items-start lg:gap-x-8">
+        <div class="col-span-2 flex flex-col">
+          <div class="w-full">
+            <div class="embla" id="main-carousel">
+              <div class="embla__viewport">
+                <div class="embla__container">
+                  <div class="embla__slide">
+                    <div class="embla__slide__inner">
+                      <img
+                        class="embla__slide__img"
+                        src="https://www.embla-carousel.com/static/slide-1-ae1074a2ded156f4bb23fc2cbf269223.jpg"
+                      />
+                    </div>
+                  </div>
+                  <div class="embla__slide">
+                    <div class="embla__slide__inner">
+                      <img
+                        class="embla__slide__img"
+                        src="https://www.embla-carousel.com/static/slide-1-ae1074a2ded156f4bb23fc2cbf269223.jpg"
+                      />
+                    </div>
+                  </div>
+                  <div class="embla__slide">
+                    <div class="embla__slide__inner">
+                      <img
+                        class="embla__slide__img"
+                        src="https://www.embla-carousel.com/static/slide-1-ae1074a2ded156f4bb23fc2cbf269223.jpg"
+                      />
+                    </div>
+                  </div>
+                  <div class="embla__slide">
+                    <div class="embla__slide__inner">
+                      <img
+                        class="embla__slide__img"
+                        src="https://www.embla-carousel.com/static/slide-1-ae1074a2ded156f4bb23fc2cbf269223.jpg"
+                      />
+                    </div>
+                  </div>
+                  <div class="embla__slide">
+                    <div class="embla__slide__inner">
+                      <img
+                        class="embla__slide__img"
+                        src="https://www.embla-carousel.com/static/slide-1-ae1074a2ded156f4bb23fc2cbf269223.jpg"
+                      />
+                    </div>
+                  </div>
+                  <div class="embla__slide">
+                    <div class="embla__slide__inner">
+                      <img
+                        class="embla__slide__img"
+                        src="https://www.embla-carousel.com/static/slide-1-ae1074a2ded156f4bb23fc2cbf269223.jpg"
+                      />
+                    </div>
+                  </div>
+                  <div class="embla__slide">
+                    <div class="embla__slide__inner">
+                      <img
+                        class="embla__slide__img"
+                        src="https://www.embla-carousel.com/static/slide-1-ae1074a2ded156f4bb23fc2cbf269223.jpg"
+                      />
+                    </div>
+                  </div>
+                  <div class="embla__slide">
+                    <div class="embla__slide__inner">
+                      <img
+                        class="embla__slide__img"
+                        src="https://www.embla-carousel.com/static/slide-1-ae1074a2ded156f4bb23fc2cbf269223.jpg"
+                      />
+                    </div>
+                  </div>
+                  <div class="embla__slide">
+                    <div class="embla__slide__inner">
+                      <img
+                        class="embla__slide__img"
+                        src="https://www.embla-carousel.com/static/slide-1-ae1074a2ded156f4bb23fc2cbf269223.jpg"
+                      />
+                    </div>
+                  </div>
+                  <div class="embla__slide">
+                    <div class="embla__slide__inner">
+                      <img
+                        class="embla__slide__img"
+                        src="https://www.embla-carousel.com/static/slide-1-ae1074a2ded156f4bb23fc2cbf269223.jpg"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="embla embla--thumb" id="thumb-carousel">
+              <div class="embla__viewport">
+                <div class="embla__container embla__container--thumb">
+                  <div class="embla__slide embla__slide--thumb">
+                    <button
+                      class="embla__slide__inner embla__slide__inner--thumb"
+                      type="button"
+                    >
+                      <img
+                        class="embla__slide__thumbnail"
+                        src="https://www.embla-carousel.com/static/slide-1-ae1074a2ded156f4bb23fc2cbf269223.jpg"
+                      />
+                    </button>
+                  </div>
+                  <div class="embla__slide embla__slide--thumb">
+                    <button
+                      class="embla__slide__inner embla__slide__inner--thumb"
+                      type="button"
+                    >
+                      <img
+                        class="embla__slide__thumbnail"
+                        src="https://www.embla-carousel.com/static/slide-1-ae1074a2ded156f4bb23fc2cbf269223.jpg"
+                      />
+                    </button>
+                  </div>
+                  <div class="embla__slide embla__slide--thumb">
+                    <button
+                      class="embla__slide__inner embla__slide__inner--thumb"
+                      type="button"
+                    >
+                      <img
+                        class="embla__slide__thumbnail"
+                        src="https://www.embla-carousel.com/static/slide-1-ae1074a2ded156f4bb23fc2cbf269223.jpg"
+                      />
+                    </button>
+                  </div>
+                  <div class="embla__slide embla__slide--thumb">
+                    <button
+                      class="embla__slide__inner embla__slide__inner--thumb"
+                      type="button"
+                    >
+                      <img
+                        class="embla__slide__thumbnail"
+                        src="https://www.embla-carousel.com/static/slide-1-ae1074a2ded156f4bb23fc2cbf269223.jpg"
+                      />
+                    </button>
+                  </div>
+                  <div class="embla__slide embla__slide--thumb">
+                    <button
+                      class="embla__slide__inner embla__slide__inner--thumb"
+                      type="button"
+                    >
+                      <img
+                        class="embla__slide__thumbnail"
+                        src="https://www.embla-carousel.com/static/slide-1-ae1074a2ded156f4bb23fc2cbf269223.jpg"
+                      />
+                    </button>
+                  </div>
+                  <div class="embla__slide embla__slide--thumb">
+                    <button
+                      class="embla__slide__inner embla__slide__inner--thumb"
+                      type="button"
+                    >
+                      <img
+                        class="embla__slide__thumbnail"
+                        src="https://www.embla-carousel.com/static/slide-1-ae1074a2ded156f4bb23fc2cbf269223.jpg"
+                      />
+                    </button>
+                  </div>
+                  <div class="embla__slide embla__slide--thumb">
+                    <button
+                      class="embla__slide__inner embla__slide__inner--thumb"
+                      type="button"
+                    >
+                      <img
+                        class="embla__slide__thumbnail"
+                        src="https://www.embla-carousel.com/static/slide-1-ae1074a2ded156f4bb23fc2cbf269223.jpg"
+                      />
+                    </button>
+                  </div>
+                  <div class="embla__slide embla__slide--thumb">
+                    <button
+                      class="embla__slide__inner embla__slide__inner--thumb"
+                      type="button"
+                    >
+                      <img
+                        class="embla__slide__thumbnail"
+                        src="https://www.embla-carousel.com/static/slide-1-ae1074a2ded156f4bb23fc2cbf269223.jpg"
+                      />
+                    </button>
+                  </div>
+                  <div class="embla__slide embla__slide--thumb">
+                    <button
+                      class="embla__slide__inner embla__slide__inner--thumb"
+                      type="button"
+                    >
+                      <img
+                        class="embla__slide__thumbnail"
+                        src="https://www.embla-carousel.com/static/slide-1-ae1074a2ded156f4bb23fc2cbf269223.jpg"
+                      />
+                    </button>
+                  </div>
+                  <div class="embla__slide embla__slide--thumb">
+                    <button
+                      class="embla__slide__inner embla__slide__inner--thumb"
+                      type="button"
+                    >
+                      <img
+                        class="embla__slide__thumbnail"
+                        src="https://www.embla-carousel.com/static/slide-1-ae1074a2ded156f4bb23fc2cbf269223.jpg"
+                      />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-10 px-4 sm:mt-16 sm:px-0 lg:mt-0">
+          <div class="text-5xl font-bold tracking-tight text-green-500">
+            {{ .Product.FinancialPlan }}
+          </div>
+          <div class="mt-2">
+            <p class="text-xl tracking-tight text-gray-400">
+              Kế hoạch tài chính
+            </p>
+          </div>
+          <!-- <div class="mt-2 h-[5px] bg-green-400 w-full rounded-full"></div> -->
+          <div class="mt-6">
+            <div class="">
+              <p>Lợi thế kinh doanh</p>
+              <p class="font-bold text-3xl">{{ .Product.BusinessAdvantage }}</p>
+            </div>
+            <div class="mt-6">
+              <p>Loại hình</p>
+              <p class="font-bold text-3xl">{{ .Product.CategoryID }}</p>
+            </div>
+            <div class="mt-6">
+              <p>Tình trạng pháp lý</p>
+              <p class="font-bold text-3xl">{{ .Product.DocumentType }}</p>
+            </div>
+          </div>
+          <form class="mt-6">
+            <div class="sm:flex-col1 mt-10 flex">
+              <button
+                type="submit"
+                class="flex w-full flex-1 items-center justify-center rounded-md border border-transparent bg-sky-600 py-3 px-8 text-2xl font-bold text-white hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-gray-50 sm:w-full"
+              >
+                Đầu tư
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div
+      class="mx-auto max-w-2xl px-4 pt-18 pb-16 sm:px-6 lg:grid lg:max-w-7xl lg:grid-cols-3 lg:grid-rows-[auto,auto,1fr] lg:gap-x-8 lg:px-8 lg:pt-10 lg:pb-24"
+    >
+      <div class="lg:col-span-2 lg:border-r lg:border-gray-200 lg:pr-8">
+        <h1 class="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
+          {{ .Product.Title }}
+        </h1>
+      </div>
+      <div class="mt-4 lg:row-span-3 lg:mt-0">
+        <div>
+          <div class="text-gray-400">Diện tích</div>
+          <div class="font-bold text-xl">{{ .Product.Area }}m<sup>2</sup></div>
+        </div>
+        <div class="mt-4 border-t pt-4">
+          <div class="text-gray-400">Mặt tiền</div>
+          <div class="font-bold text-xl">{{ .Product.FrontWidth }}m</div>
+        </div>
+        <div class="mt-4 border-t pt-4">
+          <div class="text-gray-400">Đường trước nhà</div>
+          <div class="font-bold text-xl">{{ .Product.StreetWidth }}m</div>
+        </div>
+        <div class="mt-4 border-t pt-4">
+          <div class="text-gray-400">Độ rộng vỉa hè</div>
+          <div class="font-bold text-xl">{{ .Product.PavementWidth }}m</div>
+        </div>
+        <div class="mt-4 border-t pt-4">
+          <div class="text-gray-400">Số phòng ngủ</div>
+          <div class="font-bold text-xl">{{ .Product.Bedroom }}</div>
+        </div>
+        <div class="mt-4 border-t pt-4">
+          <div class="text-gray-400">Kết cấu tài sản</div>
+          <div class="font-bold text-xl">{{ .Product.Furniture }}</div>
+        </div>
+        <div class="mt-4 border-t pt-4">
+          <div class="text-gray-400">Số toilet</div>
+          <div class="font-bold text-xl">{{ .Product.Toilet }}</div>
+        </div>
+        <div class="mt-4 border-t pt-4">
+          <div class="text-gray-400">Hướng nhà</div>
+          <div class="font-bold text-xl">{{ .Product.HouseDirection }}</div>
+        </div>
+        <!-- <div class="mt-4 border-t pt-4">
+          <div class="text-gray-400">Valuation cap</div>
+          <div class="font-bold text-xl blur hover:blur-none transition-all">
+            Login to view
+          </div>
+        </div> -->
+      </div>
+      <div
+        class="py-10 lg:col-span-2 lg:col-start-1 lg:border-r lg:border-gray-200 lg:pt-6 lg:pb-16 lg:pr-8"
+      >
+        <div>
+          <div class="space-y-6">
+            <p class="text-base text-gray-900">{{ .Product.Description }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+{{- end}}

@@ -1,11 +1,16 @@
 {
   "name": "deeincom",
+<<<<<<< HEAD
   "version": "0.0.1",
+=======
+  "version": "1.0.0",
+>>>>>>> 5ed448758ec77912d8f15b1cd516eb78d5d5ec71
   "private": true,
   "description": "deeincom",
   "license": "UNLICENSED",
   "author": "deeincom",
   "scripts": {
+<<<<<<< HEAD
     "dev": "unocss \"../ui/**/*.html\" --watch --config uno.config.js --out-file \"../ui/basic/static/css/style.css\"",
     "build": "unocss \"../ui/**/*.html\" --config uno.config.js --out-file \"../ui/basic/static/css/style.css\""
   },
@@ -15,5 +20,14 @@
     "@unocss/preset-uno": "^0.47.6",
     "@unocss/preset-web-fonts": "^0.47.6",
     "mini-svg-data-uri": "^1.4.4"
+=======
+    "dev": "unocss \"../resources/views/web/**/*.html\" --watch --config uno.config.js --out-file \"../public/assets/web/css/deeincom.css\"",
+    "build": "unocss \"../resources/views/web/**/*.html\" --config uno.config.js --out-file \"../public/assets/web/css/deeincom.css\""
+  },
+  "devDependencies": {
+    "@unocss/cli": "^0.45.30",
+    "@unocss/preset-uno": "^0.45.30",
+    "@unocss/preset-web-fonts": "^0.45.30"
+>>>>>>> 5ed448758ec77912d8f15b1cd516eb78d5d5ec71
   }
 }

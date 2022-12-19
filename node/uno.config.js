@@ -1,7 +1,12 @@
+<<<<<<< HEAD
 import presetTypography from '@unocss/preset-typography';
 import presetUno from '@unocss/preset-uno';
 import presetWebFonts from '@unocss/preset-web-fonts';
 import svgToDataUri from 'mini-svg-data-uri';
+=======
+import presetUno from '@unocss/preset-uno';
+import presetWebFonts from '@unocss/preset-web-fonts';
+>>>>>>> 5ed448758ec77912d8f15b1cd516eb78d5d5ec71
 
 export default {
   presets: [
@@ -12,12 +17,16 @@ export default {
         sans: 'Barlow',
       },
     }),
+<<<<<<< HEAD
     presetTypography(),
+=======
+>>>>>>> 5ed448758ec77912d8f15b1cd516eb78d5d5ec71
   ],
   preflights: [
     {
       getCSS: () => '.preload *{transition-property: none;}',
     },
+<<<<<<< HEAD
     {
       getCSS: ({ theme }) => `.dee-ol {
   padding-left: 4.75rem;
@@ -409,5 +418,7 @@ export default {
         return style.join('\n');
       },
     },
+=======
+>>>>>>> 5ed448758ec77912d8f15b1cd516eb78d5d5ec71
   ],
 };

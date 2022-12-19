@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .DS_Store
 config.json
 doc/*
@@ -10,3 +11,23 @@ upload/*
 .editorconfig
 .prettierrc
 node_modules
+=======
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+go.work
+.DS_Store
+.env
+.idea
+.air.toml
+.editorconfig
+.prettierrc
+tmp/
+vendor/
+tmp
+node_modules/
+>>>>>>> 5ed448758ec77912d8f15b1cd516eb78d5d5ec71
