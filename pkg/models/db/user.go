@@ -154,6 +154,20 @@ func (m *UserModel) ID(id string) (*models.User, error) {
 	return o, nil
 }
 
+// use all case
+func (m *UserModel) GetByConditions(conditions map[string]interface{}) (*models.User, error) {
+	var o *models.User
+	for key, value := range conditions {
+		q := m.query(fmt.Sprintf(`where % = $1`, key))
+		row := m.DB.QueryRow(q, value)
+		o = new(models.User)
+		if err := scanUser(row, o); err != nil {
+			return nil, errors.Wrap(err, fmt.Sprintf("user.GetBy%", key))
+		}
+	}
+	return o, nil
+}
+
 func (m *UserModel) GetByEmailToken(token string) (*models.User, error) {
 	q := m.query(`where users.email_token = $1`)
 	row := m.DB.QueryRow(q, token)

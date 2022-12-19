@@ -288,6 +288,5 @@ func CreateBill(payload APTBillPayload) (*APTBillResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	return &result, nil
 }

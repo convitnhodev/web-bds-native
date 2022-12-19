@@ -462,6 +462,110 @@ func (a *router) callbackPaymentIPN(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// hung viet
+
+func (a *router) listPaymentIPN(w http.ResponseWriter, r *http.Request) {
+	//defer func() {
+	//	w.WriteHeader(http.StatusOK)
+	//	w.Write([]byte(`{"status": "ok"}`))
+	//}()
+
+	userId := a.session.GetInt(r, "user")
+
+	if r.Method == "Get" {
+
+		payments, err := a.App.Payment.InvoiceID(userId)
+
+		reqBody, err := ioutil.ReadAll(r.Body)
+
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		var paymentData appotapay.APTPaymentRecipition
+		err = json.Unmarshal(reqBody, &paymentData)
+
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		// Verify signature
+		appotapay.SecretKey = a.App.Config.APTSecretKey
+		paymentDataStr, err := appotapay.VerifyIPNPaymentCallback(paymentData)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		isSuccess := paymentData.ErrorCode == 0
+		payment, err := a.App.Payment.ID(paymentData.ParseOrderId(a.App.Config.APTPaymentHost))
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		ctx := r.Context()
+		tx, err := a.App.DB.BeginTx(ctx, nil)
+
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		// Update payment status của payment được tạo trước đó
+		err = a.App.Payment.UpdatePaymentCallback(
+			tx,
+			ctx,
+			payment.ID,
+			isSuccess,
+			paymentDataStr,
+			paymentData.AppotapayTransId,
+			paymentData.TransactionTs,
+			paymentData.Amount,
+		)
+		if err != nil {
+			log.Println(err)
+			tx.Rollback()
+			return
+		}
+
+		// Update Invoice: update invoice_synced_at và status
+		// Nếu cọc thành công thì chuyển thành status deposit
+		// Nếu không cọc thì chuyển thành canceled và update slot_canceled_by thành user tạo đơn
+		err = a.App.Invoice.UpdatePaymentCallback(tx, ctx, payment.InvoiceId, paymentData.TransactionTs, isSuccess)
+		if err != nil {
+			log.Println(err)
+			tx.Rollback()
+			return
+		}
+
+		if isSuccess {
+			// Update Product: số slot còn lại
+			invoiceItems, err := a.App.InvoiceItem.InvoiceID(payment.InvoiceId)
+			if err != nil {
+				log.Println(err)
+				tx.Rollback()
+				return
+			}
+
+			for _, it := range invoiceItems {
+				err = a.App.Products.UpdatePaymentCallback(tx, ctx, it.ProductId, isSuccess, it.Quatity)
+				if err != nil {
+					log.Println(err)
+					tx.Rollback()
+					return
+				}
+			}
+		}
+
+		tx.Commit()
+	}
+}
+
+// hung viet
+
 func (a *router) callbackBillIPN(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		w.WriteHeader(http.StatusOK)

@@ -66,6 +66,7 @@ func SendSMS(phone string, content string) error {
 
 	req, err := http.NewRequest("POST", "http://rest.esms.vn/MainService.svc/json/SendMultipleMessage_V4_post_json/",
 		bytes.NewBuffer([]byte(values)))
+
 	if err != nil {
 		return err
 	}

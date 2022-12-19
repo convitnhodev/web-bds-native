@@ -50,7 +50,7 @@ func run(c *root.Cmd) error {
 			panic(err)
 		}
 
-		log.Println("Run b2 job")
+		log.Println("Run b2 asyncJob")
 		B2Scheduler.StartScheduler(
 			limit,
 			sleep,

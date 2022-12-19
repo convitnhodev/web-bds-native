@@ -199,7 +199,6 @@ func (m *PaymentModel) UpdatePaymentCallback(
 		transactionAt,
 		amount,
 	)
-
 	return err
 }
 

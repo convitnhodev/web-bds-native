@@ -20,7 +20,7 @@ import (
 func main() {
 	fmt.Println("starting cmd: ", os.Args[1])
 	for _, cmd := range root.CmdSet {
-		cfg := cmd.String("cfg", "config.json", "path to config file")
+		cfg := cmd.String("cfg", "config.json", "./config.json")
 
 		if os.Args[1] == cmd.Name() {
 			cmd.Parse(os.Args[2:])
